@@ -2,7 +2,7 @@ defmodule Eject.File do
   @moduledoc """
   Functions for writing files to an ejection destination.
 
-  An `Eject.File.t/0` can be any of the following:
+  An `t:Eject.File.t/0` can be any of the following:
 
   - A text file to copy (such as a `.ex`, `.exs`, or `.json` file)
   - A directory to copy
