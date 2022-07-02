@@ -29,8 +29,22 @@ defmodule Eject.App do
 
   ### Example
 
-      iex> new!(manifest, TwitterClone)
+      iex> project = %Eject.Project{
+      ...>   base_app: :test_app,
+      ...>   module: TestApp.Project,
+      ...>   destination: "/Users/me/code"
+      ...> }
+      ...> manifest = %Eject.Manifest{
+      ...>   lib_deps: [:included_lib],
+      ...>   extra: [some_data: "from eject.exs"]
+      ...> }
+      ...> new!(project, manifest, TwitterClone)
       %Eject.App{
+        project: %Eject.Project{
+          base_app: :test_app,
+          module: TestApp.Project,
+          destination: "/Users/me/code"
+        },
         name: %{
           module: TwitterClone,
           web_module: TwitterCloneWeb,
@@ -41,22 +55,28 @@ defmodule Eject.App do
         destination: "/Users/me/code/twitter_clone",
         deps: %Eject.Deps{
           lib: %{
-            my_company_backend: %Eject.LibDep{
-              name: :my_company_backend,
-              always: true,
+            included_lib: %Eject.LibDep{
+              name: :included_lib,
+              always: false,
               mix_deps: [],
               lib_deps: [],
-              file_rules: []
+              file_rules: %Eject.Rules{
+                associated_files: nil,
+                chmod: nil,
+                except: nil,
+                lib_directory: nil,
+                only: nil
+              }
             }
           },
           mix: %{},
           included: %{
-            lib: [:my_company_backend],
+            lib: [:included_lib],
             mix: []
           },
           all: %{
-            lib: [:my_company_backend, :unused_lib_folder],
-            mix: [:mint]
+            lib: [:excluded_lib, :included_lib],
+            mix: [:excluded_mix, :included_mix]
           }
         },
         extra: [
@@ -95,13 +115,31 @@ defmodule Eject.App do
 
   ### Examples
 
-      iex> depends_on?(%App{}, :mix, :some_included_mix_dep)
+      iex> depends_on?(
+      ...>   %Eject.App{
+      ...>     deps: %{
+      ...>       included: %{
+      ...>         mix: [:some_included_mix_dep]
+      ...>       }
+      ...>     }
+      ...>   },
+      ...>   :mix,
+      ...>   :some_included_mix_dep
+      ...> )
       true
 
-      iex> depends_on?(%App{}, :mix, :not_included_dep)
+      iex> depends_on?(
+      ...>   %Eject.App{deps: %{included: %{mix: [:included]}}},
+      ...>   :mix,
+      ...>   :not_included_dep
+      ...> )
       false
 
-      iex> depends_on?(%App{}, :lib, :some_included_lib)
+      iex> depends_on?(
+      ...>   %Eject.App{deps: %{included: %{lib: [:some_included_lib]}}},
+      ...>   :lib,
+      ...>   :some_included_lib
+      ...> )
       true
 
   """

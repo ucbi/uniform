@@ -11,7 +11,21 @@ defmodule Eject.MixDep do
           mix_deps: [name]
         }
 
-  @doc "Creates a new `%MixDep{}` struct."
+  @doc """
+  Creates a new `%MixDep{}` struct.
+
+  ### Example
+
+      iex> new!(%{
+      ...>   name: :swoosh,
+      ...>   mix_deps: [:phoenix_swoosh]
+      ...> })
+      %Eject.MixDep{
+        name: :swoosh,
+        mix_deps: [:phoenix_swoosh]
+      }
+
+  """
   def new!(%{name: name, mix_deps: mix_deps}) when is_atom(name) and is_list(mix_deps) do
     struct!(__MODULE__, name: name, mix_deps: mix_deps)
   end

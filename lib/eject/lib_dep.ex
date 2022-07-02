@@ -25,7 +25,39 @@ defmodule Eject.LibDep do
           file_rules: Eject.Rules.t()
         }
 
-  @doc "Creates a new `%LibDep{}` struct."
+  @doc """
+  Creates a new `%LibDep{}` struct.
+
+  ### Example
+
+      iex> new!(%{
+      ...>   name: :my_graph,
+      ...>   mix_deps: [:absinthe],
+      ...>   lib_deps: [:my_graph_dep],
+      ...>   always: true,
+      ...>   file_rules: %Eject.Rules{
+      ...>     only: nil,
+      ...>     except: [~r/regex-of-files-not-to-eject/],
+      ...>     associated_files: ["priv/path/to/associated/file"],
+      ...>     chmod: nil,
+      ...>     lib_directory: nil
+      ...>   }
+      ...> })
+      %Eject.LibDep{
+        always: true,
+        file_rules: %Eject.Rules{
+          associated_files: ["priv/path/to/associated/file"],
+          chmod: nil,
+          except: [~r/regex-of-files-not-to-eject/],
+          lib_directory: nil,
+          only: nil
+        },
+        lib_deps: [:my_graph_dep],
+        mix_deps: [:absinthe],
+        name: :my_graph
+      }
+
+  """
   def new!(%{
         name: name,
         mix_deps: mix_deps,
