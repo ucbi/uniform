@@ -45,7 +45,7 @@ defmodule Eject.MixProject do
       groups_for_modules: [
         "Ejectable Apps": [
           Eject.App,
-          Eject.Ejectable,
+          Eject.File,
           Eject.Manifest
         ],
         Transformation: [

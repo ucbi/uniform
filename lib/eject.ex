@@ -234,9 +234,9 @@ defmodule Eject do
     IO.write(IO.ANSI.clear_line() <> "\r📂 #{app.destination}")
     File.mkdir_p!(app.destination)
 
-    for ejectable <- Eject.Ejectable.all_for_app(app) do
+    for ejectable <- Eject.File.all_for_app(app) do
       IO.write(IO.ANSI.clear_line() <> "\r💾 [#{ejectable.type}] #{ejectable.destination}")
-      Eject.Ejectable.eject!(ejectable, app)
+      Eject.File.eject!(ejectable, app)
     end
 
     IO.puts("")

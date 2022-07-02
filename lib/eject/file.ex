@@ -1,9 +1,16 @@
-defmodule Eject.Ejectable do
+defmodule Eject.File do
   @moduledoc """
   Functions for writing files to an ejection destination.
+
+  An `Eject.File.t/0` can be any of the following:
+
+  - A text file to copy (such as a `.ex`, `.exs`, or `.json` file)
+  - A directory to copy
+  - An EEx template used to generate a file
+  - A binary file to copy
+
   """
 
-  alias __MODULE__
   alias Eject.{App, CodeFence, Manifest, MixExs, Rules}
 
   defstruct [:type, :source, :destination, :chmod]
@@ -16,23 +23,23 @@ defmodule Eject.Ejectable do
         }
 
   #
-  # Functions for gathering all Ejectables for a given app
+  # Functions for gathering all Eject.Files for a given app
   #
 
-  @doc "Returns all Ejectables for the given app."
+  @doc "Returns all Eject.Files for the given app."
   @spec all_for_app(App.t()) :: [t]
   def all_for_app(app) do
-    # for our purposes, we keep `app_lib_ejectables` last since sometimes the
+    # for our purposes, we keep `app_lib_files` last since sometimes the
     # ejected app wants to override phoenix-ish files in `lib/app_name_web`
     # (See `error_view.ex`)
-    base_file_ejectables(app) ++
-      lib_dep_ejectables(app) ++
-      app_lib_ejectables(app)
+    base_files(app) ++
+      lib_dep_files(app) ++
+      app_lib_files(app)
   end
 
   @doc "Returns `base` ejectables for the app."
-  @spec base_file_ejectables(App.t()) :: [t]
-  def base_file_ejectables(app) do
+  @spec base_files(App.t()) :: [t]
+  def base_files(app) do
     project = Eject.project()
     base_files = app |> project.base_files() |> List.flatten()
 
@@ -56,7 +63,7 @@ defmodule Eject.Ejectable do
       type = type || detect_base_file_type(path)
       file_rules = Rules.new(opts)
       destination = destination(path, app, file_rules)
-      %Ejectable{type: type, source: path, destination: destination, chmod: file_rules.chmod}
+      %Eject.File{type: type, source: path, destination: destination, chmod: file_rules.chmod}
     end
   end
 
@@ -77,8 +84,8 @@ defmodule Eject.Ejectable do
   end
 
   @doc "Returns `lib/my_app` ejectables for the app."
-  @spec app_lib_ejectables(App.t()) :: [t]
-  def app_lib_ejectables(app) do
+  @spec app_lib_files(App.t()) :: [t]
+  def app_lib_files(app) do
     manifest_path = Manifest.manifest_path(app.name.snake)
 
     file_rules =
@@ -88,16 +95,16 @@ defmodule Eject.Ejectable do
       |> Rules.new()
 
     for path <- lib_dir_files(app.name.snake, file_rules) do
-      %Ejectable{type: :text, source: path, destination: destination(path, app, file_rules)}
+      %Eject.File{type: :text, source: path, destination: destination(path, app, file_rules)}
     end
   end
 
   @doc "Returns LibDeps as ejectables."
-  @spec lib_dep_ejectables(App.t()) :: [t]
-  def lib_dep_ejectables(app) do
+  @spec lib_dep_files(App.t()) :: [t]
+  def lib_dep_files(app) do
     Enum.flat_map(app.deps.lib, fn {_, lib_dep} ->
       for path <- lib_dir_files(to_string(lib_dep.name), lib_dep.file_rules) do
-        %Ejectable{
+        %Eject.File{
           type: :text,
           source: path,
           destination: destination(path, app, lib_dep.file_rules),
@@ -152,7 +159,7 @@ defmodule Eject.Ejectable do
   end
 
   #
-  # Functions for modifying and copying Ejectables to their destination directory
+  # Functions for modifying and copying Files to their destination directory
   #
 
   @doc """
@@ -161,7 +168,7 @@ defmodule Eject.Ejectable do
   it to the same directory in the ejected project. (Replacing `my_app` in
   the path with the ejected app's name.)
   """
-  def eject!(%Ejectable{source: source, type: type, destination: destination, chmod: chmod}, app) do
+  def eject!(%Eject.File{source: source, type: type, destination: destination, chmod: chmod}, app) do
     # ensure the base directory exists before trying to write the file
     dirname = Path.dirname(Path.expand(destination))
 
