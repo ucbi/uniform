@@ -67,10 +67,9 @@ defmodule Eject.Deps do
   @spec lib_deps_included_in_app(Manifest.t(), %{atom => LibDep.t()}) :: %{atom => LibDep.t()}
   defp lib_deps_included_in_app(manifest, all_lib_deps) do
     root_deps =
-      Map.filter(
-        all_lib_deps,
-        fn {_, lib_dep} -> lib_dep.always || lib_dep.name in manifest.lib_deps end
-      )
+      all_lib_deps
+      |> Enum.filter(fn {_, lib_dep} -> lib_dep.always || lib_dep.name in manifest.lib_deps end)
+      |> Enum.into(%{})
 
     root_deps
     |> Map.values()
@@ -82,10 +81,9 @@ defmodule Eject.Deps do
         }
   defp mix_deps_included_in_app(manifest, lib_deps, all_mix_deps) do
     root_deps =
-      Map.filter(
-        all_mix_deps,
-        fn {_, mix_dep} -> mix_dep.name in manifest.mix_deps end
-      )
+      all_mix_deps
+      |> Enum.filter(fn {_, mix_dep} -> mix_dep.name in manifest.mix_deps end)
+      |> Enum.into(%{})
 
     # gather nested mix deps required by manifest
     root_deps =
