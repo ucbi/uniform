@@ -15,6 +15,7 @@ defmodule Eject.Project do
       %Project{
         base_app: :my_base_app,
         module: MyBaseApp.Eject.Project,
+        templates: "/Users/me/code/my_base_app/lib/my_base_app/eject/templates",
         destination: "/Users/me/code"
       }
 

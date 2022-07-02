@@ -128,14 +128,12 @@ defmodule Eject.File do
   end
 
   defp destination(path, app, file_rules) do
-    project_app_name = to_string(Mix.Project.config()[:app])
-
     destination_relative_path =
       if lib_dir = file_rules.lib_directory do
         if dir = lib_dir.(app, path) do
           path
           |> String.replace(~r/^lib\/[^\/]+\//, "lib/#{dir}/")
-          |> String.replace(project_app_name, app.name.snake)
+          |> String.replace(app.project.base_app, app.name.snake)
         else
           path
         end
@@ -143,9 +141,10 @@ defmodule Eject.File do
         path
       end
 
-    destination_relative_path
-    |> String.replace(project_app_name, app.name.snake)
-    |> then(&Path.join(app.destination, &1))
+    relative_path =
+      String.replace(destination_relative_path, app.project.base_app, app.name.snake)
+
+    Path.join(app.destination, relative_path)
   end
 
   # returns true if any of the given regexes match or strings match exactly
@@ -209,7 +208,7 @@ defmodule Eject.File do
               File.read!(Path.expand(source))
           end
 
-        snake = to_string(Mix.Project.config()[:app])
+        snake = to_string(app.project.base_app)
 
         contents
         # apply specified transformations in `Project.modify`
