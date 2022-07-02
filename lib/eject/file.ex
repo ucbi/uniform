@@ -210,17 +210,19 @@ defmodule Eject.File do
 
         snake = to_string(app.project.base_app)
 
-        contents
-        # apply specified transformations in `Project.modify`
-        |> apply_modifiers(source, app)
-        # replace `base_project_name` with `ejected_app_name`
-        |> String.replace(snake, app.name.snake)
-        # replace `base-project-name` with `ejected-app-name`
-        |> String.replace(String.replace(snake, "_", "-"), app.name.kebab)
-        # replace `BaseProjectName` with `EjectedAppName`
-        |> String.replace(Macro.camelize(snake), app.name.pascal)
-        |> CodeFence.apply_fences(app)
-        |> then(&File.write!(destination, &1))
+        transformed =
+          contents
+          # apply specified transformations in `Project.modify`
+          |> apply_modifiers(source, app)
+          # replace `base_project_name` with `ejected_app_name`
+          |> String.replace(snake, app.name.snake)
+          # replace `base-project-name` with `ejected-app-name`
+          |> String.replace(String.replace(snake, "_", "-"), app.name.kebab)
+          # replace `BaseProjectName` with `EjectedAppName`
+          |> String.replace(Macro.camelize(snake), app.name.pascal)
+          |> CodeFence.apply_fences(app)
+
+        File.write!(destination, transformed)
     end
 
     # apply chmod if relevant
