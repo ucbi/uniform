@@ -40,7 +40,7 @@ defmodule Eject.File do
   @doc "Returns `base` ejectables for the app."
   @spec base_files(App.t()) :: [t]
   def base_files(app) do
-    project = Eject.project()
+    project = app.project.module
     base_files = app |> project.base_files() |> List.flatten()
 
     base_files = [
@@ -87,9 +87,10 @@ defmodule Eject.File do
   @spec app_lib_files(App.t()) :: [t]
   def app_lib_files(app) do
     manifest_path = Manifest.manifest_path(app.name.snake)
+    project = app.project.module
 
     file_rules =
-      Eject.project().options(app)[:ejected_app]
+      project.options(app)[:ejected_app]
       # never eject the Eject manifest
       |> Keyword.update(:except, [manifest_path], fn except -> [manifest_path | except] end)
       |> Rules.new()
@@ -196,7 +197,7 @@ defmodule Eject.File do
         contents =
           case t do
             :template ->
-              template_dir = Eject.project().__templates__()
+              template_dir = app.project.module.__templates__()
 
               EEx.eval_file(
                 Path.join(template_dir, source <> ".eex"),
@@ -230,7 +231,8 @@ defmodule Eject.File do
   end
 
   defp apply_modifiers(contents, relative_path, app) do
-    modifiers = Eject.project().modify()
+    project = app.project.module
+    modifiers = project.modify()
     modifiers = [{"mix.exs", &MixExs.remove_unused_deps/2} | modifiers]
 
     Enum.reduce(modifiers, contents, fn {path_or_regex, modifier}, contents ->

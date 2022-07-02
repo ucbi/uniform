@@ -60,10 +60,6 @@ defmodule Eject do
     end
   end
 
-  @doc "Gets the 'project module' that implements the `Eject` behaviour."
-  @spec project() :: module
-  def project(), do: config()[:project]
-
   @doc """
   Lists additional 'base files' to be ejected.
 
@@ -219,10 +215,11 @@ defmodule Eject do
           "🤖 Please pass in a module name corresponding to a directory in `lib` containing an `eject.exs` file. E.g. TwitterClone (received #{inspect(name)})"
     end
 
-    name
-    |> Macro.underscore()
-    |> Eject.Manifest.eval_and_parse()
-    |> Eject.App.new!(name, opts)
+    project = project()
+
+    project
+    |> Eject.Manifest.eval_and_parse(Macro.underscore(name))
+    |> Eject.App.new!(project, name, opts)
   end
 
   @doc """
@@ -264,10 +261,8 @@ defmodule Eject do
     end
   end
 
-  @doc "Returns the `Eject` configuration."
-  def config() do
-    Mix.Project.config()
-    |> Keyword.fetch!(:app)
-    |> Application.get_env(Eject)
+  defp project do
+    base_app = Keyword.fetch!(Mix.Project.config(), :app)
+    Eject.Project.from_config_key(base_app)
   end
 end

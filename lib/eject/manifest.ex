@@ -29,6 +29,8 @@ defmodule Eject.Manifest do
   """
   defstruct mix_deps: [], lib_deps: [], extra: []
 
+  alias Eject.{Project, LibDep, MixDep}
+
   @typedoc "A struct containing the `Eject` manifest for an app."
   @type t :: %__MODULE__{
           mix_deps: [MixDep.name()],
@@ -37,19 +39,17 @@ defmodule Eject.Manifest do
         }
 
   @doc "Loads a manifest file into a `%Manifest{}` struct."
-  @spec eval_and_parse(String.t() | atom) :: t
-  def eval_and_parse(app_name_snake_case) do
-    app_name_snake_case
-    |> eval()
-    |> new!()
+  @spec eval_and_parse(Project.t(), String.t() | atom) :: t
+  def eval_and_parse(project, app_name_snake_case) do
+    new!(project, eval(app_name_snake_case))
   end
 
   @doc "Initializes a new `%Manifest{}` struct."
-  def new!(params) when is_list(params) do
+  def new!(%Project{} = project, params) when is_list(params) do
     manifest = struct!(__MODULE__, params)
 
-    lib_deps = Map.keys(Eject.LibDep.all())
-    mix_deps = Map.keys(Eject.MixDep.all())
+    lib_deps = Map.keys(Project.lib_deps(project))
+    mix_deps = Map.keys(Project.mix_deps(project))
     missing_lib_deps = Enum.filter(manifest.lib_deps, &(&1 not in lib_deps))
     missing_mix_deps = Enum.filter(manifest.mix_deps, &(&1 not in mix_deps))
 
@@ -70,7 +70,7 @@ defmodule Eject.Manifest do
     manifest
   end
 
-  def new!(_) do
+  def new!(_project, _) do
     raise "eject.exs should contain a keyword list"
   end
 

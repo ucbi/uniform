@@ -4,9 +4,12 @@ defmodule Eject.App do
   """
 
   alias __MODULE__
-  defstruct [:name, :destination, :deps, :extra]
+  alias Eject.{Deps, Manifest, Project}
+
+  defstruct [:project, :name, :destination, :deps, :extra]
 
   @type t :: %__MODULE__{
+          project: Project.t(),
           name: %{
             module: module,
             web_module: module,
@@ -15,7 +18,7 @@ defmodule Eject.App do
             pascal: String.t()
           },
           destination: Path.t(),
-          deps: Eject.Deps.t(),
+          deps: Deps.t(),
           extra: keyword
         }
 
@@ -62,14 +65,15 @@ defmodule Eject.App do
       }
 
   """
-  @spec new!(Eject.Manifest.t(), atom) :: t
-  @spec new!(Eject.Manifest.t(), atom, [new_opt]) :: t
-  def new!(%Eject.Manifest{} = manifest, name, opts \\ []) when is_atom(name) do
+  @spec new!(Project.t(), Manifest.t(), atom) :: t
+  @spec new!(Project.t(), Manifest.t(), atom, [new_opt]) :: t
+  def new!(%Project{} = project, %Manifest{} = manifest, name, opts \\ []) when is_atom(name) do
     "Elixir." <> app_name_pascal_case = to_string(name)
     app_name_snake_case = Macro.underscore(name)
-    deps = Eject.Deps.discover!(manifest)
+    deps = Deps.discover!(project, manifest)
 
     app = %App{
+      project: project,
       name: %{
         module: name,
         # credo:disable-for-next-line Credo.Check.Warning.UnsafeToAtom
@@ -78,12 +82,12 @@ defmodule Eject.App do
         snake: app_name_snake_case,
         kebab: String.replace(app_name_snake_case, "_", "-")
       },
-      destination: destination(app_name_snake_case, opts),
+      destination: destination(app_name_snake_case, project, opts),
       deps: deps
     }
 
     # `extra/1` requires an app struct
-    %{app | extra: Keyword.merge(Eject.project().extra(app), manifest.extra)}
+    %{app | extra: Keyword.merge(project.module.extra(app), manifest.extra)}
   end
 
   @doc """
@@ -105,9 +109,9 @@ defmodule Eject.App do
     dep_name in app.deps.included[category]
   end
 
-  defp destination(app_name_snake_case, opts) do
+  defp destination(app_name_snake_case, project, opts) do
     destination =
-      case {Eject.config()[:destination], opts[:destination]} do
+      case {project.destination, opts[:destination]} do
         {nil, nil} -> "../" <> app_name_snake_case
         {nil, opt} -> opt
         {config, nil} -> Path.join(config, app_name_snake_case)

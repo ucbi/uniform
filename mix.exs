@@ -11,6 +11,7 @@ defmodule Eject.MixProject do
       elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
+      elixirc_paths: elixirc_paths(Mix.env()),
 
       # Hex
       description: "A simple alternative to Umbrella and Poncho apps",
@@ -20,6 +21,10 @@ defmodule Eject.MixProject do
       name: "Eject",
       docs: docs()
     ]
+  end
+
+  def application do
+    [extra_applications: [:eex]]
   end
 
   defp deps do
@@ -64,4 +69,7 @@ defmodule Eject.MixProject do
       ]
     ]
   end
+
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_), do: ["lib"]
 end
