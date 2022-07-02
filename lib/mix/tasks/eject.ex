@@ -69,9 +69,7 @@ defmodule Mix.Tasks.Eject do
     app.deps.included.mix
     |> Enum.chunk_every(6)
     |> Enum.each(fn mix_deps ->
-      mix_deps
-      |> Enum.join(" ")
-      |> then(&IO.puts("   " <> &1))
+      IO.puts("   " <> Enum.join(mix_deps, " "))
     end)
 
     IO.puts("")
@@ -80,9 +78,7 @@ defmodule Mix.Tasks.Eject do
     app.deps.included.lib
     |> Enum.chunk_every(6)
     |> Enum.each(fn lib_deps ->
-      lib_deps
-      |> Enum.join(" ")
-      |> then(&IO.puts("   " <> &1))
+      IO.puts("   " <> Enum.join(lib_deps, " "))
     end)
 
     IO.puts("")
