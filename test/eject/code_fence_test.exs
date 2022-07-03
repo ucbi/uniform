@@ -65,6 +65,7 @@ defmodule Eject.CodeFenceTest do
     # prime String.to_existing_atom
     :code_fence_app
     :another_app
+
     output =
       CodeFence.apply_fences(
         """

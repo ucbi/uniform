@@ -45,6 +45,7 @@ defmodule Eject.Manifest do
   end
 
   @doc "Initializes a new `%Manifest{}` struct."
+  @spec new!(Project.t(), keyword) :: t
   def new!(%Project{} = project, params) when is_list(params) do
     manifest = struct!(__MODULE__, params)
 
@@ -85,7 +86,15 @@ defmodule Eject.Manifest do
     end
   end
 
-  @doc "Relative file path to the manifest file."
+  @doc """
+  Relative file path to the manifest file.
+
+  ### Example
+
+      iex> manifest_path("my_app")
+      "lib/my_app/eject.exs"
+
+  """
   @spec manifest_path(String.t() | atom) :: String.t()
   def manifest_path(app_name_snake_case) do
     "lib/#{app_name_snake_case}/eject.exs"
