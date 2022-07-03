@@ -1,0 +1,1 @@
+This file should be excluded from ejection (assuming the app doesn't specify to include it).

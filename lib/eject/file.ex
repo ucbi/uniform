@@ -90,7 +90,9 @@ defmodule Eject.File do
     project = app.project.module
 
     file_rules =
-      project.options(app)[:ejected_app]
+      app
+      |> project.options()
+      |> Keyword.get(:ejected_app, [])
       # never eject the Eject manifest
       |> Keyword.update(:except, [manifest_path], fn except -> [manifest_path | except] end)
       |> Rules.new()
@@ -119,8 +121,10 @@ defmodule Eject.File do
   # associated with that directory. Includes files in `lib/<lib_dir>`
   # as well as `test/<lib_dir>`
   defp lib_dir_files(lib_dir, %Rules{associated_files: extra, only: only, except: except}) do
-    paths = Path.wildcard("lib/#{lib_dir}/**")
-    paths = paths ++ Path.wildcard("test/#{lib_dir}/**")
+    # location of lib and test directories is configurable for testing
+    root_dir = Application.get_env(:eject, :root_dir, "")
+    paths = Path.wildcard("#{root_dir}lib/#{lib_dir}/**")
+    paths = paths ++ Path.wildcard("#{root_dir}test/#{lib_dir}/**")
     paths = if only, do: Enum.filter(paths, &filter_path(&1, only)), else: paths
     paths = if except, do: Enum.reject(paths, &filter_path(&1, except)), else: paths
     paths = if extra, do: List.flatten(extra) ++ paths, else: paths
@@ -142,7 +146,11 @@ defmodule Eject.File do
       end
 
     relative_path =
-      String.replace(destination_relative_path, app.project.base_app, app.name.snake)
+      String.replace(
+        destination_relative_path,
+        to_string(app.project.base_app),
+        app.name.snake
+      )
 
     Path.join(app.destination, relative_path)
   end
