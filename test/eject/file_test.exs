@@ -6,7 +6,7 @@ defmodule Eject.FileTest do
   setup do
     project = %Project{base_app: :test_app, module: TestApp.Project}
     manifest = %Manifest{lib_deps: [:included_lib], mix_deps: [:included_mix]}
-    app = App.new!(project, manifest, TwitterClone)
+    app = App.new!(project, manifest, Tweeter)
     %{app: app}
   end
 
