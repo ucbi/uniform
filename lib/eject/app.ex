@@ -38,7 +38,7 @@ defmodule Eject.App do
       ...>   lib_deps: [:included_lib],
       ...>   extra: [some_data: "from eject.exs"]
       ...> }
-      ...> new!(project, manifest, TwitterClone)
+      ...> new!(project, manifest, Tweeter)
       %Eject.App{
         project: %Eject.Project{
           base_app: :test_app,
@@ -46,13 +46,13 @@ defmodule Eject.App do
           destination: "/Users/me/code"
         },
         name: %{
-          module: TwitterClone,
-          web_module: TwitterCloneWeb,
-          kebab: "twitter-clone",
-          snake: "twitter_clone",
-          pascal: "TwitterClone"
+          module: Tweeter,
+          web_module: TweeterWeb,
+          kebab: "tweeter",
+          snake: "tweeter",
+          pascal: "Tweeter"
         },
-        destination: "/Users/me/code/twitter_clone",
+        destination: "/Users/me/code/tweeter",
         deps: %Eject.Deps{
           lib: %{
             included_lib: %Eject.LibDep{

@@ -28,7 +28,7 @@ defmodule Eject do
 
   ### Usage
 
-      $ mix eject TwitterClone
+      $ mix eject Tweeter
 
   See `Mix.Tasks.App.Eject` for details.
 
@@ -173,12 +173,12 @@ defmodule Eject do
   ### Examples
 
       $ fd eject.exs
-      lib/twitter_clone/eject.exs
+      lib/tweeter/eject.exs
       lib/trello_clone/eject.exs
       lib/hotmail_clone/eject.exs
 
       iex> ejectables()
-      ["TwitterClone", "TrelloClone", "HotmailClone"]
+      ["Tweeter", "TrelloClone", "HotmailClone"]
 
   """
   @spec ejectables :: [String.t()]
@@ -212,7 +212,7 @@ defmodule Eject do
     if not is_atom(name) do
       raise ArgumentError,
         message:
-          "🤖 Please pass in a module name corresponding to a directory in `lib` containing an `eject.exs` file. E.g. TwitterClone (received #{inspect(name)})"
+          "🤖 Please pass in a module name corresponding to a directory in `lib` containing an `eject.exs` file. E.g. Tweeter (received #{inspect(name)})"
     end
 
     project = project()
