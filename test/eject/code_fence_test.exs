@@ -1,5 +1,5 @@
 defmodule Eject.CodeFenceTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   alias Eject.{App, CodeFence, Manifest, Project}
 

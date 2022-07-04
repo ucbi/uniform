@@ -1,5 +1,5 @@
 defmodule Eject.DepsTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   alias Eject.{Deps, Manifest, Project}
 

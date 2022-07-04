@@ -1,5 +1,5 @@
 defmodule Eject.ManifestTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   doctest Eject.Manifest, import: true
 
   alias Eject.{Manifest, Project}

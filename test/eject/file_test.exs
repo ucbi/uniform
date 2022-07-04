@@ -1,5 +1,5 @@
 defmodule Eject.FileTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   alias Eject.{App, File, Manifest, Project}
 
