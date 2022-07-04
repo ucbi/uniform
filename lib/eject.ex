@@ -174,11 +174,11 @@ defmodule Eject do
 
       $ fd eject.exs
       lib/tweeter/eject.exs
-      lib/trello_clone/eject.exs
-      lib/hotmail_clone/eject.exs
+      lib/trillo/eject.exs
+      lib/hatmail/eject.exs
 
       iex> ejectables()
-      ["Tweeter", "TrelloClone", "HotmailClone"]
+      ["Tweeter", "Trillo", "Hatmail"]
 
   """
   @spec ejectables :: [String.t()]
