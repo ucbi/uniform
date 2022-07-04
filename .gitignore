@@ -24,3 +24,6 @@ eject-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+
+# A directory for tests to eject to
+/test/support/ejected

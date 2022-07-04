@@ -247,7 +247,7 @@ defmodule Eject do
   # Clear the destination folder where the app will be ejected.
   def clear_destination(app) do
     if File.exists?(app.destination) do
-      preserve = Keyword.get(project().options(app), :preserve, [])
+      preserve = Keyword.get(app.project.module.options(app), :preserve, [])
       preserve = [".git", "deps", "_build" | preserve]
 
       app.destination

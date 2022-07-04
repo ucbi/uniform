@@ -28,9 +28,9 @@ defmodule TestApp.Project do
 
   def base_files(_app) do
     [
-      {:dir, "assets"},
+      {:dir, "test/support/dir"},
       {:template, "config/runtime.exs"},
-      ".credo.exs"
+      "test/support/.dotfile"
     ]
   end
 

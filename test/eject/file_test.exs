@@ -16,7 +16,7 @@ defmodule Eject.FileTest do
     files = File.all_for_app(app)
 
     # expected to be included
-    assert Enum.find(files, &match?(%File{source: ".credo.exs"}, &1))
+    assert Enum.find(files, &match?(%File{source: "test/support/.dotfile"}, &1))
     assert Enum.find(files, &match?(%File{source: "config/runtime.exs", type: :template}, &1))
 
     assert Enum.find(
