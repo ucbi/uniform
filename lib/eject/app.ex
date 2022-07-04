@@ -58,6 +58,19 @@ defmodule Eject.App do
             included_lib: %Eject.LibDep{
               name: :included_lib,
               always: false,
+              mix_deps: [:included_mix],
+              lib_deps: [:indirectly_included_lib],
+              file_rules: %Eject.Rules{
+                associated_files: nil,
+                chmod: nil,
+                except: nil,
+                lib_directory: nil,
+                only: nil
+              }
+            },
+            indirectly_included_lib: %Eject.LibDep{
+              name: :indirectly_included_lib,
+              always: false,
               mix_deps: [],
               lib_deps: [],
               file_rules: %Eject.Rules{
@@ -69,14 +82,23 @@ defmodule Eject.App do
               }
             }
           },
-          mix: %{},
+          mix: %{
+            included_mix: %Eject.MixDep{
+              name: :included_mix,
+              mix_deps: [:indirectly_included_mix]
+            },
+            indirectly_included_mix: %Eject.MixDep{
+              name: :indirectly_included_mix,
+              mix_deps: []
+            }
+          },
           included: %{
-            lib: [:included_lib],
-            mix: []
+            lib: [:included_lib, :indirectly_included_lib],
+            mix: [:included_mix, :indirectly_included_mix]
           },
           all: %{
-            lib: [:excluded_lib, :included_lib],
-            mix: [:excluded_mix, :included_mix]
+            lib: [:excluded_lib, :included_lib, :indirectly_included_lib],
+            mix: [:excluded_mix, :included_mix, :indirectly_included_mix]
           }
         },
         extra: [

@@ -6,11 +6,24 @@ defmodule TestApp.Project do
   end
 
   def lib_deps do
-    [:included_lib, :excluded_lib]
+    [
+      :indirectly_included_lib,
+      :excluded_lib,
+      included_lib: [
+        mix_deps: [:included_mix],
+        lib_deps: [:indirectly_included_lib]
+      ]
+    ]
   end
 
   def mix_deps do
-    [:included_mix, :excluded_mix]
+    [
+      :excluded_mix,
+      :indirectly_included_mix,
+      included_mix: [
+        mix_deps: [:indirectly_included_mix]
+      ]
+    ]
   end
 
   def base_files(_app) do
