@@ -18,6 +18,13 @@ defmodule EjectTest do
 
     Eject.eject(app)
 
+    # check for files that are always ejected (read! will crash if missing)
+    read!("tweeter/mix.exs")
+    read!("tweeter/mix.lock")
+    read!("tweeter/.gitignore")
+    read!("tweeter/.formatter.exs")
+    read!("tweeter/test/test_helper.exs")
+
     # files in {:dir, _} tuples should not be modified
     file_txt = read!("tweeter/test/support/dir/file.txt")
     assert file_txt =~ "TestApp"
