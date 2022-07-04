@@ -5,9 +5,9 @@ defmodule Mix.Tasks.Eject do
   ## Examples
 
   ```bash
-  $ mix eject TrelloClone
+  $ mix eject Trillo
   $ mix eject Tweeter --confirm
-  $ mix eject HotmailClone --confirm --destination ../../new/dir
+  $ mix eject Hatmail --confirm --destination ../../new/dir
   ```
 
   ## Command line options
