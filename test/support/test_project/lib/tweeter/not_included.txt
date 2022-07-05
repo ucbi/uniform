@@ -1,0 +1,1 @@
+this file should not be copied because while it's part of the ejected app's lib directory, it's not in the `only` allow-list.

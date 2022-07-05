@@ -16,15 +16,18 @@ defmodule Eject.FileTest do
     files = File.all_for_app(app)
 
     # expected to be included
-    assert Enum.find(files, &match?(%File{source: "test/support/.dotfile"}, &1))
+    assert Enum.find(files, &match?(%File{source: "test/support/test_project/.dotfile"}, &1))
     assert Enum.find(files, &match?(%File{source: "config/runtime.exs", type: :template}, &1))
 
     assert Enum.find(
              files,
-             &match?(%File{source: "test/support/lib/included_lib/included.ex"}, &1)
+             &match?(%File{source: "test/support/test_project/lib/included_lib/included.ex"}, &1)
            )
 
     # not expected to be included
-    refute Enum.find(files, &match?(%File{source: "test/support/lib/excluded_lib" <> _}, &1))
+    refute Enum.find(
+             files,
+             &match?(%File{source: "test/support/test_project/lib/excluded_lib" <> _}, &1)
+           )
   end
 end
