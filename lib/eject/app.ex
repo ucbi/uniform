@@ -4,9 +4,12 @@ defmodule Eject.App do
   """
 
   alias __MODULE__
-  defstruct [:name, :destination, :deps, :extra]
+  alias Eject.{Deps, Manifest, Project}
+
+  defstruct [:project, :name, :destination, :deps, :extra]
 
   @type t :: %__MODULE__{
+          project: Project.t(),
           name: %{
             module: module,
             web_module: module,
@@ -15,7 +18,7 @@ defmodule Eject.App do
             pascal: String.t()
           },
           destination: Path.t(),
-          deps: Eject.Deps.t(),
+          deps: Deps.t(),
           extra: keyword
         }
 
@@ -26,34 +29,76 @@ defmodule Eject.App do
 
   ### Example
 
-      iex> new!(manifest, TwitterClone)
+      iex> project = %Eject.Project{
+      ...>   base_app: :test_app,
+      ...>   module: TestApp.Project,
+      ...>   destination: "/Users/me/code"
+      ...> }
+      ...> manifest = %Eject.Manifest{
+      ...>   lib_deps: [:included_lib],
+      ...>   extra: [some_data: "from eject.exs"]
+      ...> }
+      ...> new!(project, manifest, Tweeter)
       %Eject.App{
-        name: %{
-          module: TwitterClone,
-          web_module: TwitterCloneWeb,
-          kebab: "twitter-clone",
-          snake: "twitter_clone",
-          pascal: "TwitterClone"
+        project: %Eject.Project{
+          base_app: :test_app,
+          module: TestApp.Project,
+          destination: "/Users/me/code"
         },
-        destination: "/Users/me/code/twitter_clone",
+        name: %{
+          module: Tweeter,
+          web_module: TweeterWeb,
+          kebab: "tweeter",
+          snake: "tweeter",
+          pascal: "Tweeter"
+        },
+        destination: "/Users/me/code/tweeter",
         deps: %Eject.Deps{
           lib: %{
-            my_company_backend: %Eject.LibDep{
-              name: :my_company_backend,
-              always: true,
+            included_lib: %Eject.LibDep{
+              name: :included_lib,
+              always: false,
+              mix_deps: [:included_mix],
+              lib_deps: [:indirectly_included_lib],
+              file_rules: %Eject.Rules{
+                associated_files: nil,
+                chmod: nil,
+                except: nil,
+                lib_directory: nil,
+                only: nil
+              }
+            },
+            indirectly_included_lib: %Eject.LibDep{
+              name: :indirectly_included_lib,
+              always: false,
               mix_deps: [],
               lib_deps: [],
-              file_rules: []
+              file_rules: %Eject.Rules{
+                associated_files: nil,
+                chmod: nil,
+                except: nil,
+                lib_directory: nil,
+                only: nil
+              }
             }
           },
-          mix: %{},
+          mix: %{
+            included_mix: %Eject.MixDep{
+              name: :included_mix,
+              mix_deps: [:indirectly_included_mix]
+            },
+            indirectly_included_mix: %Eject.MixDep{
+              name: :indirectly_included_mix,
+              mix_deps: []
+            }
+          },
           included: %{
-            lib: [:my_company_backend],
-            mix: []
+            lib: [:included_lib, :indirectly_included_lib],
+            mix: [:included_mix, :indirectly_included_mix]
           },
           all: %{
-            lib: [:my_company_backend, :unused_lib_folder],
-            mix: [:mint]
+            lib: [:excluded_lib, :included_lib, :indirectly_included_lib],
+            mix: [:excluded_mix, :included_mix, :indirectly_included_mix]
           }
         },
         extra: [
@@ -62,14 +107,15 @@ defmodule Eject.App do
       }
 
   """
-  @spec new!(Eject.Manifest.t(), atom) :: t
-  @spec new!(Eject.Manifest.t(), atom, [new_opt]) :: t
-  def new!(%Eject.Manifest{} = manifest, name, opts \\ []) when is_atom(name) do
+  @spec new!(Project.t(), Manifest.t(), atom) :: t
+  @spec new!(Project.t(), Manifest.t(), atom, [new_opt]) :: t
+  def new!(%Project{} = project, %Manifest{} = manifest, name, opts \\ []) when is_atom(name) do
     "Elixir." <> app_name_pascal_case = to_string(name)
     app_name_snake_case = Macro.underscore(name)
-    deps = Eject.Deps.discover!(manifest)
+    deps = Deps.discover!(project, manifest)
 
     app = %App{
+      project: project,
       name: %{
         module: name,
         # credo:disable-for-next-line Credo.Check.Warning.UnsafeToAtom
@@ -78,12 +124,12 @@ defmodule Eject.App do
         snake: app_name_snake_case,
         kebab: String.replace(app_name_snake_case, "_", "-")
       },
-      destination: destination(app_name_snake_case, opts),
+      destination: destination(app_name_snake_case, project, opts),
       deps: deps
     }
 
     # `extra/1` requires an app struct
-    %{app | extra: Keyword.merge(Eject.project().extra(app), manifest.extra)}
+    %{app | extra: Keyword.merge(project.module.extra(app), manifest.extra)}
   end
 
   @doc """
@@ -91,13 +137,31 @@ defmodule Eject.App do
 
   ### Examples
 
-      iex> depends_on?(%App{}, :mix, :some_included_mix_dep)
+      iex> depends_on?(
+      ...>   %Eject.App{
+      ...>     deps: %{
+      ...>       included: %{
+      ...>         mix: [:some_included_mix_dep]
+      ...>       }
+      ...>     }
+      ...>   },
+      ...>   :mix,
+      ...>   :some_included_mix_dep
+      ...> )
       true
 
-      iex> depends_on?(%App{}, :mix, :not_included_dep)
+      iex> depends_on?(
+      ...>   %Eject.App{deps: %{included: %{mix: [:included]}}},
+      ...>   :mix,
+      ...>   :not_included_dep
+      ...> )
       false
 
-      iex> depends_on?(%App{}, :lib, :some_included_lib)
+      iex> depends_on?(
+      ...>   %Eject.App{deps: %{included: %{lib: [:some_included_lib]}}},
+      ...>   :lib,
+      ...>   :some_included_lib
+      ...> )
       true
 
   """
@@ -105,9 +169,9 @@ defmodule Eject.App do
     dep_name in app.deps.included[category]
   end
 
-  defp destination(app_name_snake_case, opts) do
+  defp destination(app_name_snake_case, project, opts) do
     destination =
-      case {Eject.config()[:destination], opts[:destination]} do
+      case {project.destination, opts[:destination]} do
         {nil, nil} -> "../" <> app_name_snake_case
         {nil, opt} -> opt
         {config, nil} -> Path.join(config, app_name_snake_case)

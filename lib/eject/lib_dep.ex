@@ -1,7 +1,6 @@
 defmodule Eject.LibDep do
   @moduledoc "A struct for a dependency within a sub folder in the `lib/` directory."
 
-  alias __MODULE__
   @enforce_keys [:name, :always, :mix_deps, :lib_deps, :file_rules]
   defstruct [:name, :always, :mix_deps, :lib_deps, :file_rules]
 
@@ -26,7 +25,39 @@ defmodule Eject.LibDep do
           file_rules: Eject.Rules.t()
         }
 
-  @doc "Creates a new `%LibDep{}` struct."
+  @doc """
+  Creates a new `%LibDep{}` struct.
+
+  ### Example
+
+      iex> new!(%{
+      ...>   name: :my_graph,
+      ...>   mix_deps: [:absinthe],
+      ...>   lib_deps: [:my_graph_dep],
+      ...>   always: true,
+      ...>   file_rules: %Eject.Rules{
+      ...>     only: nil,
+      ...>     except: [~r/regex-of-files-not-to-eject/],
+      ...>     associated_files: ["priv/path/to/associated/file"],
+      ...>     chmod: nil,
+      ...>     lib_directory: nil
+      ...>   }
+      ...> })
+      %Eject.LibDep{
+        always: true,
+        file_rules: %Eject.Rules{
+          associated_files: ["priv/path/to/associated/file"],
+          chmod: nil,
+          except: [~r/regex-of-files-not-to-eject/],
+          lib_directory: nil,
+          only: nil
+        },
+        lib_deps: [:my_graph_dep],
+        mix_deps: [:absinthe],
+        name: :my_graph
+      }
+
+  """
   def new!(%{
         name: name,
         mix_deps: mix_deps,
@@ -42,33 +73,5 @@ defmodule Eject.LibDep do
       always: always,
       file_rules: file_rules
     )
-  end
-
-  @doc """
-  Returns all lib deps that can be ejected, in the form of a map where the key is
-  the lib's name.
-
-  Hydrated using the `c:Eject.lib_deps/0` callback implementation, e.g. `YourProject.Eject.Project.lib_deps/1`.
-  """
-  @spec all :: %{LibDep.name() => LibDep.t()}
-  def all do
-    project = Eject.project()
-
-    project.lib_deps()
-    |> Enum.map(fn
-      {dep, opts} -> {dep, opts}
-      dep -> {dep, []}
-    end)
-    |> Enum.map(fn {dep, opts} ->
-      {dep,
-       LibDep.new!(%{
-         name: dep,
-         lib_deps: opts |> Keyword.get(:lib_deps, []) |> List.wrap(),
-         mix_deps: opts |> Keyword.get(:mix_deps, []) |> List.wrap(),
-         always: Keyword.get(opts, :always, false),
-         file_rules: Eject.Rules.new(opts)
-       })}
-    end)
-    |> Enum.into(%{})
   end
 end

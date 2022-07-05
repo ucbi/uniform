@@ -43,8 +43,9 @@ defmodule Eject.Rules do
 
   @doc "Initializes a new `%Rules{}` struct."
   def new(params) when is_list(params) do
-    params
-    |> Keyword.take([:only, :except, :associated_files, :lib_directory, :chmod])
-    |> then(&struct!(__MODULE__, &1))
+    struct!(
+      __MODULE__,
+      Keyword.take(params, ~w(only except associated_files lib_directory chmod)a)
+    )
   end
 end

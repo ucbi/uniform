@@ -2,7 +2,7 @@ defmodule Eject.File do
   @moduledoc """
   Functions for writing files to an ejection destination.
 
-  An `Eject.File.t/0` can be any of the following:
+  An `t:Eject.File.t/0` can be any of the following:
 
   - A text file to copy (such as a `.ex`, `.exs`, or `.json` file)
   - A directory to copy
@@ -40,7 +40,7 @@ defmodule Eject.File do
   @doc "Returns `base` ejectables for the app."
   @spec base_files(App.t()) :: [t]
   def base_files(app) do
-    project = Eject.project()
+    project = app.project.module
     base_files = app |> project.base_files() |> List.flatten()
 
     base_files = [
@@ -87,9 +87,12 @@ defmodule Eject.File do
   @spec app_lib_files(App.t()) :: [t]
   def app_lib_files(app) do
     manifest_path = Manifest.manifest_path(app.name.snake)
+    project = app.project.module
 
     file_rules =
-      Eject.project().options(app)[:ejected_app]
+      app
+      |> project.options()
+      |> Keyword.get(:ejected_app, [])
       # never eject the Eject manifest
       |> Keyword.update(:except, [manifest_path], fn except -> [manifest_path | except] end)
       |> Rules.new()
@@ -118,8 +121,10 @@ defmodule Eject.File do
   # associated with that directory. Includes files in `lib/<lib_dir>`
   # as well as `test/<lib_dir>`
   defp lib_dir_files(lib_dir, %Rules{associated_files: extra, only: only, except: except}) do
-    paths = Path.wildcard("lib/#{lib_dir}/**")
-    paths = paths ++ Path.wildcard("test/#{lib_dir}/**")
+    # location of lib and test directories is configurable for testing
+    root_dir = Application.get_env(:eject, :root_dir, "")
+    paths = Path.wildcard("#{root_dir}lib/#{lib_dir}/**")
+    paths = paths ++ Path.wildcard("#{root_dir}test/#{lib_dir}/**")
     paths = if only, do: Enum.filter(paths, &filter_path(&1, only)), else: paths
     paths = if except, do: Enum.reject(paths, &filter_path(&1, except)), else: paths
     paths = if extra, do: List.flatten(extra) ++ paths, else: paths
@@ -127,14 +132,12 @@ defmodule Eject.File do
   end
 
   defp destination(path, app, file_rules) do
-    project_app_name = to_string(Mix.Project.config()[:app])
-
     destination_relative_path =
       if lib_dir = file_rules.lib_directory do
         if dir = lib_dir.(app, path) do
           path
           |> String.replace(~r/^lib\/[^\/]+\//, "lib/#{dir}/")
-          |> String.replace(project_app_name, app.name.snake)
+          |> String.replace(app.project.base_app, app.name.snake)
         else
           path
         end
@@ -142,9 +145,14 @@ defmodule Eject.File do
         path
       end
 
-    destination_relative_path
-    |> String.replace(project_app_name, app.name.snake)
-    |> then(&Path.join(app.destination, &1))
+    relative_path =
+      String.replace(
+        destination_relative_path,
+        to_string(app.project.base_app),
+        app.name.snake
+      )
+
+    Path.join(app.destination, relative_path)
   end
 
   # returns true if any of the given regexes match or strings match exactly
@@ -196,7 +204,7 @@ defmodule Eject.File do
         contents =
           case t do
             :template ->
-              template_dir = Eject.project().__templates__()
+              template_dir = app.project.module.__templates__()
 
               EEx.eval_file(
                 Path.join(template_dir, source <> ".eex"),
@@ -208,19 +216,21 @@ defmodule Eject.File do
               File.read!(Path.expand(source))
           end
 
-        snake = to_string(Mix.Project.config()[:app])
+        snake = to_string(app.project.base_app)
 
-        contents
-        # apply specified transformations in `Project.modify`
-        |> apply_modifiers(source, app)
-        # replace `base_project_name` with `ejected_app_name`
-        |> String.replace(snake, app.name.snake)
-        # replace `base-project-name` with `ejected-app-name`
-        |> String.replace(String.replace(snake, "_", "-"), app.name.kebab)
-        # replace `BaseProjectName` with `EjectedAppName`
-        |> String.replace(Macro.camelize(snake), app.name.pascal)
-        |> CodeFence.apply_fences(app)
-        |> then(&File.write!(destination, &1))
+        transformed =
+          contents
+          # apply specified transformations in `Project.modify`
+          |> apply_modifiers(source, app)
+          # replace `base_project_name` with `ejected_app_name`
+          |> String.replace(snake, app.name.snake)
+          # replace `base-project-name` with `ejected-app-name`
+          |> String.replace(String.replace(snake, "_", "-"), app.name.kebab)
+          # replace `BaseProjectName` with `EjectedAppName`
+          |> String.replace(Macro.camelize(snake), app.name.pascal)
+          |> CodeFence.apply_fences(app)
+
+        File.write!(destination, transformed)
     end
 
     # apply chmod if relevant
@@ -230,7 +240,8 @@ defmodule Eject.File do
   end
 
   defp apply_modifiers(contents, relative_path, app) do
-    modifiers = Eject.project().modify()
+    project = app.project.module
+    modifiers = project.modify()
     modifiers = [{"mix.exs", &MixExs.remove_unused_deps/2} | modifiers]
 
     Enum.reduce(modifiers, contents, fn {path_or_regex, modifier}, contents ->

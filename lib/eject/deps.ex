@@ -3,7 +3,7 @@ defmodule Eject.Deps do
 
   defstruct [:lib, :mix, :included, :all]
 
-  alias Eject.{LibDep, MixDep, Manifest}
+  alias Eject.{LibDep, MixDep, Manifest, Project}
 
   @type dep :: LibDep.t() | MixDep.t()
 
@@ -40,10 +40,10 @@ defmodule Eject.Deps do
   Given a manifest struct, returns a `%Deps{}` struct containing
   information about lib and mix dependencies.
   """
-  @spec discover!(Manifest.t()) :: t
-  def discover!(manifest) do
-    all_lib_deps = LibDep.all()
-    all_mix_deps = MixDep.all()
+  @spec discover!(Project.t(), Manifest.t()) :: t
+  def discover!(project, manifest) do
+    all_lib_deps = Project.lib_deps(project)
+    all_mix_deps = Project.mix_deps(project)
     lib_deps = lib_deps_included_in_app(manifest, all_lib_deps)
     mix_deps = mix_deps_included_in_app(manifest, lib_deps, all_mix_deps)
 
@@ -67,10 +67,9 @@ defmodule Eject.Deps do
   @spec lib_deps_included_in_app(Manifest.t(), %{atom => LibDep.t()}) :: %{atom => LibDep.t()}
   defp lib_deps_included_in_app(manifest, all_lib_deps) do
     root_deps =
-      Map.filter(
-        all_lib_deps,
-        fn {_, lib_dep} -> lib_dep.always || lib_dep.name in manifest.lib_deps end
-      )
+      all_lib_deps
+      |> Enum.filter(fn {_, lib_dep} -> lib_dep.always || lib_dep.name in manifest.lib_deps end)
+      |> Enum.into(%{})
 
     root_deps
     |> Map.values()
@@ -82,10 +81,9 @@ defmodule Eject.Deps do
         }
   defp mix_deps_included_in_app(manifest, lib_deps, all_mix_deps) do
     root_deps =
-      Map.filter(
-        all_mix_deps,
-        fn {_, mix_dep} -> mix_dep.name in manifest.mix_deps end
-      )
+      all_mix_deps
+      |> Enum.filter(fn {_, mix_dep} -> mix_dep.name in manifest.mix_deps end)
+      |> Enum.into(%{})
 
     # gather nested mix deps required by manifest
     root_deps =

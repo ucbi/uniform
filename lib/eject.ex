@@ -28,7 +28,7 @@ defmodule Eject do
 
   ### Usage
 
-      $ mix eject TwitterClone
+      $ mix eject Tweeter
 
   See `Mix.Tasks.App.Eject` for details.
 
@@ -59,10 +59,6 @@ defmodule Eject do
       def __templates__, do: unquote(templates)
     end
   end
-
-  @doc "Gets the 'project module' that implements the `Eject` behaviour."
-  @spec project() :: module
-  def project(), do: config()[:project]
 
   @doc """
   Lists additional 'base files' to be ejected.
@@ -177,12 +173,12 @@ defmodule Eject do
   ### Examples
 
       $ fd eject.exs
-      lib/twitter_clone/eject.exs
-      lib/trello_clone/eject.exs
-      lib/hotmail_clone/eject.exs
+      lib/tweeter/eject.exs
+      lib/trillo/eject.exs
+      lib/hatmail/eject.exs
 
       iex> ejectables()
-      ["TwitterClone", "TrelloClone", "HotmailClone"]
+      ["Tweeter", "Trillo", "Hatmail"]
 
   """
   @spec ejectables :: [String.t()]
@@ -216,13 +212,14 @@ defmodule Eject do
     if not is_atom(name) do
       raise ArgumentError,
         message:
-          "🤖 Please pass in a module name corresponding to a directory in `lib` containing an `eject.exs` file. E.g. TwitterClone (received #{inspect(name)})"
+          "🤖 Please pass in a module name corresponding to a directory in `lib` containing an `eject.exs` file. E.g. Tweeter (received #{inspect(name)})"
     end
 
-    name
-    |> Macro.underscore()
-    |> Eject.Manifest.eval_and_parse()
-    |> Eject.App.new!(name, opts)
+    project = project()
+
+    project
+    |> Eject.Manifest.eval_and_parse(Macro.underscore(name))
+    |> Eject.App.new!(project, name, opts)
   end
 
   @doc """
@@ -250,7 +247,7 @@ defmodule Eject do
   # Clear the destination folder where the app will be ejected.
   def clear_destination(app) do
     if File.exists?(app.destination) do
-      preserve = Keyword.get(project().options(app), :preserve, [])
+      preserve = Keyword.get(app.project.module.options(app), :preserve, [])
       preserve = [".git", "deps", "_build" | preserve]
 
       app.destination
@@ -264,10 +261,8 @@ defmodule Eject do
     end
   end
 
-  @doc "Returns the `Eject` configuration."
-  def config() do
-    Mix.Project.config()
-    |> Keyword.fetch!(:app)
-    |> Application.get_env(Eject)
+  defp project do
+    base_app = Keyword.fetch!(Mix.Project.config(), :app)
+    Eject.Project.from_config_key(base_app)
   end
 end
