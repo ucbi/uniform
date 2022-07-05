@@ -10,7 +10,7 @@ defmodule Eject.ProjectTest do
 
   test "lib_deps/1", %{project: project} do
     assert %LibDep{
-             lib_deps: [:indirectly_included_lib],
+             lib_deps: [:indirectly_included_lib, :with_only],
              mix_deps: [:included_mix]
            } = Project.lib_deps(project).included_lib
 

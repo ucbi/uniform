@@ -1,5 +1,5 @@
 defmodule TestApp.Project do
-  use Eject, templates: "test/support/templates"
+  use Eject, templates: "test/support/test_project/templates"
 
   def extra(_app) do
     []
@@ -9,9 +9,26 @@ defmodule TestApp.Project do
     [
       :indirectly_included_lib,
       :excluded_lib,
+      always_included_lib: [always: true],
       included_lib: [
         mix_deps: [:included_mix],
-        lib_deps: [:indirectly_included_lib]
+        lib_deps: [:indirectly_included_lib, :with_only],
+        associated_files: [
+          "test/support/test_project/priv/associated.txt"
+        ],
+        except: [
+          ~r/excluded/
+        ],
+        lib_directory: fn _app, file_path ->
+          if String.contains?(file_path, "lib_dir_changed") do
+            "included_lib_changed"
+          end
+        end
+      ],
+      with_only: [
+        only: [
+          ~r/included.txt/
+        ]
       ]
     ]
   end
@@ -28,21 +45,39 @@ defmodule TestApp.Project do
 
   def base_files(_app) do
     [
-      {:dir, "test/support/dir"},
+      {:dir, "test/support/test_project/dir"},
       {:template, "config/runtime.exs"},
-      "test/support/.dotfile"
+      "test/support/test_project/.dotfile"
     ]
   end
 
   def modify do
     [
-      {~r/.dotfile/, &modify_dotfile/2}
+      {~r/\.dotfile/, &modify_dotfile/2}
     ]
   end
 
   def options(_app) do
     [
-      preserve: [".gitignore"]
+      preserve: [".gitignore"],
+      ejected_app: [
+        except: [
+          ~r/excluded/
+        ],
+        only: [
+          ~r/dotfile/,
+          ~r/\/included/,
+          # add `excluded` to `only` so that we're truly testing whether
+          # `except` works (they can be layered)
+          ~r/excluded/,
+          ~r/lib_dir_changed/
+        ],
+        lib_directory: fn _app, file_path ->
+          if String.contains?(file_path, "lib_dir_changed") do
+            "tweeter_changed"
+          end
+        end
+      ]
     ]
   end
 

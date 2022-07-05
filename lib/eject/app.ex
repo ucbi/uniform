@@ -29,22 +29,10 @@ defmodule Eject.App do
 
   ### Example
 
-      iex> project = %Eject.Project{
-      ...>   base_app: :test_app,
-      ...>   module: TestApp.Project,
-      ...>   destination: "/Users/me/code"
-      ...> }
-      ...> manifest = %Eject.Manifest{
-      ...>   lib_deps: [:included_lib],
-      ...>   extra: [some_data: "from eject.exs"]
-      ...> }
-      ...> new!(project, manifest, Tweeter)
+      new!(project, manifest, Tweeter)
+
       %Eject.App{
-        project: %Eject.Project{
-          base_app: :test_app,
-          module: TestApp.Project,
-          destination: "/Users/me/code"
-        },
+        project: %Project{...},
         name: %{
           module: Tweeter,
           web_module: TweeterWeb,
@@ -52,45 +40,15 @@ defmodule Eject.App do
           snake: "tweeter",
           pascal: "Tweeter"
         },
-        destination: "/Users/me/code/tweeter",
-        deps: %Eject.Deps{
+        destination: "...",
+        deps: %Deps{
           lib: %{
-            included_lib: %Eject.LibDep{
-              name: :included_lib,
-              always: false,
-              mix_deps: [:included_mix],
-              lib_deps: [:indirectly_included_lib],
-              file_rules: %Eject.Rules{
-                associated_files: nil,
-                chmod: nil,
-                except: nil,
-                lib_directory: nil,
-                only: nil
-              }
-            },
-            indirectly_included_lib: %Eject.LibDep{
-              name: :indirectly_included_lib,
-              always: false,
-              mix_deps: [],
-              lib_deps: [],
-              file_rules: %Eject.Rules{
-                associated_files: nil,
-                chmod: nil,
-                except: nil,
-                lib_directory: nil,
-                only: nil
-              }
-            }
+            included_lib: %LibDep{...},
+            indirectly_included_lib: %LibDep{...}
           },
           mix: %{
-            included_mix: %Eject.MixDep{
-              name: :included_mix,
-              mix_deps: [:indirectly_included_mix]
-            },
-            indirectly_included_mix: %Eject.MixDep{
-              name: :indirectly_included_mix,
-              mix_deps: []
-            }
+            included_mix: %MixDep{...},
+            indirectly_included_mix: %MixDep{...}
           },
           included: %{
             lib: [:included_lib, :indirectly_included_lib],
@@ -101,9 +59,7 @@ defmodule Eject.App do
             mix: [:excluded_mix, :included_mix, :indirectly_included_mix]
           }
         },
-        extra: [
-          some_data: "from eject.exs"
-        ]
+        extra: [...]
       }
 
   """

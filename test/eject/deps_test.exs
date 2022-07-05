@@ -9,7 +9,14 @@ defmodule Eject.DepsTest do
     result = Deps.discover!(project, manifest)
 
     # all mix/lib deps are returned in the :all key
-    assert result.all.lib == [:excluded_lib, :included_lib, :indirectly_included_lib]
+    assert result.all.lib == [
+             :always_included_lib,
+             :excluded_lib,
+             :included_lib,
+             :indirectly_included_lib,
+             :with_only
+           ]
+
     assert result.all.mix == [:excluded_mix, :included_mix, :indirectly_included_mix]
 
     # only included mix/lib deps are included in the :mix and :lib keys

@@ -135,9 +135,12 @@ defmodule Eject.File do
     destination_relative_path =
       if lib_dir = file_rules.lib_directory do
         if dir = lib_dir.(app, path) do
+          root_dir = Application.get_env(:eject, :root_dir, "")
+          regex = Regex.compile!("^#{root_dir}lib\/[^\/]+\/")
+
           path
-          |> String.replace(~r/^lib\/[^\/]+\//, "lib/#{dir}/")
-          |> String.replace(app.project.base_app, app.name.snake)
+          |> String.replace(regex, "#{root_dir}lib/#{dir}/")
+          |> String.replace(to_string(app.project.base_app), app.name.snake)
         else
           path
         end
