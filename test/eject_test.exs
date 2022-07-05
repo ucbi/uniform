@@ -46,5 +46,10 @@ defmodule EjectTest do
     modified_file = read!("tweeter/test/support/.dotfile")
     assert modified_file =~ "[REPLACED LINE WHILE EJECTING Tweeter]"
     refute modified_file =~ "[REPLACE THIS LINE VIA modify/0]"
+
+    # files in `preserve` option are never cleared
+    # (note: TestApp.Project specifies to preserve .gitignore)
+    Eject.clear_destination(app)
+    read!("tweeter/.gitignore")
   end
 end

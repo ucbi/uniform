@@ -41,7 +41,9 @@ defmodule TestApp.Project do
   end
 
   def options(_app) do
-    []
+    [
+      preserve: [".gitignore"]
+    ]
   end
 
   defp modify_dotfile(file_contents, app) do
