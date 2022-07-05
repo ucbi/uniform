@@ -35,10 +35,20 @@ defmodule TestApp.Project do
   end
 
   def modify do
-    []
+    [
+      {~r/.dotfile/, &modify_dotfile/2}
+    ]
   end
 
   def options(_app) do
     []
+  end
+
+  defp modify_dotfile(file_contents, app) do
+    String.replace(
+      file_contents,
+      "[REPLACE THIS LINE VIA modify/0]",
+      "[REPLACED LINE WHILE EJECTING #{app.name.pascal}]"
+    )
   end
 end

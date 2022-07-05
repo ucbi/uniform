@@ -41,5 +41,10 @@ defmodule EjectTest do
     assert template_file =~ "App name is tweeter"
     assert template_file =~ "Depends on included_mix"
     refute template_file =~ "Depends on excluded_mix"
+
+    # transformations from modify/0 are ran
+    modified_file = read!("tweeter/test/support/.dotfile")
+    assert modified_file =~ "[REPLACED LINE WHILE EJECTING Tweeter]"
+    refute modified_file =~ "[REPLACE THIS LINE VIA modify/0]"
   end
 end
