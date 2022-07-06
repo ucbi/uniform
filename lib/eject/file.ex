@@ -43,13 +43,16 @@ defmodule Eject.File do
     project = app.project.module
     base_files = app |> project.base_files() |> List.flatten()
 
-    base_files = [
-      "mix.exs",
-      "mix.lock",
-      ".gitignore",
-      ".formatter.exs",
-      "test/test_helper.exs" | base_files
-    ]
+    base_files =
+      [
+        "mix.exs",
+        "mix.lock",
+        ".gitignore",
+        ".formatter.exs",
+        "test/test_helper.exs"
+      ]
+      |> Enum.filter(&File.exists?/1)
+      |> Enum.concat(base_files)
 
     for file <- base_files, not is_nil(file) do
       {type, path, opts} =
@@ -122,9 +125,8 @@ defmodule Eject.File do
   # as well as `test/<lib_dir>`
   defp lib_dir_files(lib_dir, %Rules{associated_files: extra, only: only, except: except}) do
     # location of lib and test directories is configurable for testing
-    root_dir = Application.get_env(:eject, :root_dir, "")
-    paths = Path.wildcard("#{root_dir}lib/#{lib_dir}/**")
-    paths = paths ++ Path.wildcard("#{root_dir}test/#{lib_dir}/**")
+    paths = Path.wildcard("lib/#{lib_dir}/**")
+    paths = paths ++ Path.wildcard("test/#{lib_dir}/**")
     paths = if only, do: Enum.filter(paths, &filter_path(&1, only)), else: paths
     paths = if except, do: Enum.reject(paths, &filter_path(&1, except)), else: paths
     paths = if extra, do: List.flatten(extra) ++ paths, else: paths
@@ -135,11 +137,8 @@ defmodule Eject.File do
     destination_relative_path =
       if lib_dir = file_rules.lib_directory do
         if dir = lib_dir.(app, path) do
-          root_dir = Application.get_env(:eject, :root_dir, "")
-          regex = Regex.compile!("^#{root_dir}lib\/[^\/]+\/")
-
           path
-          |> String.replace(regex, "#{root_dir}lib/#{dir}/")
+          |> String.replace(~r/^lib\/[^\/]+\//, "lib/#{dir}/")
           |> String.replace(to_string(app.project.base_app), app.name.snake)
         else
           path
@@ -208,6 +207,14 @@ defmodule Eject.File do
           case t do
             :template ->
               template_dir = app.project.module.__templates__()
+
+              if !template_dir do
+                raise "`use Eject, templates: \"...\"` must specify a templates directory"
+              end
+
+              if !File.dir?(Path.expand(template_dir)) do
+                raise "String given to `use Eject, templates: \"...\"` is not a directory (Expands to #{Path.expand(template_dir)})"
+              end
 
               EEx.eval_file(
                 Path.join(template_dir, source <> ".eex"),

@@ -24,7 +24,7 @@ defmodule Eject.MixProject do
   end
 
   def application do
-    [extra_applications: [:eex]]
+    [extra_applications: [:eex, :logger]]
   end
 
   defp deps do

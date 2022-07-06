@@ -1,5 +1,5 @@
 defmodule TestApp.Project do
-  use Eject, templates: "test/support/test_project/templates"
+  use Eject, templates: "templates"
 
   def extra(_app) do
     []
@@ -14,7 +14,7 @@ defmodule TestApp.Project do
         mix_deps: [:included_mix],
         lib_deps: [:indirectly_included_lib, :with_only],
         associated_files: [
-          "test/support/test_project/priv/associated.txt"
+          "priv/associated.txt"
         ],
         except: [
           ~r/excluded/
@@ -45,9 +45,9 @@ defmodule TestApp.Project do
 
   def base_files(_app) do
     [
-      {:dir, "test/support/test_project/dir"},
+      {:dir, "dir"},
       {:template, "config/runtime.exs"},
-      "test/support/test_project/.dotfile"
+      ".dotfile"
     ]
   end
 

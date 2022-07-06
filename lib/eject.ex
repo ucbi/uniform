@@ -34,6 +34,8 @@ defmodule Eject do
 
   """
 
+  require Logger
+
   @doc """
   A macro for using the eject in a project.
 
@@ -48,10 +50,6 @@ defmodule Eject do
   """
   defmacro __using__(opts) do
     templates = opts[:templates]
-
-    if !templates || !File.dir?(Path.expand(templates)) do
-      raise "`use Eject, templates: \"...\"` must specify a templates directory"
-    end
 
     quote do
       @behaviour Eject
@@ -228,20 +226,17 @@ defmodule Eject do
   """
   def eject(app) do
     clear_destination(app)
-    IO.write(IO.ANSI.clear_line() <> "\r📂 #{app.destination}")
+    Logger.info("📂 #{app.destination}")
     File.mkdir_p!(app.destination)
 
     for ejectable <- Eject.File.all_for_app(app) do
-      IO.write(IO.ANSI.clear_line() <> "\r💾 [#{ejectable.type}] #{ejectable.destination}")
+      Logger.info("💾 [#{ejectable.type}] #{ejectable.destination}")
       Eject.File.eject!(ejectable, app)
     end
 
-    IO.puts("")
     # remove mix deps that are not needed for this project from mix.lock
     System.cmd("mix", ["deps.clean", "--unlock", "--unused"], cd: app.destination)
     System.cmd("mix", ["format"], cd: app.destination)
-    IO.puts("")
-    IO.puts("✅ #{app.name.pascal} ejected to #{app.destination}")
   end
 
   # Clear the destination folder where the app will be ejected.
@@ -255,7 +250,7 @@ defmodule Eject do
       |> Enum.reject(&(&1 in preserve))
       |> Enum.each(fn file_or_folder ->
         path = Path.join(app.destination, file_or_folder)
-        IO.write(IO.ANSI.clear_line() <> "\r💥 #{path}")
+        Logger.info("💥 #{path}")
         File.rm_rf(path)
       end)
     end
