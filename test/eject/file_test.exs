@@ -1,7 +1,18 @@
 defmodule Eject.FileTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case
 
-  alias Eject.{App, File, Manifest, Project}
+  alias Eject.{App, Manifest, Project}
+
+  setup do
+    cwd = File.cwd!()
+
+    # set alternative working directory so that Path.wildcard and Path.expand
+    # start within the test corral
+    File.cd("test/support/test_project")
+
+    # restore working directory
+    on_exit(fn -> File.cd(cwd) end)
+  end
 
   setup do
     project = %Project{base_app: :test_app, module: TestApp.Project}
@@ -13,21 +24,25 @@ defmodule Eject.FileTest do
   test "all_for_app/1 returns all files the app is configured to eject (and only those)", %{
     app: app
   } do
-    files = File.all_for_app(app)
+    files = Eject.File.all_for_app(app)
 
     # expected to be included
-    assert Enum.find(files, &match?(%File{source: "test/support/test_project/.dotfile"}, &1))
-    assert Enum.find(files, &match?(%File{source: "config/runtime.exs", type: :template}, &1))
+    assert Enum.find(files, &match?(%Eject.File{source: ".dotfile"}, &1))
 
     assert Enum.find(
              files,
-             &match?(%File{source: "test/support/test_project/lib/included_lib/included.ex"}, &1)
+             &match?(%Eject.File{source: "config/runtime.exs", type: :template}, &1)
+           )
+
+    assert Enum.find(
+             files,
+             &match?(%Eject.File{source: "lib/included_lib/included.ex"}, &1)
            )
 
     # not expected to be included
     refute Enum.find(
              files,
-             &match?(%File{source: "test/support/test_project/lib/excluded_lib" <> _}, &1)
+             &match?(%Eject.File{source: "lib/excluded_lib" <> _}, &1)
            )
   end
 end

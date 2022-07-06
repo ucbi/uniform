@@ -49,10 +49,6 @@ defmodule Eject do
   defmacro __using__(opts) do
     templates = opts[:templates]
 
-    if !templates || !File.dir?(Path.expand(templates)) do
-      raise "`use Eject, templates: \"...\"` must specify a templates directory"
-    end
-
     quote do
       @behaviour Eject
       import Eject.App, only: [depends_on?: 3]

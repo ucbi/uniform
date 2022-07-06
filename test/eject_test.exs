@@ -1,25 +1,34 @@
 defmodule EjectTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case
 
   alias Eject.{Project, Manifest, App}
 
-  @destination "test/support/ejected"
-
   defp read!(path) do
-    File.read!(@destination <> "/tweeter/" <> path)
+    File.read!("../ejected/tweeter/" <> path)
   end
 
   defp file_exists?(path) do
-    case File.read(@destination <> "/tweeter/test/support/test_project/" <> path) do
+    case File.read("../ejected/tweeter/" <> path) do
       {:ok, _} -> true
       _ -> false
     end
   end
 
+  setup do
+    cwd = File.cwd!()
+
+    # set alternative working directory so that Path.wildcard and Path.expand
+    # start within the test corral
+    File.cd("test/support/test_project")
+
+    # restore working directory
+    on_exit(fn -> File.cd(cwd) end)
+  end
+
   test "full ejection" do
     # this is gitignored; we can eject to it without adding to the git index
     # prepare app
-    project = %Project{base_app: :test_app, module: TestApp.Project, destination: @destination}
+    project = %Project{base_app: :test_app, module: TestApp.Project, destination: "../ejected"}
     manifest = %Manifest{lib_deps: [:included_lib], mix_deps: [:included_mix]}
     app = App.new!(project, manifest, Tweeter)
 
@@ -33,12 +42,12 @@ defmodule EjectTest do
     read!("test/test_helper.exs")
 
     # files in {:dir, _} tuples should not be modified
-    file_txt = read!("test/support/test_project/dir/file.txt")
+    file_txt = read!("dir/file.txt")
     assert file_txt =~ "TestApp"
     refute file_txt =~ "Tweeter"
 
     # lib files should be modified
-    lib_file = read!("test/support/test_project/lib/included_lib/included.ex")
+    lib_file = read!("lib/included_lib/included.ex")
     assert lib_file =~ "Tweeter"
     refute lib_file =~ "TestApp"
 
@@ -50,7 +59,7 @@ defmodule EjectTest do
     refute template_file =~ "Depends on excluded_mix"
 
     # transformations from modify/0 are ran
-    modified_file = read!("test/support/test_project/.dotfile")
+    modified_file = read!(".dotfile")
     assert modified_file =~ "[REPLACED LINE WHILE EJECTING Tweeter]"
     refute modified_file =~ "[REPLACE THIS LINE VIA modify/0]"
 
