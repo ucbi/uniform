@@ -115,6 +115,7 @@ defmodule Mix.Tasks.Eject do
     if eject do
       IO.puts("")
       Eject.eject(app)
+      IO.puts("✅ #{app.name.pascal} ejected to #{app.destination}")
     end
   end
 end
