@@ -16,6 +16,7 @@ defmodule TestProject.Eject.Project do
         lib_directory: &TestProject.Eject.Project.lib_dir_changed/2
 
     file ".dotfile"
+    binary "assets/static/images/pixel.png"
     dir "dir"
     template "config/runtime.exs"
 
@@ -50,10 +51,6 @@ defmodule TestProject.Eject.Project do
     if String.contains?(file_path, "lib_dir_changed") do
       "included_lib_changed"
     end
-  end
-
-  def base_files(_app) do
-    []
   end
 
   def lib_dir_changed(_app, file_path) do

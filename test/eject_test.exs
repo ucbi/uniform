@@ -41,6 +41,10 @@ defmodule EjectTest do
     assert file_txt =~ "TestProject"
     refute file_txt =~ "Tweeter"
 
+    # binary files are copied without modification
+    assert read!("assets/static/images/pixel.png") ==
+             read!("../../support/test_project/assets/static/images/pixel.png")
+
     # lib files should be modified
     lib_file = read!("lib/included_lib/included.ex")
     assert lib_file =~ "Tweeter"

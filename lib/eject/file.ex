@@ -34,6 +34,7 @@ defmodule Eject.File do
     # (See `error_view.ex`)
     base_files(app) ++
       files(app) ++
+      binaries(app) ++
       directories(app) ++
       templates(app) ++
       lib_dep_files(app) ++
@@ -43,10 +44,7 @@ defmodule Eject.File do
   @doc "Returns `base` ejectables for the app."
   @spec base_files(App.t()) :: [t]
   def base_files(app) do
-    project = app.project.module
-    base_files = app |> project.base_files() |> List.flatten()
-
-    base_files =
+    files =
       [
         "mix.exs",
         "mix.lock",
@@ -55,21 +53,10 @@ defmodule Eject.File do
         "test/test_helper.exs"
       ]
       |> Enum.filter(&File.exists?/1)
-      |> Enum.concat(base_files)
 
-    for file <- base_files, not is_nil(file) do
-      {type, path, opts} =
-        case file do
-          {type, path, opts} when is_atom(type) and is_binary(path) -> {type, path, opts}
-          {type, path} when is_atom(type) and is_binary(path) -> {type, path, []}
-          {path, opts} when is_binary(path) -> {nil, path, opts}
-          path -> {nil, path, []}
-        end
-
-      type = type || detect_base_file_type(path)
-      file_rules = Rules.new(opts)
-      destination = destination(path, app, file_rules)
-      %Eject.File{type: type, source: path, destination: destination, chmod: file_rules.chmod}
+    for path <- files do
+      destination = destination(path, app, Rules.new([]))
+      %Eject.File{type: :text, source: path, destination: destination, chmod: nil}
     end
   end
 
@@ -77,6 +64,17 @@ defmodule Eject.File do
     for path <- app.project.module.__files__() do
       destination = destination(path, app, Rules.new([]))
       %Eject.File{type: :text, source: path, destination: destination, chmod: nil}
+    end
+  end
+
+  @doc """
+  These will not go through text-file transformations but will instead be
+  copied over with a `cp` system call.
+  """
+  def binaries(app) do
+    for path <- app.project.module.__binaries__() do
+      destination = destination(path, app, Rules.new([]))
+      %Eject.File{type: :binary, source: path, destination: destination, chmod: nil}
     end
   end
 
@@ -91,22 +89,6 @@ defmodule Eject.File do
     for path <- app.project.module.__templates__() do
       destination = destination(path, app, Rules.new([]))
       %Eject.File{type: :template, source: path, destination: destination, chmod: nil}
-    end
-  end
-
-  # extensions of binary files; these will not go through text-file
-  # transformations but will instead be copied over with a `cp` system call
-  @binary_extensions ["ico", "jpg", "bmp", "png"]
-
-  defp detect_base_file_type(path) do
-    if File.dir?(path) do
-      :dir
-    else
-      if Path.extname(path) in @binary_extensions do
-        :binary
-      else
-        :text
-      end
     end
   end
 

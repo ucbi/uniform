@@ -58,6 +58,7 @@ defmodule Eject do
       import Eject,
         only: [
           app: 1,
+          binary: 1,
           dir: 1,
           file: 1,
           lib: 2,
@@ -76,6 +77,7 @@ defmodule Eject do
       Module.register_attribute(__MODULE__, :mix_deps, accumulate: true)
       Module.register_attribute(__MODULE__, :modifiers, accumulate: true)
       Module.register_attribute(__MODULE__, :files, accumulate: true)
+      Module.register_attribute(__MODULE__, :binaries, accumulate: true)
       Module.register_attribute(__MODULE__, :directories, accumulate: true)
       Module.register_attribute(__MODULE__, :templates, accumulate: true)
       Module.register_attribute(__MODULE__, :preserve, accumulate: true)
@@ -95,6 +97,7 @@ defmodule Eject do
         mix_deps = @mix_deps |> Enum.reverse()
         modifiers = @modifiers |> Enum.reverse()
         files = @files |> Enum.reverse()
+        binaries = @binaries |> Enum.reverse()
         directories = @directories |> Enum.reverse()
         templates = @templates |> Enum.reverse()
         preserve = @preserve |> Enum.reverse()
@@ -104,6 +107,7 @@ defmodule Eject do
         def __mix_deps__, do: unquote(Macro.escape(mix_deps))
         def __modifiers__, do: unquote(Macro.escape(modifiers))
         def __files__, do: unquote(Macro.escape(files))
+        def __binaries__, do: unquote(Macro.escape(binaries))
         def __directories__, do: unquote(Macro.escape(directories))
         def __templates__, do: unquote(Macro.escape(templates))
         def __preserve__, do: unquote(Macro.escape(preserve))
@@ -219,9 +223,26 @@ defmodule Eject do
     Module.put_attribute(mod, :modifiers, {path_or_regex, {mod, fn_name}})
   end
 
+  @doc """
+  The following files are automatically ejected and should not be listed:
+
+    - files in the lib directory of the ejected app
+    - files packaged in a `lib` directory (refer to the `lib_deps` callback for details)
+
+  """
   defmacro file(path) do
     quote do
       Module.put_attribute(__MODULE__, :files, unquote(path))
+    end
+  end
+
+  @doc """
+  These will not go through text-file transformations but will instead be
+  copied over with a `cp` system call.
+  """
+  defmacro binary(path) do
+    quote do
+      Module.put_attribute(__MODULE__, :binaries, unquote(path))
     end
   end
 
@@ -242,15 +263,6 @@ defmodule Eject do
       Module.put_attribute(__MODULE__, :preserve, unquote(path))
     end
   end
-
-  @doc """
-  Lists additional 'base files' to be ejected.
-
-  The following files are automatically ejected and should not be listed:
-    - files in the lib directory of the ejected app
-    - files packaged in a `lib` directory (refer to the `lib_deps` callback for details)
-  """
-  @callback base_files(Eject.App.t()) :: [Path.t() | {:dir | :template | :binary, Path.t()}]
 
   @doc """
   Returns a keyword list of additional key value pairs available to _all_ ejectable apps.
