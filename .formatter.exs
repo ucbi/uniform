@@ -1,5 +1,6 @@
 locals_without_parens = [
   dir: 1,
+  file: 1,
   lib: 2,
   mix: 2,
   preserve: 1,

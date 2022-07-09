@@ -2,6 +2,7 @@ defmodule TestProject.Eject.Project do
   use Eject, templates: "templates"
 
   project do
+    file ".dotfile"
     dir "dir"
     template "config/runtime.exs"
 
@@ -39,9 +40,7 @@ defmodule TestProject.Eject.Project do
   end
 
   def base_files(_app) do
-    [
-      ".dotfile"
-    ]
+    []
   end
 
   def options(_app) do

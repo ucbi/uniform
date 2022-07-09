@@ -56,7 +56,7 @@ defmodule Eject do
       require Eject
 
       import Eject,
-        only: [lib: 2, mix: 2, project: 1, modify: 4, dir: 1, template: 1, preserve: 1]
+        only: [lib: 2, mix: 2, project: 1, modify: 4, dir: 1, template: 1, preserve: 1, file: 1]
 
       import Eject.App, only: [depends_on?: 3]
       def __template_dir, do: unquote(templates)
@@ -64,6 +64,7 @@ defmodule Eject do
       Module.register_attribute(__MODULE__, :lib_deps, accumulate: true)
       Module.register_attribute(__MODULE__, :mix_deps, accumulate: true)
       Module.register_attribute(__MODULE__, :modifiers, accumulate: true)
+      Module.register_attribute(__MODULE__, :files, accumulate: true)
       Module.register_attribute(__MODULE__, :directories, accumulate: true)
       Module.register_attribute(__MODULE__, :templates, accumulate: true)
       Module.register_attribute(__MODULE__, :preserve, accumulate: true)
@@ -81,6 +82,7 @@ defmodule Eject do
         lib_deps = @lib_deps |> Enum.reverse()
         mix_deps = @mix_deps |> Enum.reverse()
         modifiers = @modifiers |> Enum.reverse()
+        files = @files |> Enum.reverse()
         directories = @directories |> Enum.reverse()
         templates = @templates |> Enum.reverse()
         preserve = @preserve |> Enum.reverse()
@@ -88,6 +90,7 @@ defmodule Eject do
         def __lib_deps__, do: unquote(Macro.escape(lib_deps))
         def __mix_deps__, do: unquote(Macro.escape(mix_deps))
         def __modifiers__, do: unquote(Macro.escape(modifiers))
+        def __files__, do: unquote(Macro.escape(files))
         def __directories__, do: unquote(Macro.escape(directories))
         def __templates__, do: unquote(Macro.escape(templates))
         def __preserve__, do: unquote(Macro.escape(preserve))
@@ -190,6 +193,12 @@ defmodule Eject do
 
   def __register_modifier__(mod, path_or_regex, fn_name) do
     Module.put_attribute(mod, :modifiers, {path_or_regex, {mod, fn_name}})
+  end
+
+  defmacro file(path) do
+    quote do
+      Module.put_attribute(__MODULE__, :files, unquote(path))
+    end
   end
 
   defmacro dir(path) do
