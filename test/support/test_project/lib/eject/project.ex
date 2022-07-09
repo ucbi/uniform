@@ -21,6 +21,8 @@ defmodule TestProject.Eject.Project do
         "[REPLACED LINE WHILE EJECTING #{app.name.pascal}]"
       )
     end
+
+    dir "dir"
   end
 
   def extra(_app) do
@@ -35,7 +37,6 @@ defmodule TestProject.Eject.Project do
 
   def base_files(_app) do
     [
-      {:dir, "dir"},
       {:template, "config/runtime.exs"},
       ".dotfile"
     ]

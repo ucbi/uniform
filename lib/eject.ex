@@ -54,13 +54,14 @@ defmodule Eject do
     quote do
       @behaviour Eject
       require Eject
-      import Eject, only: [lib: 2, mix: 2, project: 1, modify: 4]
+      import Eject, only: [lib: 2, mix: 2, project: 1, modify: 4, dir: 1]
       import Eject.App, only: [depends_on?: 3]
       def __templates__, do: unquote(templates)
 
       Module.register_attribute(__MODULE__, :lib_deps, accumulate: true)
       Module.register_attribute(__MODULE__, :mix_deps, accumulate: true)
       Module.register_attribute(__MODULE__, :modifiers, accumulate: true)
+      Module.register_attribute(__MODULE__, :directories, accumulate: true)
     end
   end
 
@@ -75,10 +76,12 @@ defmodule Eject do
         lib_deps = @lib_deps |> Enum.reverse()
         mix_deps = @mix_deps |> Enum.reverse()
         modifiers = @modifiers |> Enum.reverse()
+        directories = @directories |> Enum.reverse()
 
         def __lib_deps__, do: unquote(Macro.escape(lib_deps))
         def __mix_deps__, do: unquote(Macro.escape(mix_deps))
         def __modifiers__, do: unquote(Macro.escape(modifiers))
+        def __directories__, do: unquote(Macro.escape(directories))
       end
 
     quote do
@@ -177,6 +180,12 @@ defmodule Eject do
 
   def __register_modifier__(mod, path_or_regex, fn_name) do
     Module.put_attribute(mod, :modifiers, {path_or_regex, {mod, fn_name}})
+  end
+
+  defmacro dir(path) do
+    quote do
+      Module.put_attribute(__MODULE__, :directories, unquote(path))
+    end
   end
 
   @doc """

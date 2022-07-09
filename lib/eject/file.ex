@@ -33,6 +33,7 @@ defmodule Eject.File do
     # ejected app wants to override phoenix-ish files in `lib/app_name_web`
     # (See `error_view.ex`)
     base_files(app) ++
+      directories(app) ++
       lib_dep_files(app) ++
       app_lib_files(app)
   end
@@ -67,6 +68,13 @@ defmodule Eject.File do
       file_rules = Rules.new(opts)
       destination = destination(path, app, file_rules)
       %Eject.File{type: type, source: path, destination: destination, chmod: file_rules.chmod}
+    end
+  end
+
+  def directories(app) do
+    for dir <- app.project.module.__directories__() do
+      destination = destination(dir, app, Rules.new([]))
+      %Eject.File{type: :dir, source: dir, destination: destination, chmod: nil}
     end
   end
 
