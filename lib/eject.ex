@@ -59,7 +59,7 @@ defmodule Eject do
         only: [
           app: 1,
           binary: 1,
-          dir: 1,
+          cp_r: 1,
           file: 1,
           lib: 2,
           mix: 2,
@@ -246,7 +246,7 @@ defmodule Eject do
     end
   end
 
-  defmacro dir(path) do
+  defmacro cp_r(path) do
     quote do
       Module.put_attribute(__MODULE__, :directories, unquote(path))
     end

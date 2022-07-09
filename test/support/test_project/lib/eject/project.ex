@@ -17,7 +17,7 @@ defmodule TestProject.Eject.Project do
 
     file ".dotfile"
     binary "assets/static/images/pixel.png"
-    dir "dir"
+    cp_r "dir"
     template "config/runtime.exs"
 
     preserve ".gitignore"
