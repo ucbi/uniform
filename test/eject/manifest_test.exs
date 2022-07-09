@@ -9,7 +9,7 @@ defmodule Eject.ManifestTest do
       Manifest.new!(
         %Project{
           base_app: :test,
-          mix_module: TestApp.MixProject,
+          mix_module: TestProject.MixProject,
           module: TestProject.Eject.Project
         },
         mix_deps: [:included_mix],
@@ -27,7 +27,7 @@ defmodule Eject.ManifestTest do
   test "new!/2 raises if mix_deps or lib_deps contain unspecified deps" do
     project = %Project{
       base_app: :test,
-      mix_module: TestApp.MixProject,
+      mix_module: TestProject.MixProject,
       module: TestProject.Eject.Project
     }
 

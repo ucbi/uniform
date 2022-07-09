@@ -6,7 +6,7 @@ defmodule Eject.CodeFenceTest do
   setup do
     project = %Project{
       base_app: :test,
-      mix_module: TestApp.MixProject,
+      mix_module: TestProject.MixProject,
       module: TestProject.Eject.Project
     }
 

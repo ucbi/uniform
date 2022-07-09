@@ -6,8 +6,8 @@ defmodule Eject.AppTest do
 
   test "new!/3" do
     project = %Project{
-      base_app: :test_app,
-      mix_module: TestApp.MixProject,
+      base_app: :test_project,
+      mix_module: TestProject.MixProject,
       module: TestProject.Eject.Project,
       destination: "/Users/me/code"
     }
@@ -28,8 +28,8 @@ defmodule Eject.AppTest do
            }
 
     assert app.project == %Project{
-             base_app: :test_app,
-             mix_module: TestApp.MixProject,
+             base_app: :test_project,
+             mix_module: TestProject.MixProject,
              module: TestProject.Eject.Project,
              destination: "/Users/me/code"
            }

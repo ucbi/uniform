@@ -18,8 +18,8 @@ defmodule EjectTest do
     # this is gitignored; we can eject to it without adding to the git index
     # prepare app
     project = %Project{
-      base_app: :test_app,
-      mix_module: TestApp.MixProject,
+      base_app: :test_project,
+      mix_module: TestProject.MixProject,
       module: TestProject.Eject.Project,
       destination: "../../ejected"
     }
@@ -38,13 +38,13 @@ defmodule EjectTest do
 
     # files in {:dir, _} tuples should not be modified
     file_txt = read!("dir/file.txt")
-    assert file_txt =~ "TestApp"
+    assert file_txt =~ "TestProject"
     refute file_txt =~ "Tweeter"
 
     # lib files should be modified
     lib_file = read!("lib/included_lib/included.ex")
     assert lib_file =~ "Tweeter"
-    refute lib_file =~ "TestApp"
+    refute lib_file =~ "TestProject"
 
     # files are created from templates
     template_file = read!("config/runtime.exs")

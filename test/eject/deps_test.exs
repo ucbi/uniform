@@ -6,7 +6,7 @@ defmodule Eject.DepsTest do
   test "discover!/2 packages all mix/lib deps and catalogues which ones are required for the app" do
     project = %Project{
       base_app: :test,
-      mix_module: TestApp.MixProject,
+      mix_module: TestProject.MixProject,
       module: TestProject.Eject.Project
     }
 

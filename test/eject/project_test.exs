@@ -5,8 +5,8 @@ defmodule Eject.ProjectTest do
 
   setup do
     project = %Project{
-      base_app: :test_app,
-      mix_module: TestApp.MixProject,
+      base_app: :test_project,
+      mix_module: TestProject.MixProject,
       module: TestProject.Eject.Project
     }
 
