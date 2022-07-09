@@ -54,14 +54,15 @@ defmodule Eject do
     quote do
       @behaviour Eject
       require Eject
-      import Eject, only: [lib: 2, mix: 2, project: 1, modify: 4, dir: 1]
+      import Eject, only: [lib: 2, mix: 2, project: 1, modify: 4, dir: 1, template: 1]
       import Eject.App, only: [depends_on?: 3]
-      def __templates__, do: unquote(templates)
+      def __template_dir, do: unquote(templates)
 
       Module.register_attribute(__MODULE__, :lib_deps, accumulate: true)
       Module.register_attribute(__MODULE__, :mix_deps, accumulate: true)
       Module.register_attribute(__MODULE__, :modifiers, accumulate: true)
       Module.register_attribute(__MODULE__, :directories, accumulate: true)
+      Module.register_attribute(__MODULE__, :templates, accumulate: true)
     end
   end
 
@@ -77,11 +78,13 @@ defmodule Eject do
         mix_deps = @mix_deps |> Enum.reverse()
         modifiers = @modifiers |> Enum.reverse()
         directories = @directories |> Enum.reverse()
+        templates = @templates |> Enum.reverse()
 
         def __lib_deps__, do: unquote(Macro.escape(lib_deps))
         def __mix_deps__, do: unquote(Macro.escape(mix_deps))
         def __modifiers__, do: unquote(Macro.escape(modifiers))
         def __directories__, do: unquote(Macro.escape(directories))
+        def __templates__, do: unquote(Macro.escape(templates))
       end
 
     quote do
@@ -152,6 +155,7 @@ defmodule Eject do
 
     Module.put_attribute(mod, :mix_deps, mix_dep)
   end
+
   @doc """
   Specify a file or regex pattern and a transformation function to apply to all files matching that pattern.
 
@@ -168,13 +172,13 @@ defmodule Eject do
       end
 
   """
-  defmacro modify(path_or_regex, file, app, [do: block]) do
+  defmacro modify(path_or_regex, file, app, do: block) do
     line = __ENV__.line
     fn_name = String.to_atom("modify_#{line}")
 
     quote do
       Eject.__register_modifier__(__MODULE__, unquote(path_or_regex), unquote(fn_name))
-      def unquote(fn_name)(unquote(file), unquote(app)), [do: unquote(block)]
+      def unquote(fn_name)(unquote(file), unquote(app)), do: unquote(block)
     end
   end
 
@@ -185,6 +189,12 @@ defmodule Eject do
   defmacro dir(path) do
     quote do
       Module.put_attribute(__MODULE__, :directories, unquote(path))
+    end
+  end
+
+  defmacro template(path) do
+    quote do
+      Module.put_attribute(__MODULE__, :templates, unquote(path))
     end
   end
 

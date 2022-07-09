@@ -22,7 +22,9 @@ defmodule TestProject.Eject.Project do
       )
     end
 
-    dir "dir"
+    dir("dir")
+
+    template("config/runtime.exs")
   end
 
   def extra(_app) do
@@ -37,7 +39,6 @@ defmodule TestProject.Eject.Project do
 
   def base_files(_app) do
     [
-      {:template, "config/runtime.exs"},
       ".dotfile"
     ]
   end

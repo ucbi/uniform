@@ -34,6 +34,7 @@ defmodule Eject.File do
     # (See `error_view.ex`)
     base_files(app) ++
       directories(app) ++
+      templates(app) ++
       lib_dep_files(app) ++
       app_lib_files(app)
   end
@@ -75,6 +76,13 @@ defmodule Eject.File do
     for dir <- app.project.module.__directories__() do
       destination = destination(dir, app, Rules.new([]))
       %Eject.File{type: :dir, source: dir, destination: destination, chmod: nil}
+    end
+  end
+
+  def templates(app) do
+    for path <- app.project.module.__templates__() do
+      destination = destination(path, app, Rules.new([]))
+      %Eject.File{type: :template, source: path, destination: destination, chmod: nil}
     end
   end
 
@@ -214,7 +222,7 @@ defmodule Eject.File do
         contents =
           case t do
             :template ->
-              template_dir = app.project.module.__templates__()
+              template_dir = app.project.module.__template_dir()
 
               if !template_dir do
                 raise "`use Eject, templates: \"...\"` must specify a templates directory"
