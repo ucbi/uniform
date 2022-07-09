@@ -2,6 +2,11 @@ defmodule TestProject.Eject.Project do
   use Eject, templates: "templates"
 
   project do
+    dir "dir"
+    template "config/runtime.exs"
+
+    preserve ".gitignore"
+
     lib :included_lib,
       mix_deps: [:included_mix],
       lib_deps: [:indirectly_included_lib, :with_only],
@@ -21,10 +26,6 @@ defmodule TestProject.Eject.Project do
         "[REPLACED LINE WHILE EJECTING #{app.name.pascal}]"
       )
     end
-
-    dir("dir")
-
-    template("config/runtime.exs")
   end
 
   def extra(_app) do
@@ -45,7 +46,6 @@ defmodule TestProject.Eject.Project do
 
   def options(_app) do
     [
-      preserve: [".gitignore"],
       ejected_app: [
         except: [
           ~r/excluded/

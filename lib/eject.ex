@@ -54,7 +54,10 @@ defmodule Eject do
     quote do
       @behaviour Eject
       require Eject
-      import Eject, only: [lib: 2, mix: 2, project: 1, modify: 4, dir: 1, template: 1]
+
+      import Eject,
+        only: [lib: 2, mix: 2, project: 1, modify: 4, dir: 1, template: 1, preserve: 1]
+
       import Eject.App, only: [depends_on?: 3]
       def __template_dir, do: unquote(templates)
 
@@ -63,6 +66,7 @@ defmodule Eject do
       Module.register_attribute(__MODULE__, :modifiers, accumulate: true)
       Module.register_attribute(__MODULE__, :directories, accumulate: true)
       Module.register_attribute(__MODULE__, :templates, accumulate: true)
+      Module.register_attribute(__MODULE__, :preserve, accumulate: true)
     end
   end
 
@@ -79,12 +83,14 @@ defmodule Eject do
         modifiers = @modifiers |> Enum.reverse()
         directories = @directories |> Enum.reverse()
         templates = @templates |> Enum.reverse()
+        preserve = @preserve |> Enum.reverse()
 
         def __lib_deps__, do: unquote(Macro.escape(lib_deps))
         def __mix_deps__, do: unquote(Macro.escape(mix_deps))
         def __modifiers__, do: unquote(Macro.escape(modifiers))
         def __directories__, do: unquote(Macro.escape(directories))
         def __templates__, do: unquote(Macro.escape(templates))
+        def __preserve__, do: unquote(Macro.escape(preserve))
       end
 
     quote do
@@ -195,6 +201,12 @@ defmodule Eject do
   defmacro template(path) do
     quote do
       Module.put_attribute(__MODULE__, :templates, unquote(path))
+    end
+  end
+
+  defmacro preserve(path) do
+    quote do
+      Module.put_attribute(__MODULE__, :preserve, unquote(path))
     end
   end
 
@@ -321,7 +333,7 @@ defmodule Eject do
   # Clear the destination folder where the app will be ejected.
   def clear_destination(app) do
     if File.exists?(app.destination) do
-      preserve = Keyword.get(app.project.module.options(app), :preserve, [])
+      preserve = app.project.module.__preserve__()
       preserve = [".git", "deps", "_build" | preserve]
 
       app.destination

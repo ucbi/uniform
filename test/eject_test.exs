@@ -36,7 +36,7 @@ defmodule EjectTest do
     read!(".formatter.exs")
     read!("test/test_helper.exs")
 
-    # files in {:dir, _} tuples should not be modified
+    # files copied with `dir` should not be modified
     file_txt = read!("dir/file.txt")
     assert file_txt =~ "TestProject"
     refute file_txt =~ "Tweeter"
@@ -53,7 +53,7 @@ defmodule EjectTest do
     assert template_file =~ "Depends on included_mix"
     refute template_file =~ "Depends on excluded_mix"
 
-    # transformations from modify/0 are ran
+    # `modify` transformations are ran
     modified_file = read!(".dotfile")
     assert modified_file =~ "[REPLACED LINE WHILE EJECTING Tweeter]"
     refute modified_file =~ "[REPLACE THIS LINE VIA modify/0]"
@@ -79,7 +79,7 @@ defmodule EjectTest do
     assert file_exists?("lib/included_lib_changed/lib_dir_changed.txt")
     assert file_exists?("lib/tweeter_changed/lib_dir_changed.txt")
 
-    # files in `preserve` option are never cleared
+    # `preserve`d files are never cleared
     # (note: TestProject.Eject.Project specifies to preserve .gitignore)
     Eject.clear_destination(app)
     read!(".gitignore")
