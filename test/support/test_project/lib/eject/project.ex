@@ -13,6 +13,14 @@ defmodule TestProject.Eject.Project do
     lib :with_only, only: [~r/included.txt/]
 
     mix :included_mix, mix_deps: [:indirectly_included_mix]
+
+    modify ~r/\.dotfile/, file, app do
+      String.replace(
+        file,
+        "[REPLACE THIS LINE VIA modify/0]",
+        "[REPLACED LINE WHILE EJECTING #{app.name.pascal}]"
+      )
+    end
   end
 
   def extra(_app) do
@@ -30,12 +38,6 @@ defmodule TestProject.Eject.Project do
       {:dir, "dir"},
       {:template, "config/runtime.exs"},
       ".dotfile"
-    ]
-  end
-
-  def modify do
-    [
-      {~r/\.dotfile/, &modify_dotfile/2}
     ]
   end
 
@@ -61,13 +63,5 @@ defmodule TestProject.Eject.Project do
         end
       ]
     ]
-  end
-
-  defp modify_dotfile(file_contents, app) do
-    String.replace(
-      file_contents,
-      "[REPLACE THIS LINE VIA modify/0]",
-      "[REPLACED LINE WHILE EJECTING #{app.name.pascal}]"
-    )
   end
 end

@@ -251,12 +251,12 @@ defmodule Eject.File do
 
   defp apply_modifiers(contents, relative_path, app) do
     project = app.project.module
-    modifiers = project.modify()
-    modifiers = [{"mix.exs", &MixExs.remove_unused_deps/2} | modifiers]
+    modifiers = project.__modifiers__()
+    modifiers = [{"mix.exs", {MixExs, :remove_unused_deps}} | modifiers]
 
-    Enum.reduce(modifiers, contents, fn {path_or_regex, modifier}, contents ->
+    Enum.reduce(modifiers, contents, fn {path_or_regex, {module, function}}, contents ->
       if apply_modifier?(path_or_regex, relative_path) do
-        modifier.(contents, app)
+        apply(module, function, [contents, app])
       else
         contents
       end

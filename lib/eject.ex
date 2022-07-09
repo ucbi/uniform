@@ -54,12 +54,13 @@ defmodule Eject do
     quote do
       @behaviour Eject
       require Eject
-      import Eject, only: [lib: 2, mix: 2, project: 1]
+      import Eject, only: [lib: 2, mix: 2, project: 1, modify: 4]
       import Eject.App, only: [depends_on?: 3]
       def __templates__, do: unquote(templates)
 
       Module.register_attribute(__MODULE__, :lib_deps, accumulate: true)
       Module.register_attribute(__MODULE__, :mix_deps, accumulate: true)
+      Module.register_attribute(__MODULE__, :modifiers, accumulate: true)
     end
   end
 
@@ -73,9 +74,11 @@ defmodule Eject do
       quote unquote: false do
         lib_deps = @lib_deps |> Enum.reverse()
         mix_deps = @mix_deps |> Enum.reverse()
+        modifiers = @modifiers |> Enum.reverse()
 
         def __lib_deps__, do: unquote(Macro.escape(lib_deps))
         def __mix_deps__, do: unquote(Macro.escape(mix_deps))
+        def __modifiers__, do: unquote(Macro.escape(modifiers))
       end
 
     quote do
@@ -146,6 +149,35 @@ defmodule Eject do
 
     Module.put_attribute(mod, :mix_deps, mix_dep)
   end
+  @doc """
+  Specify a file or regex pattern and a transformation function to apply to all files matching that pattern.
+
+  ### Example
+
+      modify ~r/lib\/.+_(worker|cron).ex/, file, app do
+        # Return modified `file` string
+        # Only ran on files matching the regex
+      end
+
+      modify "lib/my_app_web/router.ex", file, app do
+        # Return modified `file` string
+        # Only ran on files with the exact path "lib/my_app_web/router.ex"
+      end
+
+  """
+  defmacro modify(path_or_regex, file, app, [do: block]) do
+    line = __ENV__.line
+    fn_name = String.to_atom("modify_#{line}")
+
+    quote do
+      Eject.__register_modifier__(__MODULE__, unquote(path_or_regex), unquote(fn_name))
+      def unquote(fn_name)(unquote(file), unquote(app)), [do: unquote(block)]
+    end
+  end
+
+  def __register_modifier__(mod, path_or_regex, fn_name) do
+    Module.put_attribute(mod, :modifiers, {path_or_regex, {mod, fn_name}})
+  end
 
   @doc """
   Lists additional 'base files' to be ejected.
@@ -155,25 +187,6 @@ defmodule Eject do
     - files packaged in a `lib` directory (refer to the `lib_deps` callback for details)
   """
   @callback base_files(Eject.App.t()) :: [Path.t() | {:dir | :template | :binary, Path.t()}]
-
-  @doc """
-  Returns a list of tuples, with each tuple containing a file or regex pattern and a transformation function.
-
-  ### Example
-
-      [
-        {
-          ~r/lib\/.+_(worker|cron).ex/,
-          &Modify.worker_cron/2
-        },
-        {
-          "lib/my_app_web/router.ex",
-          &Modify.router/2
-        }
-      ]
-
-  """
-  @callback modify :: [{Path.t() | Regex.t(), (String.t(), Eject.App.t() -> String.t())}]
 
   @doc """
   Lists various options or settings that control the ejection process, including:
