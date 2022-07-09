@@ -1,4 +1,5 @@
 locals_without_parens = [
+  app: 1,
   dir: 1,
   file: 1,
   lib: 2,

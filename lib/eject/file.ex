@@ -114,14 +114,13 @@ defmodule Eject.File do
   @spec app_lib_files(App.t()) :: [t]
   def app_lib_files(app) do
     manifest_path = Manifest.manifest_path(app.name.snake)
-    project = app.project.module
+    opts = app.project.module.__app_options__() || []
 
     file_rules =
-      app
-      |> project.options()
-      |> Keyword.get(:ejected_app, [])
+      opts
       # never eject the Eject manifest
       |> Keyword.update(:except, [manifest_path], fn except -> [manifest_path | except] end)
+      |> Keyword.take([:only, :except, :lib_directory])
       |> Rules.new()
 
     for path <- lib_dir_files(app.name.snake, file_rules) do

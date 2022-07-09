@@ -56,11 +56,22 @@ defmodule Eject do
       require Eject
 
       import Eject,
-        only: [lib: 2, mix: 2, project: 1, modify: 4, dir: 1, template: 1, preserve: 1, file: 1]
+        only: [
+          app: 1,
+          dir: 1,
+          file: 1,
+          lib: 2,
+          mix: 2,
+          modify: 4,
+          preserve: 1,
+          project: 1,
+          template: 1
+        ]
 
       import Eject.App, only: [depends_on?: 3]
       def __template_dir, do: unquote(templates)
 
+      Module.register_attribute(__MODULE__, :app_options, [])
       Module.register_attribute(__MODULE__, :lib_deps, accumulate: true)
       Module.register_attribute(__MODULE__, :mix_deps, accumulate: true)
       Module.register_attribute(__MODULE__, :modifiers, accumulate: true)
@@ -79,6 +90,7 @@ defmodule Eject do
 
     postlude =
       quote unquote: false do
+        app_options = @app_options
         lib_deps = @lib_deps |> Enum.reverse()
         mix_deps = @mix_deps |> Enum.reverse()
         modifiers = @modifiers |> Enum.reverse()
@@ -87,6 +99,7 @@ defmodule Eject do
         templates = @templates |> Enum.reverse()
         preserve = @preserve |> Enum.reverse()
 
+        def __app_options__, do: unquote(Macro.escape(app_options))
         def __lib_deps__, do: unquote(Macro.escape(lib_deps))
         def __mix_deps__, do: unquote(Macro.escape(mix_deps))
         def __modifiers__, do: unquote(Macro.escape(modifiers))
@@ -99,6 +112,17 @@ defmodule Eject do
     quote do
       unquote(prelude)
       unquote(postlude)
+    end
+  end
+
+  @doc """
+  Specify various rules to apply to the ejected app `lib/` directory files. These are the
+  same "file rules" that can be applied to a lib dep. See `Eject.Rules` for a full
+  list of options.
+  """
+  defmacro app(opts) do
+    quote do
+      Module.put_attribute(__MODULE__, :app_options, unquote(opts))
     end
   end
 
@@ -227,17 +251,6 @@ defmodule Eject do
     - files packaged in a `lib` directory (refer to the `lib_deps` callback for details)
   """
   @callback base_files(Eject.App.t()) :: [Path.t() | {:dir | :template | :binary, Path.t()}]
-
-  @doc """
-  Lists various options or settings that control the ejection process, including:
-
-    - `preserve` - Preserve (i.e. do not delete) the specified root-level files/directories
-      when clearing ejection destination.
-    - `ejected_app` - Specify various rules to apply to the ejected app `lib/` directory files. These
-    are the same "file rules" that can be applied to a lib dep. See `Eject.Rules` for a full list of options.
-
-  """
-  @callback options(Eject.App.t()) :: keyword
 
   @doc """
   Returns a keyword list of additional key value pairs available to _all_ ejectable apps.

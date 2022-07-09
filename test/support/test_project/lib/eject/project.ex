@@ -2,6 +2,19 @@ defmodule TestProject.Eject.Project do
   use Eject, templates: "templates"
 
   project do
+    app except: [
+          ~r/excluded/
+        ],
+        only: [
+          ~r/dotfile/,
+          ~r/\/included/,
+          # add `excluded` to `only` so that we're truly testing whether
+          # `except` works (they can be layered)
+          ~r/excluded/,
+          ~r/lib_dir_changed/
+        ],
+        lib_directory: &TestProject.Eject.Project.lib_dir_changed/2
+
     file ".dotfile"
     dir "dir"
     template "config/runtime.exs"
@@ -43,26 +56,9 @@ defmodule TestProject.Eject.Project do
     []
   end
 
-  def options(_app) do
-    [
-      ejected_app: [
-        except: [
-          ~r/excluded/
-        ],
-        only: [
-          ~r/dotfile/,
-          ~r/\/included/,
-          # add `excluded` to `only` so that we're truly testing whether
-          # `except` works (they can be layered)
-          ~r/excluded/,
-          ~r/lib_dir_changed/
-        ],
-        lib_directory: fn _app, file_path ->
-          if String.contains?(file_path, "lib_dir_changed") do
-            "tweeter_changed"
-          end
-        end
-      ]
-    ]
+  def lib_dir_changed(_app, file_path) do
+    if String.contains?(file_path, "lib_dir_changed") do
+      "tweeter_changed"
+    end
   end
 end
