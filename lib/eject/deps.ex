@@ -123,7 +123,7 @@ defmodule Eject.Deps do
               %MixDep{} -> :mix
             end
 
-          raise "#{type}_dep #{dep.name} has a child #{type}_dep #{child_name} which isn't defined in master #{type}_deps function"
+          raise "Could not find #{type} dependency #{child_name} which is a dependency of #{dep.name}"
         end
       end
     end)

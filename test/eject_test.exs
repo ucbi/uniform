@@ -1,34 +1,29 @@
 defmodule EjectTest do
-  use ExUnit.Case
+  use Eject.ProjectCase
 
   alias Eject.{Project, Manifest, App}
 
   defp read!(path) do
-    File.read!("../ejected/tweeter/" <> path)
+    File.read!("../../ejected/tweeter/" <> path)
   end
 
   defp file_exists?(path) do
-    case File.read("../ejected/tweeter/" <> path) do
+    case File.read("../../ejected/tweeter/" <> path) do
       {:ok, _} -> true
       _ -> false
     end
   end
 
-  setup do
-    cwd = File.cwd!()
-
-    # set alternative working directory so that Path.wildcard and Path.expand
-    # start within the test corral
-    File.cd("test/support/test_project")
-
-    # restore working directory
-    on_exit(fn -> File.cd(cwd) end)
-  end
-
   test "full ejection" do
     # this is gitignored; we can eject to it without adding to the git index
     # prepare app
-    project = %Project{base_app: :test_app, module: TestApp.Project, destination: "../ejected"}
+    project = %Project{
+      base_app: :test_app,
+      mix_module: TestApp.MixProject,
+      module: TestProject.Eject.Project,
+      destination: "../../ejected"
+    }
+
     manifest = %Manifest{lib_deps: [:included_lib], mix_deps: [:included_mix]}
     app = App.new!(project, manifest, Tweeter)
 
@@ -85,7 +80,7 @@ defmodule EjectTest do
     assert file_exists?("lib/tweeter_changed/lib_dir_changed.txt")
 
     # files in `preserve` option are never cleared
-    # (note: TestApp.Project specifies to preserve .gitignore)
+    # (note: TestProject.Eject.Project specifies to preserve .gitignore)
     Eject.clear_destination(app)
     read!(".gitignore")
   end

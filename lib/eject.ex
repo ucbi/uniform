@@ -53,29 +53,44 @@ defmodule Eject do
 
     quote do
       @behaviour Eject
+      require Eject
+      import Eject, only: [lib: 2, mix: 2, project: 1]
       import Eject.App, only: [depends_on?: 3]
       def __templates__, do: unquote(templates)
+
+      Module.register_attribute(__MODULE__, :lib_deps, accumulate: true)
+      Module.register_attribute(__MODULE__, :mix_deps, accumulate: true)
+    end
+  end
+
+  defmacro project(do: block) do
+    prelude =
+      quote do
+        unquote(block)
+      end
+
+    postlude =
+      quote unquote: false do
+        lib_deps = @lib_deps |> Enum.reverse()
+        mix_deps = @mix_deps |> Enum.reverse()
+
+        def __lib_deps__, do: unquote(Macro.escape(lib_deps))
+        def __mix_deps__, do: unquote(Macro.escape(mix_deps))
+      end
+
+    quote do
+      unquote(prelude)
+      unquote(postlude)
     end
   end
 
   @doc """
-  Lists additional 'base files' to be ejected.
-
-  The following files are automatically ejected and should not be listed:
-    - files in the lib directory of the ejected app
-    - files packaged in a `lib` directory (refer to the `lib_deps` callback for details)
-  """
-  @callback base_files(Eject.App.t()) :: [Path.t() | {:dir | :template | :binary, Path.t()}]
-
-  @doc """
-  Lists all available local lib (not hex) dependencies an ejected app may use.
-
   Lib dependencies are identified by an atom that corresponds to the lib directory. For
   example, `:my_cool_utilities` ejects _all_ files in the `lib/my_cool_utilities` directory.
   If additional files from a different directory are needed, use the `associated_files` option.
   If you only need selected files from the `lib` directory, use the `only` option.
 
-  Once listed, each ejectable app may elect to include the lib dependency by adding it
+  Each ejectable app may elect to include the lib dependency by adding it
   to its `Eject` manifest (see `Eject.Manifest`).
 
   Options include:
@@ -90,24 +105,56 @@ defmodule Eject do
     - `except` - exclude specific files from the lib directory.
 
   """
-  @callback lib_deps :: [LibDep.name() | {LibDep.name(), keyword}]
+  defmacro lib(name, opts) do
+    quote do
+      Eject.__lib__(__MODULE__, unquote(name), unquote(opts))
+    end
+  end
+
+  @doc false
+  def __lib__(mod, name, opts) when is_atom(name) and is_list(opts) do
+    lib_dep =
+      Eject.LibDep.new!(%{
+        name: name,
+        lib_deps: opts |> Keyword.get(:lib_deps, []) |> List.wrap(),
+        mix_deps: opts |> Keyword.get(:mix_deps, []) |> List.wrap(),
+        always: Keyword.get(opts, :always, false),
+        file_rules: Eject.Rules.new(opts)
+      })
+
+    Module.put_attribute(mod, :lib_deps, lib_dep)
+  end
 
   @doc """
-  Lists mix.exs dependencies NOT to always include. In other words, mix dependencies that
-  may optionally be excluded.
-
-  Unlike `lib_deps`, which are _excluded_ by default, `mix_deps` are _included_ by default.
-  As such, the mix dependency must be added to this list in order to allow each ejectable app
-  to exclude the dependency.
-
-  Once listed, each ejectable app may elect to exclude (i.e. don't eject) the mix dependency
-  by adding it to its `Eject` manifest (see `Eject.Manifest`).
-
   Options include:
     - `mix_deps: atom | [atom]` - other mix dependencies that the mix requires (i.e. nested dependencies).
       Note that each nested dependency itself must also have an entry on the "top" level of the list.
   """
-  @callback mix_deps :: [MixDep.name() | {MixDep.name(), keyword}]
+  defmacro mix(name, opts) do
+    quote do
+      Eject.__mix__(__MODULE__, unquote(name), unquote(opts))
+    end
+  end
+
+  @doc false
+  def __mix__(mod, name, opts) when is_atom(name) and is_list(opts) do
+    mix_dep =
+      Eject.MixDep.new!(%{
+        name: name,
+        mix_deps: opts |> Keyword.get(:mix_deps, []) |> List.wrap()
+      })
+
+    Module.put_attribute(mod, :mix_deps, mix_dep)
+  end
+
+  @doc """
+  Lists additional 'base files' to be ejected.
+
+  The following files are automatically ejected and should not be listed:
+    - files in the lib directory of the ejected app
+    - files packaged in a `lib` directory (refer to the `lib_deps` callback for details)
+  """
+  @callback base_files(Eject.App.t()) :: [Path.t() | {:dir | :template | :binary, Path.t()}]
 
   @doc """
   Returns a list of tuples, with each tuple containing a file or regex pattern and a transformation function.
@@ -213,7 +260,7 @@ defmodule Eject do
           "🤖 Please pass in a module name corresponding to a directory in `lib` containing an `eject.exs` file. E.g. Tweeter (received #{inspect(name)})"
     end
 
-    project = project()
+    project = Eject.Project.build()
 
     project
     |> Eject.Manifest.eval_and_parse(Macro.underscore(name))
@@ -254,10 +301,5 @@ defmodule Eject do
         File.rm_rf(path)
       end)
     end
-  end
-
-  defp project do
-    base_app = Keyword.fetch!(Mix.Project.config(), :app)
-    Eject.Project.from_config_key(base_app)
   end
 end

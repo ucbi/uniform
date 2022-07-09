@@ -1,46 +1,28 @@
-defmodule TestApp.Project do
+defmodule TestProject.Eject.Project do
   use Eject, templates: "templates"
+
+  project do
+    lib :included_lib,
+      mix_deps: [:included_mix],
+      lib_deps: [:indirectly_included_lib, :with_only],
+      associated_files: ["priv/associated.txt"],
+      except: [~r/excluded/],
+      lib_directory: &TestProject.Eject.Project.included_lib_dir/2
+
+    lib :always_included_lib, always: true
+    lib :with_only, only: [~r/included.txt/]
+
+    mix :included_mix, mix_deps: [:indirectly_included_mix]
+  end
 
   def extra(_app) do
     []
   end
 
-  def lib_deps do
-    [
-      :indirectly_included_lib,
-      :excluded_lib,
-      always_included_lib: [always: true],
-      included_lib: [
-        mix_deps: [:included_mix],
-        lib_deps: [:indirectly_included_lib, :with_only],
-        associated_files: [
-          "priv/associated.txt"
-        ],
-        except: [
-          ~r/excluded/
-        ],
-        lib_directory: fn _app, file_path ->
-          if String.contains?(file_path, "lib_dir_changed") do
-            "included_lib_changed"
-          end
-        end
-      ],
-      with_only: [
-        only: [
-          ~r/included.txt/
-        ]
-      ]
-    ]
-  end
-
-  def mix_deps do
-    [
-      :excluded_mix,
-      :indirectly_included_mix,
-      included_mix: [
-        mix_deps: [:indirectly_included_mix]
-      ]
-    ]
+  def included_lib_dir(_app, file_path) do
+    if String.contains?(file_path, "lib_dir_changed") do
+      "included_lib_changed"
+    end
   end
 
   def base_files(_app) do

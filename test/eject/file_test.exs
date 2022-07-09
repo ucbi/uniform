@@ -1,5 +1,5 @@
 defmodule Eject.FileTest do
-  use ExUnit.Case
+  use Eject.ProjectCase
 
   alias Eject.{App, Manifest, Project}
 
@@ -15,7 +15,12 @@ defmodule Eject.FileTest do
   end
 
   setup do
-    project = %Project{base_app: :test_app, module: TestApp.Project}
+    project = %Project{
+      base_app: :test_app,
+      mix_module: TestApp.MixProject,
+      module: TestProject.Eject.Project
+    }
+
     manifest = %Manifest{lib_deps: [:included_lib], mix_deps: [:included_mix]}
     app = App.new!(project, manifest, Tweeter)
     %{app: app}

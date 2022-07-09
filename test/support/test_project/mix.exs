@@ -12,7 +12,9 @@ defmodule TestApp.MixProject do
 
   defp deps do
     [
-      {:ex_doc, ">= 0.19.0", only: [:dev, :docs], runtime: false}
+      {:included_mix, ">= 0.1.0"},
+      {:excluded_mix, ">= 0.1.0"},
+      {:indirectly_included_mix, ">= 0.1.0"}
     ]
   end
 end

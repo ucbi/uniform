@@ -1,10 +1,15 @@
 defmodule Eject.ProjectTest do
-  use ExUnit.Case, async: true
+  use Eject.ProjectCase
 
   alias Eject.{LibDep, MixDep, Project}
 
   setup do
-    project = %Project{base_app: :test_app, module: TestApp.Project}
+    project = %Project{
+      base_app: :test_app,
+      mix_module: TestApp.MixProject,
+      module: TestProject.Eject.Project
+    }
+
     %{project: project}
   end
 

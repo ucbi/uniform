@@ -1,10 +1,14 @@
 defmodule Eject.CodeFenceTest do
-  use ExUnit.Case, async: true
+  use Eject.ProjectCase
 
   alias Eject.{App, CodeFence, Manifest, Project}
 
   setup do
-    project = %Project{base_app: :test, module: TestApp.Project}
+    project = %Project{
+      base_app: :test,
+      mix_module: TestApp.MixProject,
+      module: TestProject.Eject.Project
+    }
 
     manifest =
       Manifest.new!(

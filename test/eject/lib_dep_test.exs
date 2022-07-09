@@ -1,4 +1,4 @@
 defmodule Eject.LibDepTest do
-  use ExUnit.Case, async: true
+  use Eject.ProjectCase
   doctest Eject.LibDep, import: true
 end

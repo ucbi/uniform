@@ -1,5 +1,5 @@
 defmodule Eject.Project do
-  defstruct [:base_app, :module, :templates, :destination]
+  defstruct [:base_app, :mix_module, :module, :templates, :destination]
 
   alias Eject.{LibDep, MixDep}
 
@@ -14,6 +14,7 @@ defmodule Eject.Project do
 
       %Project{
         base_app: :my_base_app,
+        mix_module: MyBaseApp.MixProject,
         module: MyBaseApp.Eject.Project,
         templates: "/Users/me/code/my_base_app/lib/my_base_app/eject/templates",
         destination: "/Users/me/code"
@@ -22,17 +23,29 @@ defmodule Eject.Project do
   """
   @type t :: %__MODULE__{
           base_app: atom,
+          mix_module: module,
           module: module,
           templates: nil | Path.t(),
           destination: nil | Path.t()
         }
 
-  @spec from_config_key(atom) :: t
-  def from_config_key(config_key) do
-    config = Application.get_env(config_key, Eject)
+  @doc """
+  Builds a `t:Eject.Project.t` struct from the current Mix project.
+
+  To derive the `module`, `templates`, and `destination` fields, looks for the following in config:
+
+        config :my_app, Eject, project: SomeModule, templates: "...", destination: "..."
+
+  where `:my_app` is the value of the `:app` key in your Mix project specification in `mix.exs`.
+  """
+  @spec build :: t
+  def build do
+    mix_app = Keyword.fetch!(Mix.Project.config(), :app)
+    config = Application.get_env(mix_app, Eject)
 
     %__MODULE__{
-      base_app: config_key,
+      base_app: mix_app,
+      mix_module: Mix.Project.get(),
       module: config[:project],
       templates: config[:templates],
       destination: config[:destination]
@@ -42,53 +55,61 @@ defmodule Eject.Project do
   @doc """
   Returns all lib deps that can be ejected, in the form of a map where the key is
   the lib's name.
-
-  Hydrated using the `c:Eject.lib_deps/0` callback implementation, e.g. `YourProject.Eject.Project.lib_deps/1`.
   """
   @spec lib_deps(t) :: %{LibDep.name() => LibDep.t()}
   def lib_deps(project) do
-    for dep <- project.module.lib_deps(), into: %{} do
-      {name, opts} =
-        case dep do
-          {name, opts} -> {name, opts}
-          name -> {name, []}
-        end
+    registered = project.module.__lib_deps__()
+    names = for lib_dep <- registered, do: to_string(lib_dep.name)
+    rules = Eject.Rules.new([])
 
-      lib_dep =
+    unregistered =
+      for dir <- File.ls!("lib"), File.dir?(Path.join("lib", dir)), dir not in names do
         LibDep.new!(%{
-          name: name,
-          lib_deps: opts |> Keyword.get(:lib_deps, []) |> List.wrap(),
-          mix_deps: opts |> Keyword.get(:mix_deps, []) |> List.wrap(),
-          always: Keyword.get(opts, :always, false),
-          file_rules: Eject.Rules.new(opts)
+          name: String.to_atom(dir),
+          lib_deps: [],
+          mix_deps: [],
+          always: false,
+          file_rules: rules
         })
+      end
 
-      {name, lib_dep}
+    for lib_dep <- registered ++ unregistered, into: %{} do
+      {lib_dep.name, lib_dep}
     end
   end
 
   @doc """
   Returns all mix deps that can be ejected, in the form of a map where the key is
   the mix dep's name.
-
-  Hydrated using the `c:Eject.mix_deps/0` callback implementation, e.g. `YourProject.Eject.Project.mix_deps/1`.
   """
   @spec mix_deps(t) :: %{MixDep.name() => MixDep.t()}
   def mix_deps(project) do
-    for dep <- project.module.mix_deps(), into: %{} do
-      {name, opts} =
-        case dep do
-          {name, opts} -> {name, opts}
-          name -> {name, []}
+    registered = project.module.__mix_deps__()
+
+    mix_exs_deps =
+      project.mix_module.project()
+      |> Keyword.get(:deps, [])
+      |> Enum.map(fn
+        {name, _} -> name
+        {name, _, _} -> name
+      end)
+
+    names =
+      for mix_dep <- registered do
+        if mix_dep.name not in mix_exs_deps do
+          raise "Mix dependency #{mix_dep.name} is not in mix.exs"
         end
 
-      mix_dep =
-        MixDep.new!(%{
-          name: name,
-          mix_deps: opts |> Keyword.get(:mix_deps, []) |> List.wrap()
-        })
+        mix_dep.name
+      end
 
-      {name, mix_dep}
+    unregistered =
+      for name <- mix_exs_deps, name not in names do
+        MixDep.new!(%{name: name, mix_deps: []})
+      end
+
+    for mix_dep <- registered ++ unregistered, into: %{} do
+      {mix_dep.name, mix_dep}
     end
   end
 end

@@ -1,5 +1,5 @@
 defmodule Eject.AppTest do
-  use ExUnit.Case, async: true
+  use Eject.ProjectCase
   doctest Eject.App, import: true
 
   alias Eject.{Project, Manifest, App, LibDep, MixDep}
@@ -7,7 +7,8 @@ defmodule Eject.AppTest do
   test "new!/3" do
     project = %Project{
       base_app: :test_app,
-      module: TestApp.Project,
+      mix_module: TestApp.MixProject,
+      module: TestProject.Eject.Project,
       destination: "/Users/me/code"
     }
 
@@ -28,7 +29,8 @@ defmodule Eject.AppTest do
 
     assert app.project == %Project{
              base_app: :test_app,
-             module: TestApp.Project,
+             mix_module: TestApp.MixProject,
+             module: TestProject.Eject.Project,
              destination: "/Users/me/code"
            }
 
@@ -53,9 +55,11 @@ defmodule Eject.AppTest do
 
     assert app.deps.all.lib == [
              :always_included_lib,
+             :eject,
              :excluded_lib,
              :included_lib,
              :indirectly_included_lib,
+             :tweeter,
              :with_only
            ]
 
