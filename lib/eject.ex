@@ -87,7 +87,12 @@ defmodule Eject do
   defmacro project(do: block) do
     prelude =
       quote do
-        unquote(block)
+        try do
+          import Eject
+          unquote(block)
+        after
+          :ok
+        end
       end
 
     postlude =
@@ -124,6 +129,15 @@ defmodule Eject do
   same "file rules" that can be applied to a lib dep. See `Eject.Rules` for a full
   list of options.
   """
+  defmacro app(do: block) do
+    # inject magic `app` variable
+    app = quote generated: true, do: var!(app)
+
+    quote do
+      def __app__(unquote(app)), do: unquote(block)
+    end
+  end
+
   defmacro app(opts) do
     quote do
       Module.put_attribute(__MODULE__, :app_options, unquote(opts))

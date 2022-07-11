@@ -1,6 +1,10 @@
 defmodule TestProject.Eject.Project do
   use Eject, templates: "templates"
 
+  app do
+    IO.puts "foo"
+  end
+
   project do
     app except: [
           ~r/excluded/
