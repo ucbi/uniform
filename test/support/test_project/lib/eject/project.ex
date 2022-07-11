@@ -1,8 +1,22 @@
 defmodule TestProject.Eject.Project do
   use Eject, templates: "templates"
 
+  deps do
+    lib :included_lib,
+      mix_deps: [:included_mix],
+      lib_deps: [:indirectly_included_lib, :with_only],
+      associated_files: ["priv/associated.txt"],
+      except: [~r/excluded/],
+      lib_directory: &TestProject.Eject.Project.included_lib_dir/2
+
+    lib :always_included_lib, always: true
+    lib :with_only, only: [~r/included.txt/]
+
+    mix :included_mix, mix_deps: [:indirectly_included_mix]
+  end
+
   app do
-    IO.puts "foo"
+    IO.puts("foo")
   end
 
   project do
@@ -25,18 +39,6 @@ defmodule TestProject.Eject.Project do
     template "config/runtime.exs"
 
     preserve ".gitignore"
-
-    lib :included_lib,
-      mix_deps: [:included_mix],
-      lib_deps: [:indirectly_included_lib, :with_only],
-      associated_files: ["priv/associated.txt"],
-      except: [~r/excluded/],
-      lib_directory: &TestProject.Eject.Project.included_lib_dir/2
-
-    lib :always_included_lib, always: true
-    lib :with_only, only: [~r/included.txt/]
-
-    mix :included_mix, mix_deps: [:indirectly_included_mix]
 
     modify ~r/\.dotfile/, file, app do
       String.replace(

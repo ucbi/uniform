@@ -54,21 +54,7 @@ defmodule Eject do
     quote do
       @behaviour Eject
       require Eject
-
-      import Eject,
-        only: [
-          app: 1,
-          binary: 1,
-          cp_r: 1,
-          file: 1,
-          lib: 2,
-          mix: 2,
-          modify: 4,
-          preserve: 1,
-          project: 1,
-          template: 1
-        ]
-
+      import Eject, only: [deps: 1, app: 1, project: 1]
       import Eject.App, only: [depends_on?: 3]
       def __template_dir, do: unquote(templates)
 
@@ -84,11 +70,47 @@ defmodule Eject do
     end
   end
 
+  defmacro deps(do: block) do
+    prelude =
+      quote do
+        try do
+          import Eject, only: [lib: 2, mix: 2]
+          unquote(block)
+        after
+          :ok
+        end
+      end
+
+    postlude =
+      quote unquote: false do
+        lib_deps = @lib_deps |> Enum.reverse()
+        mix_deps = @mix_deps |> Enum.reverse()
+
+        def __lib_deps__, do: unquote(Macro.escape(lib_deps))
+        def __mix_deps__, do: unquote(Macro.escape(mix_deps))
+      end
+
+    quote do
+      unquote(prelude)
+      unquote(postlude)
+    end
+  end
+
   defmacro project(do: block) do
     prelude =
       quote do
         try do
-          import Eject
+          import Eject,
+            only: [
+              app: 1,
+              binary: 1,
+              cp_r: 1,
+              file: 1,
+              modify: 4,
+              preserve: 1,
+              template: 1
+            ]
+
           unquote(block)
         after
           :ok
@@ -98,8 +120,6 @@ defmodule Eject do
     postlude =
       quote unquote: false do
         app_options = @app_options
-        lib_deps = @lib_deps |> Enum.reverse()
-        mix_deps = @mix_deps |> Enum.reverse()
         modifiers = @modifiers |> Enum.reverse()
         files = @files |> Enum.reverse()
         binaries = @binaries |> Enum.reverse()
@@ -108,8 +128,6 @@ defmodule Eject do
         preserve = @preserve |> Enum.reverse()
 
         def __app_options__, do: unquote(Macro.escape(app_options))
-        def __lib_deps__, do: unquote(Macro.escape(lib_deps))
-        def __mix_deps__, do: unquote(Macro.escape(mix_deps))
         def __modifiers__, do: unquote(Macro.escape(modifiers))
         def __files__, do: unquote(Macro.escape(files))
         def __binaries__, do: unquote(Macro.escape(binaries))
