@@ -1,17 +1,17 @@
 defmodule Eject.DepsTest do
   use Eject.ProjectCase
 
-  alias Eject.{Deps, Manifest, Project}
+  alias Eject.{Deps, Manifest, Config}
 
   test "discover!/2 packages all mix/lib deps and catalogues which ones are required for the app" do
-    project = %Project{
+    config = %Config{
       base_app: :test,
       mix_module: TestProject.MixProject,
       module: TestProject.Eject.Project
     }
 
-    manifest = Manifest.new!(project, mix_deps: [:included_mix], lib_deps: [:included_lib])
-    result = Deps.discover!(project, manifest)
+    manifest = Manifest.new!(config, mix_deps: [:included_mix], lib_deps: [:included_lib])
+    result = Deps.discover!(config, manifest)
 
     # all mix/lib deps are returned in the :all key
     assert result.all.lib == [

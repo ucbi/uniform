@@ -1,7 +1,7 @@
 defmodule Eject.FileTest do
   use Eject.ProjectCase
 
-  alias Eject.{App, Manifest, Project}
+  alias Eject.{App, Manifest, Config}
 
   setup do
     cwd = File.cwd!()
@@ -15,14 +15,14 @@ defmodule Eject.FileTest do
   end
 
   setup do
-    project = %Project{
+    config = %Config{
       base_app: :test_project,
       mix_module: TestProject.MixProject,
       module: TestProject.Eject.Project
     }
 
     manifest = %Manifest{lib_deps: [:included_lib], mix_deps: [:included_mix]}
-    app = App.new!(project, manifest, Tweeter)
+    app = App.new!(config, manifest, Tweeter)
     %{app: app}
   end
 

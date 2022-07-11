@@ -61,7 +61,7 @@ defmodule Eject.File do
   end
 
   def files(app) do
-    for path <- app.project.module.__files__() do
+    for path <- app.config.module.__files__() do
       destination = destination(path, app, Rules.new([]))
       %Eject.File{type: :text, source: path, destination: destination, chmod: nil}
     end
@@ -72,21 +72,21 @@ defmodule Eject.File do
   copied over with a `cp` system call.
   """
   def binaries(app) do
-    for path <- app.project.module.__binaries__() do
+    for path <- app.config.module.__binaries__() do
       destination = destination(path, app, Rules.new([]))
       %Eject.File{type: :binary, source: path, destination: destination, chmod: nil}
     end
   end
 
   def directories(app) do
-    for dir <- app.project.module.__directories__() do
+    for dir <- app.config.module.__directories__() do
       destination = destination(dir, app, Rules.new([]))
       %Eject.File{type: :dir, source: dir, destination: destination, chmod: nil}
     end
   end
 
   def templates(app) do
-    for path <- app.project.module.__templates__() do
+    for path <- app.config.module.__templates__() do
       destination = destination(path, app, Rules.new([]))
       %Eject.File{type: :template, source: path, destination: destination, chmod: nil}
     end
@@ -96,7 +96,7 @@ defmodule Eject.File do
   @spec app_lib_files(App.t()) :: [t]
   def app_lib_files(app) do
     manifest_path = Manifest.manifest_path(app.name.snake)
-    opts = app.project.module.__app_options__() || []
+    opts = app.config.module.__app_options__() || []
 
     file_rules =
       opts
@@ -144,7 +144,7 @@ defmodule Eject.File do
         if dir = lib_dir.(app, path) do
           path
           |> String.replace(~r/^lib\/[^\/]+\//, "lib/#{dir}/")
-          |> String.replace(to_string(app.project.base_app), app.name.snake)
+          |> String.replace(to_string(app.config.base_app), app.name.snake)
         else
           path
         end
@@ -155,7 +155,7 @@ defmodule Eject.File do
     relative_path =
       String.replace(
         destination_relative_path,
-        to_string(app.project.base_app),
+        to_string(app.config.base_app),
         app.name.snake
       )
 
@@ -211,7 +211,7 @@ defmodule Eject.File do
         contents =
           case t do
             :template ->
-              template_dir = app.project.module.__template_dir()
+              template_dir = app.config.module.__template_dir()
 
               if !template_dir do
                 raise "`use Eject, templates: \"...\"` must specify a templates directory"
@@ -231,7 +231,7 @@ defmodule Eject.File do
               File.read!(Path.expand(source))
           end
 
-        snake = to_string(app.project.base_app)
+        snake = to_string(app.config.base_app)
 
         transformed =
           contents
@@ -255,7 +255,7 @@ defmodule Eject.File do
   end
 
   defp apply_modifiers(contents, relative_path, app) do
-    project = app.project.module
+    project = app.config.module
     modifiers = project.__modifiers__()
     modifiers = [{"mix.exs", {MixExs, :remove_unused_deps}} | modifiers]
 

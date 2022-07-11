@@ -1,34 +1,34 @@
-defmodule Eject.ProjectTest do
+defmodule Eject.ConfigTest do
   use Eject.ProjectCase
 
-  alias Eject.{LibDep, MixDep, Project}
+  alias Eject.{LibDep, MixDep, Config}
 
   setup do
-    project = %Project{
+    config = %Config{
       base_app: :test_project,
       mix_module: TestProject.MixProject,
       module: TestProject.Eject.Project
     }
 
-    %{project: project}
+    %{config: config}
   end
 
-  test "lib_deps/1", %{project: project} do
+  test "lib_deps/1", %{config: config} do
     assert %LibDep{
              lib_deps: [:indirectly_included_lib, :with_only],
              mix_deps: [:included_mix]
-           } = Project.lib_deps(project).included_lib
+           } = Config.lib_deps(config).included_lib
 
-    assert %LibDep{lib_deps: [], mix_deps: []} = Project.lib_deps(project).indirectly_included_lib
-    assert %LibDep{lib_deps: [], mix_deps: []} = Project.lib_deps(project).excluded_lib
+    assert %LibDep{lib_deps: [], mix_deps: []} = Config.lib_deps(config).indirectly_included_lib
+    assert %LibDep{lib_deps: [], mix_deps: []} = Config.lib_deps(config).excluded_lib
   end
 
-  test "mix_deps/1", %{project: project} do
+  test "mix_deps/1", %{config: config} do
     assert %MixDep{
              mix_deps: [:indirectly_included_mix]
-           } = Project.mix_deps(project).included_mix
+           } = Config.mix_deps(config).included_mix
 
-    assert %MixDep{mix_deps: []} = Project.mix_deps(project).indirectly_included_mix
-    assert %MixDep{mix_deps: []} = Project.mix_deps(project).excluded_mix
+    assert %MixDep{mix_deps: []} = Config.mix_deps(config).indirectly_included_mix
+    assert %MixDep{mix_deps: []} = Config.mix_deps(config).excluded_mix
   end
 end

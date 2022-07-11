@@ -1,4 +1,4 @@
-defmodule Eject.Project do
+defmodule Eject.Config do
   defstruct [:base_app, :mix_module, :module, :templates, :destination]
 
   alias Eject.{LibDep, MixDep}
@@ -12,7 +12,7 @@ defmodule Eject.Project do
 
   ### Example
 
-      %Project{
+      %Config{
         base_app: :my_base_app,
         mix_module: MyBaseApp.MixProject,
         module: MyBaseApp.Eject.Project,
@@ -30,7 +30,7 @@ defmodule Eject.Project do
         }
 
   @doc """
-  Builds a `t:Eject.Project.t` struct from the current Mix project.
+  Builds a `t:Eject.Config.t` struct from the current Mix project.
 
   To derive the `module`, `templates`, and `destination` fields, looks for the following in config:
 
@@ -57,8 +57,8 @@ defmodule Eject.Project do
   the lib's name.
   """
   @spec lib_deps(t) :: %{LibDep.name() => LibDep.t()}
-  def lib_deps(project) do
-    registered = project.module.__lib_deps__()
+  def lib_deps(config) do
+    registered = config.module.__lib_deps__()
     names = for lib_dep <- registered, do: to_string(lib_dep.name)
     rules = Eject.Rules.new([])
 
@@ -83,11 +83,11 @@ defmodule Eject.Project do
   the mix dep's name.
   """
   @spec mix_deps(t) :: %{MixDep.name() => MixDep.t()}
-  def mix_deps(project) do
-    registered = project.module.__mix_deps__()
+  def mix_deps(config) do
+    registered = config.module.__mix_deps__()
 
     mix_exs_deps =
-      project.mix_module.project()
+      config.mix_module.project()
       |> Keyword.get(:deps, [])
       |> Enum.map(fn
         {name, _} -> name

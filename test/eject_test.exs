@@ -1,7 +1,7 @@
 defmodule EjectTest do
   use Eject.ProjectCase
 
-  alias Eject.{Project, Manifest, App}
+  alias Eject.{Config, Manifest, App}
 
   defp read!(path) do
     File.read!("../../ejected/tweeter/" <> path)
@@ -17,7 +17,7 @@ defmodule EjectTest do
   test "full ejection" do
     # this is gitignored; we can eject to it without adding to the git index
     # prepare app
-    project = %Project{
+    config = %Config{
       base_app: :test_project,
       mix_module: TestProject.MixProject,
       module: TestProject.Eject.Project,
@@ -25,7 +25,7 @@ defmodule EjectTest do
     }
 
     manifest = %Manifest{lib_deps: [:included_lib], mix_deps: [:included_mix]}
-    app = App.new!(project, manifest, Tweeter)
+    app = App.new!(config, manifest, Tweeter)
 
     Eject.eject(app)
 

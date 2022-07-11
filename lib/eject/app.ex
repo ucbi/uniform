@@ -4,12 +4,12 @@ defmodule Eject.App do
   """
 
   alias __MODULE__
-  alias Eject.{Deps, Manifest, Project}
+  alias Eject.{Deps, Manifest, Config}
 
-  defstruct [:project, :name, :destination, :deps, :extra]
+  defstruct [:config, :name, :destination, :deps, :extra]
 
   @type t :: %__MODULE__{
-          project: Project.t(),
+          config: Config.t(),
           name: %{
             module: module,
             web_module: module,
@@ -29,10 +29,10 @@ defmodule Eject.App do
 
   ### Example
 
-      new!(project, manifest, Tweeter)
+      new!(config, manifest, Tweeter)
 
       %Eject.App{
-        project: %Project{...},
+        config: %Config{...},
         name: %{
           module: Tweeter,
           web_module: TweeterWeb,
@@ -63,15 +63,15 @@ defmodule Eject.App do
       }
 
   """
-  @spec new!(Project.t(), Manifest.t(), atom) :: t
-  @spec new!(Project.t(), Manifest.t(), atom, [new_opt]) :: t
-  def new!(%Project{} = project, %Manifest{} = manifest, name, opts \\ []) when is_atom(name) do
+  @spec new!(Config.t(), Manifest.t(), atom) :: t
+  @spec new!(Config.t(), Manifest.t(), atom, [new_opt]) :: t
+  def new!(%Config{} = config, %Manifest{} = manifest, name, opts \\ []) when is_atom(name) do
     "Elixir." <> app_name_pascal_case = to_string(name)
     app_name_snake_case = Macro.underscore(name)
-    deps = Deps.discover!(project, manifest)
+    deps = Deps.discover!(config, manifest)
 
     app = %App{
-      project: project,
+      config: config,
       name: %{
         module: name,
         # credo:disable-for-next-line Credo.Check.Warning.UnsafeToAtom
@@ -80,12 +80,12 @@ defmodule Eject.App do
         snake: app_name_snake_case,
         kebab: String.replace(app_name_snake_case, "_", "-")
       },
-      destination: destination(app_name_snake_case, project, opts),
+      destination: destination(app_name_snake_case, config, opts),
       deps: deps
     }
 
     # `extra/1` requires an app struct
-    %{app | extra: Keyword.merge(project.module.extra(app), manifest.extra)}
+    %{app | extra: Keyword.merge(config.module.extra(app), manifest.extra)}
   end
 
   @doc """
@@ -125,9 +125,9 @@ defmodule Eject.App do
     dep_name in app.deps.included[category]
   end
 
-  defp destination(app_name_snake_case, project, opts) do
+  defp destination(app_name_snake_case, config, opts) do
     destination =
-      case {project.destination, opts[:destination]} do
+      case {config.destination, opts[:destination]} do
         {nil, nil} -> "../" <> app_name_snake_case
         {nil, opt} -> opt
         {config, nil} -> Path.join(config, app_name_snake_case)

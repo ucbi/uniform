@@ -2,10 +2,10 @@ defmodule Eject.AppTest do
   use Eject.ProjectCase
   doctest Eject.App, import: true
 
-  alias Eject.{Project, Manifest, App, LibDep, MixDep}
+  alias Eject.{Config, Manifest, App, LibDep, MixDep}
 
   test "new!/3" do
-    project = %Project{
+    config = %Config{
       base_app: :test_project,
       mix_module: TestProject.MixProject,
       module: TestProject.Eject.Project,
@@ -17,7 +17,7 @@ defmodule Eject.AppTest do
       extra: [some_data: "from eject.exs"]
     }
 
-    %App{} = app = App.new!(project, manifest, Tweeter)
+    %App{} = app = App.new!(config, manifest, Tweeter)
 
     assert app.name == %{
              module: Tweeter,
@@ -27,7 +27,7 @@ defmodule Eject.AppTest do
              pascal: "Tweeter"
            }
 
-    assert app.project == %Project{
+    assert app.config == %Config{
              base_app: :test_project,
              mix_module: TestProject.MixProject,
              module: TestProject.Eject.Project,

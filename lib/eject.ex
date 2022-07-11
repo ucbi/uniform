@@ -352,11 +352,11 @@ defmodule Eject do
           "🤖 Please pass in a module name corresponding to a directory in `lib` containing an `eject.exs` file. E.g. Tweeter (received #{inspect(name)})"
     end
 
-    project = Eject.Project.build()
+    config = Eject.Config.build()
 
-    project
+    config
     |> Eject.Manifest.eval_and_parse(Macro.underscore(name))
-    |> Eject.App.new!(project, name, opts)
+    |> Eject.App.new!(config, name, opts)
   end
 
   @doc """
@@ -381,7 +381,7 @@ defmodule Eject do
   # Clear the destination folder where the app will be ejected.
   def clear_destination(app) do
     if File.exists?(app.destination) do
-      preserve = app.project.module.__preserve__()
+      preserve = app.config.module.__preserve__()
       preserve = [".git", "deps", "_build" | preserve]
 
       app.destination

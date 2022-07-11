@@ -3,7 +3,7 @@ defmodule Eject.Deps do
 
   defstruct [:lib, :mix, :included, :all]
 
-  alias Eject.{LibDep, MixDep, Manifest, Project}
+  alias Eject.{LibDep, MixDep, Manifest, Config}
 
   @type dep :: LibDep.t() | MixDep.t()
 
@@ -40,10 +40,10 @@ defmodule Eject.Deps do
   Given a manifest struct, returns a `%Deps{}` struct containing
   information about lib and mix dependencies.
   """
-  @spec discover!(Project.t(), Manifest.t()) :: t
-  def discover!(project, manifest) do
-    all_lib_deps = Project.lib_deps(project)
-    all_mix_deps = Project.mix_deps(project)
+  @spec discover!(Config.t(), Manifest.t()) :: t
+  def discover!(config, manifest) do
+    all_lib_deps = Config.lib_deps(config)
+    all_mix_deps = Config.mix_deps(config)
     lib_deps = lib_deps_included_in_app(manifest, all_lib_deps)
     mix_deps = mix_deps_included_in_app(manifest, lib_deps, all_mix_deps)
 
