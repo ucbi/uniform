@@ -214,7 +214,7 @@ defmodule Eject.File do
         contents =
           case t do
             :template ->
-              template_dir = app.config.module.__template_dir()
+              template_dir = app.config.module.__template_dir__()
 
               if !template_dir do
                 raise "`use Eject, templates: \"...\"` must specify a templates directory"

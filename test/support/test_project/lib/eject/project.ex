@@ -1,5 +1,5 @@
 defmodule TestProject.Eject.Project do
-  use Eject, templates: "templates"
+  use Eject.Plan, templates: "templates"
 
   deps do
     always do
