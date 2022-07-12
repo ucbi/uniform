@@ -1,7 +1,9 @@
 locals_without_parens = [
   app: 1,
+  app_lib: 1,
   cp: 1,
   cp_r: 1,
+  eject: 1,
   except: 1,
   file: 1,
   lib: 1,
