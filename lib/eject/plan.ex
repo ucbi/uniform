@@ -47,7 +47,7 @@ defmodule Eject.Plan do
     quote do
       @behaviour Eject.Plan
       @before_compile Eject.Plan.BeforeCompile
-      import Eject.Plan, only: [modify: 4, deps: 1, eject: 2, app_lib: 2]
+      import Eject.Plan, only: [modify: 4, deps: 1, eject: 2]
 
       def __template_dir__, do: unquote(templates)
 
@@ -106,33 +106,9 @@ defmodule Eject.Plan do
 
     quote do
       try do
-        import Eject.Plan, except: [eject: 1, except: 1, only: 1, lib_directory: 1]
+        import Eject.Plan, except: [eject: 1, only: 1, lib_directory: 1]
 
         def __eject__(unquote(app)),
-          do: unquote(items) |> List.flatten() |> Enum.reject(&is_nil/1)
-      after
-        :ok
-      end
-    end
-  end
-
-  defmacro app_lib(app, do: block) do
-    {:__block__, [], items} = block
-
-    items =
-      Enum.map(items, fn
-        {:if, meta, [condition, [do: {:__block__, [], items}]]} ->
-          {:if, meta, [condition, [do: items]]}
-
-        item ->
-          item
-      end)
-
-    quote do
-      try do
-        import Eject.Plan, only: [except: 1, only: 1, lib_directory: 1]
-
-        def __app_lib__(unquote(app)),
           do: unquote(items) |> List.flatten() |> Enum.reject(&is_nil/1)
       after
         :ok
@@ -182,8 +158,8 @@ defmodule Eject.Plan do
         lib_deps = @lib_deps |> Enum.reverse()
         mix_deps = @mix_deps |> Enum.reverse()
 
-        def __lib_deps__, do: unquote(Macro.escape(lib_deps))
-        def __mix_deps__, do: unquote(Macro.escape(mix_deps))
+        def __deps__(:lib), do: unquote(Macro.escape(lib_deps))
+        def __deps__(:mix), do: unquote(Macro.escape(mix_deps))
       end
 
     quote do

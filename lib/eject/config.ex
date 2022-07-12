@@ -1,10 +1,10 @@
 defmodule Eject.Config do
-  defstruct [:base_app, :mix_project, :plan, :templates, :destination]
+  defstruct [:mix_project_app, :mix_project, :plan, :templates, :destination]
 
   alias Eject.{LibDep, MixDep}
 
   @typedoc """
-  `base_app` is the `:app` key of the keyword list returned by the `project`
+  `mix_project_app` is the `:app` key of the keyword list returned by the `project`
   callback in `mix.exs`.
 
   `destination` is the default destination where ejectable apps will be
@@ -13,16 +13,16 @@ defmodule Eject.Config do
   ### Example
 
       %Config{
-        base_app: :my_base_app,
+        mix_project_app: :my_app,
         mix_project: MyBaseApp.MixProject,
         plan: MyBaseApp.Eject.Project,
-        templates: "/Users/me/code/my_base_app/lib/my_base_app/eject/templates",
+        templates: "/Users/me/code/my_app/lib/my_app/eject/templates",
         destination: "/Users/me/code"
       }
 
   """
   @type t :: %__MODULE__{
-          base_app: atom,
+          mix_project_app: atom,
           mix_project: module,
           plan: module,
           templates: nil | Path.t(),
@@ -40,11 +40,11 @@ defmodule Eject.Config do
   """
   @spec build :: t
   def build do
-    mix_app = Keyword.fetch!(Mix.Project.config(), :app)
-    config = Application.get_env(mix_app, Eject)
+    mix_project_app = Keyword.fetch!(Mix.Project.config(), :app)
+    config = Application.get_env(mix_project_app, Eject)
 
     %__MODULE__{
-      base_app: mix_app,
+      mix_project_app: mix_project_app,
       mix_project: Mix.Project.get(),
       plan: config[:plan],
       templates: config[:templates],
@@ -58,7 +58,7 @@ defmodule Eject.Config do
   """
   @spec lib_deps(t) :: %{LibDep.name() => LibDep.t()}
   def lib_deps(config) do
-    registered = config.plan.__lib_deps__()
+    registered = config.plan.__deps__(:lib)
     names = for lib_dep <- registered, do: to_string(lib_dep.name)
     rules = Eject.Rules.new([])
 
@@ -84,7 +84,7 @@ defmodule Eject.Config do
   """
   @spec mix_deps(t) :: %{MixDep.name() => MixDep.t()}
   def mix_deps(config) do
-    registered = config.plan.__mix_deps__()
+    registered = config.plan.__deps__(:mix)
 
     mix_exs_deps =
       config.mix_project.project()

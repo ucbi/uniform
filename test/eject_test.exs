@@ -18,7 +18,7 @@ defmodule EjectTest do
     # this is gitignored; we can eject to it without adding to the git index
     # prepare app
     config = %Config{
-      base_app: :test_project,
+      mix_project_app: :test_project,
       mix_project: TestProject.MixProject,
       plan: TestProject.Eject.Plan,
       destination: "../../ejected"
@@ -77,14 +77,13 @@ defmodule EjectTest do
     # (supported by both lib_deps() and options()[:ejected_app])
     assert file_exists?("lib/with_only/included.txt")
     refute file_exists?("lib/with_only/excluded.txt")
-    assert file_exists?("lib/tweeter/included.txt")
-    refute file_exists?("lib/tweeter/not_included.txt")
-    refute file_exists?("lib/tweeter/excluded.txt")
+
 
     # when `except` option given, does not eject files matching `except` entry
     # (supported by both lib_deps() and options()[:ejected_app])
     refute file_exists?("lib/included_lib/excluded.txt")
     refute file_exists?("lib/always_included_lib/excluded.txt")
+    assert file_exists?("lib/tweeter/included.txt")
     refute file_exists?("lib/tweeter/excluded.txt")
 
     # lib_directory option is able to modify lib directory of a given file

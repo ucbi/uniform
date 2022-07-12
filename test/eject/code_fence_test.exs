@@ -5,7 +5,7 @@ defmodule Eject.CodeFenceTest do
 
   setup do
     config = %Config{
-      base_app: :test,
+      mix_project_app: :test,
       mix_project: TestProject.MixProject,
       plan: TestProject.Eject.Plan
     }

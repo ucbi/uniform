@@ -5,7 +5,7 @@ defmodule Eject.ConfigTest do
 
   setup do
     config = %Config{
-      base_app: :test_project,
+      mix_project_app: :test_project,
       mix_project: TestProject.MixProject,
       plan: TestProject.Eject.Plan
     }

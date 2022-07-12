@@ -8,7 +8,7 @@ defmodule Eject.ManifestTest do
     result =
       Manifest.new!(
         %Config{
-          base_app: :test,
+          mix_project_app: :test,
           mix_project: TestProject.MixProject,
           plan: TestProject.Eject.Plan
         },
@@ -26,7 +26,7 @@ defmodule Eject.ManifestTest do
 
   test "new!/2 raises if mix_deps or lib_deps contain unspecified deps" do
     config = %Config{
-      base_app: :test,
+      mix_project_app: :test,
       mix_project: TestProject.MixProject,
       plan: TestProject.Eject.Plan
     }

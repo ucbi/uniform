@@ -87,14 +87,16 @@ defmodule Eject.File do
   @spec app_lib_files(App.t()) :: [t]
   def app_lib_files(app) do
     manifest_path = Manifest.manifest_path(app.name.underscore)
-    opts = app.config.plan.__app_lib__(app)
 
     file_rules =
-      opts
+      app
+      |> app.config.plan.__eject__()
       # never eject the Eject manifest
       |> Keyword.update(:except, [manifest_path], fn except -> [manifest_path | except] end)
-      |> Keyword.take([:only, :except, :lib_directory])
+      |> Keyword.take([:except])
+      |> IO.inspect()
       |> Rules.new()
+      |> IO.inspect()
 
     lib_dir_files(app, app.name.underscore, file_rules)
   end
@@ -147,7 +149,7 @@ defmodule Eject.File do
         if dir = lib_dir.(app, path) do
           path
           |> String.replace(~r/^lib\/[^\/]+\//, "lib/#{dir}/")
-          |> String.replace(to_string(app.config.base_app), app.name.underscore)
+          |> String.replace(to_string(app.config.mix_project_app), app.name.underscore)
         else
           path
         end
@@ -158,7 +160,7 @@ defmodule Eject.File do
     relative_path =
       String.replace(
         destination_relative_path,
-        to_string(app.config.base_app),
+        to_string(app.config.mix_project_app),
         app.name.underscore
       )
 
@@ -234,7 +236,7 @@ defmodule Eject.File do
               File.read!(Path.expand(source))
           end
 
-        underscore = to_string(app.config.base_app)
+        underscore = to_string(app.config.mix_project_app)
 
         transformed =
           contents

@@ -3,8 +3,8 @@ defmodule Eject.Manifest do
   A struct containing the `Eject` manifest for an app, parsed from `lib/<my_ejectable_app>/eject.exs`.
 
   The `eject.exs` manifest specifies required dependencies and configuration values:
-    - `mix_deps` - mix dependencies; each must exist in the `c:Eject.mix_deps/0` callback implementation.
-    - `lib_deps` - lib dependencies; each must exist in the `c:Eject.lib_deps/0` callback implementation.
+    - `mix_deps` - mix dependencies; each must exist in `mix.exs`.
+    - `lib_deps` - lib dependencies; each must exist as a folder in `lib/`.
     - `extra` - additional key value pairs specific to the ejectable app. For 'global' values available
       to _all_ ejectable apps, use the `c:Eject.extra/1` callback implementation.
 

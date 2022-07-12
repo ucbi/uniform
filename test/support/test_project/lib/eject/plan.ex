@@ -5,20 +5,17 @@ defmodule TestProject.Eject.Plan do
     [company: :fake_co, logo_file: "pixel"]
   end
 
-  app_lib _app do
-    except ~r/excluded/
-
-    only [
-      ~r/dotfile/,
-      ~r/\/included/,
-      # add `excluded` to `only` so that we're truly testing whether
-      # `except` works (they can be layered)
-      ~r/excluded/,
-      ~r/lib_dir_changed/
-    ]
-
-    lib_directory &TestProject.Eject.Plan.lib_dir_changed/2
+  # TODO: Implement this callback as a replacement to lib_directory
+  # (Does it affect files / cp / cp_r / template???)
+  def target_path("lib/foo/my/dir" <> source, _app) do
+    # some specific, pointed modification
+    source
   end
+
+  def target_path(source, _app), do: source
+
+  # TODO: Get rid of app_lib (move `except` to `eject(app)` and remove `only`)
+    # lib_directory &TestProject.Eject.Plan.lib_dir_changed/2
 
   def lib_dir_changed(_app, file_path) do
     if String.contains?(file_path, "lib_dir_changed") do
@@ -26,10 +23,11 @@ defmodule TestProject.Eject.Plan do
     end
   end
 
-  eject app do
+  eject(app) do
     cp "assets/static/images/#{app.extra[:logo_file]}.png"
     template "config/runtime.exs"
-    preserve ".gitignore"
+
+    except ~r/excluded/
 
     if app.extra[:company] == :fake_co do
       file ".dotfile"
@@ -57,10 +55,12 @@ defmodule TestProject.Eject.Plan do
     lib :included_lib do
       mix_deps [:included_mix]
       lib_deps [:indirectly_included_lib, :with_only]
+
       cp_r "priv"
       cp "priv/associated.txt"
       file "priv/associated.txt"
       template "priv/included_lib/template.txt"
+
       except ~r/excluded/
       lib_directory &TestProject.Eject.Plan.included_lib_dir/2
     end

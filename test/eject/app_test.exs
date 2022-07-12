@@ -6,7 +6,7 @@ defmodule Eject.AppTest do
 
   test "new!/3" do
     config = %Config{
-      base_app: :test_project,
+      mix_project_app: :test_project,
       mix_project: TestProject.MixProject,
       plan: TestProject.Eject.Plan,
       destination: "/Users/me/code"
@@ -27,7 +27,7 @@ defmodule Eject.AppTest do
            }
 
     assert app.config == %Config{
-             base_app: :test_project,
+             mix_project_app: :test_project,
              mix_project: TestProject.MixProject,
              plan: TestProject.Eject.Plan,
              destination: "/Users/me/code"
