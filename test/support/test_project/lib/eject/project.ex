@@ -7,14 +7,20 @@ defmodule TestProject.Eject.Project do
       mix :always_included_mix
     end
 
-    lib :included_lib,
-      mix_deps: [:included_mix],
-      lib_deps: [:indirectly_included_lib, :with_only],
-      associated_files: ["priv/associated.txt"],
-      except: [~r/excluded/],
-      lib_directory: &TestProject.Eject.Project.included_lib_dir/2
+    lib :included_lib do
+      mix_deps [:included_mix]
+      lib_deps [:indirectly_included_lib, :with_only]
+      cp_r "priv"
+      cp "priv/associated.txt"
+      file "priv/associated.txt"
+      template "priv/included_lib/template.txt"
+      except ~r/excluded/
+      lib_directory &TestProject.Eject.Project.included_lib_dir/2
+    end
 
-    lib :with_only, only: [~r/included.txt/]
+    lib :with_only do
+      only ~r/included.txt/
+    end
 
     mix :included_mix, mix_deps: [:indirectly_included_mix]
   end

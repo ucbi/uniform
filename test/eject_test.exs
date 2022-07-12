@@ -55,12 +55,15 @@ defmodule EjectTest do
     assert lib_file =~ "Tweeter"
     refute lib_file =~ "TestProject"
 
-    # files are created from templates
+    # files are created from templates for `eject(app) do` and `lib :name do`
     template_file = read!("config/runtime.exs")
     assert template_file =~ "1 + 1 = 2"
     assert template_file =~ "App name is tweeter"
     assert template_file =~ "Depends on included_mix"
     refute template_file =~ "Depends on excluded_mix"
+
+    lib_template = read!("priv/included_lib/template.txt")
+    assert lib_template =~ "Template generated for included lib via tweeter"
 
     # `modify` transformations are ran
     modified_file = read!(".dotfile")

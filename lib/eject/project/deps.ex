@@ -66,9 +66,21 @@ defmodule Eject.Project.Deps do
     - `except` - exclude specific files from the lib directory.
 
   """
-  defmacro lib(name, opts \\ []) do
+  defmacro lib(name, do: block) do
+    opts =
+      case block do
+        {:__block__, _meta, opts} -> opts
+        opt -> [opt]
+      end
+
     quote do
       Eject.Project.Deps.__lib__(__MODULE__, unquote(name), unquote(opts), @deps_always_block)
+    end
+  end
+
+  defmacro lib(name) do
+    quote do
+      Eject.Project.Deps.__lib__(__MODULE__, unquote(name), [], @deps_always_block)
     end
   end
 
@@ -80,7 +92,7 @@ defmodule Eject.Project.Deps do
         lib_deps: opts |> Keyword.get(:lib_deps, []) |> List.wrap(),
         mix_deps: opts |> Keyword.get(:mix_deps, []) |> List.wrap(),
         always: always,
-        file_rules: Eject.Rules.new(opts)
+        file_rules: opts |> rule_opts() |> Eject.Rules.new()
       })
 
     Module.put_attribute(mod, :lib_deps, lib_dep)
@@ -107,5 +119,32 @@ defmodule Eject.Project.Deps do
       })
 
     Module.put_attribute(mod, :mix_deps, mix_dep)
+  end
+
+  defmacro mix_deps(deps), do: {:mix_deps, List.wrap(deps)}
+  defmacro lib_deps(deps), do: {:lib_deps, List.wrap(deps)}
+  defmacro file(path), do: {:text, path}
+  defmacro template(path), do: {:template, path}
+  defmacro cp(path), do: {:cp, path}
+  defmacro cp_r(path), do: {:cp_r, path}
+  defmacro except(paths_or_regexs), do: {:except, List.wrap(paths_or_regexs)}
+  defmacro lib_directory(function), do: {:lib_directory, function}
+  defmacro only(paths_or_regexs), do: {:only, List.wrap(paths_or_regexs)}
+
+  defp rule_opts(opts) do
+    associated_files =
+      Enum.flat_map(opts, fn opt ->
+        case opt do
+          {type, path_or_paths} when type in [:text, :template, :cp, :cp_r] ->
+            path_or_paths
+            |> List.wrap()
+            |> Enum.map(&{type, &1})
+
+          _ ->
+            []
+        end
+      end)
+
+    Keyword.put(opts, :associated_files, associated_files)
   end
 end

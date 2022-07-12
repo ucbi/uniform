@@ -64,8 +64,8 @@ defmodule Eject do
       Module.register_attribute(__MODULE__, :app_options, [])
       Module.register_attribute(__MODULE__, :modifiers, accumulate: true)
       Module.register_attribute(__MODULE__, :files, accumulate: true)
-      Module.register_attribute(__MODULE__, :binaries, accumulate: true)
-      Module.register_attribute(__MODULE__, :directories, accumulate: true)
+      Module.register_attribute(__MODULE__, :cp, accumulate: true)
+      Module.register_attribute(__MODULE__, :cp_r, accumulate: true)
       Module.register_attribute(__MODULE__, :templates, accumulate: true)
       Module.register_attribute(__MODULE__, :preserve, accumulate: true)
     end
@@ -78,7 +78,7 @@ defmodule Eject do
           import Eject,
             only: [
               app_options: 1,
-              binary: 1,
+              cp: 1,
               cp_r: 1,
               file: 1,
               preserve: 1,
@@ -95,16 +95,16 @@ defmodule Eject do
       quote unquote: false do
         app_options = @app_options
         files = @files |> Enum.reverse()
-        binaries = @binaries |> Enum.reverse()
-        directories = @directories |> Enum.reverse()
+        cp = @cp |> Enum.reverse()
+        cp_r = @cp_r |> Enum.reverse()
         templates = @templates |> Enum.reverse()
         preserve = @preserve |> Enum.reverse()
 
         def __app_options__, do: unquote(Macro.escape(app_options))
         def __modifiers__, do: @modifiers
         def __files__, do: unquote(Macro.escape(files))
-        def __binaries__, do: unquote(Macro.escape(binaries))
-        def __directories__, do: unquote(Macro.escape(directories))
+        def __cp__, do: unquote(Macro.escape(cp))
+        def __cp_r__, do: unquote(Macro.escape(cp_r))
         def __templates__, do: unquote(Macro.escape(templates))
         def __preserve__, do: unquote(Macro.escape(preserve))
       end
@@ -173,15 +173,15 @@ defmodule Eject do
   These will not go through text-file transformations but will instead be
   copied over with a `cp` system call.
   """
-  defmacro binary(path) do
+  defmacro cp(path) do
     quote do
-      Module.put_attribute(__MODULE__, :binaries, unquote(path))
+      Module.put_attribute(__MODULE__, :cp, unquote(path))
     end
   end
 
   defmacro cp_r(path) do
     quote do
-      Module.put_attribute(__MODULE__, :directories, unquote(path))
+      Module.put_attribute(__MODULE__, :cp_r, unquote(path))
     end
   end
 

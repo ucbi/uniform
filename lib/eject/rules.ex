@@ -34,9 +34,9 @@ defmodule Eject.Rules do
   - `lib_directory: fn app, path -> ... end` – see `t:lib_directory_fn/0` for details.
   """
   @type t :: %__MODULE__{
-          only: nil | [String.t()],
+          only: nil | [String.t() | Regex.t()],
           except: nil | [String.t() | Regex.t()],
-          associated_files: nil | [String.t()],
+          associated_files: nil | [{:text | :template | :cp | :cp_r, String.t()}],
           chmod: nil | non_neg_integer,
           lib_directory: nil | lib_directory_fn
         }

@@ -4,10 +4,10 @@ defmodule Eject.File do
 
   An `t:Eject.File.t/0` can be any of the following:
 
-  - A text file to copy (such as a `.ex`, `.exs`, or `.json` file)
-  - A directory to copy
+  - A text file to copy with modifications (such as a `.ex`, `.exs`, or `.json` file)
+  - A file to copy without modifications (such as a `.png` file)
+  - A directory to copy without modifications
   - An EEx template used to generate a file
-  - A binary file to copy
 
   """
 
@@ -16,7 +16,7 @@ defmodule Eject.File do
   defstruct [:type, :source, :destination, :chmod]
 
   @type t :: %__MODULE__{
-          type: :text | :template | :dir | :binary,
+          type: :text | :template | :cp_r | :cp,
           source: Path.t(),
           destination: Path.t(),
           chmod: nil | non_neg_integer
@@ -35,8 +35,8 @@ defmodule Eject.File do
     base_files(app) ++
       app_files(app) ++
       files(app) ++
-      binaries(app) ++
-      directories(app) ++
+      cp(app) ++
+      cp_r(app) ++
       templates(app) ++
       lib_dep_files(app) ++
       app_lib_files(app)
@@ -45,17 +45,17 @@ defmodule Eject.File do
   def app_files(app) do
     for item <- app.config.module.__app__(app) do
       case item do
-        {:file, path} ->
+        {:text, path} ->
           destination = destination(path, app, Rules.new([]))
           %Eject.File{type: :text, source: path, destination: destination, chmod: nil}
 
         {:cp, path} ->
           destination = destination(path, app, Rules.new([]))
-          %Eject.File{type: :binary, source: path, destination: destination, chmod: nil}
+          %Eject.File{type: :cp, source: path, destination: destination, chmod: nil}
 
         {:cp_r, path} ->
           destination = destination(path, app, Rules.new([]))
-          %Eject.File{type: :dir, source: path, destination: destination, chmod: nil}
+          %Eject.File{type: :cp_r, source: path, destination: destination, chmod: nil}
 
         {:template, path} ->
           destination = destination(path, app, Rules.new([]))
@@ -98,17 +98,17 @@ defmodule Eject.File do
   These will not go through text-file transformations but will instead be
   copied over with a `cp` system call.
   """
-  def binaries(app) do
-    for path <- app.config.module.__binaries__() do
+  def cp(app) do
+    for path <- app.config.module.__cp__() do
       destination = destination(path, app, Rules.new([]))
-      %Eject.File{type: :binary, source: path, destination: destination, chmod: nil}
+      %Eject.File{type: :cp, source: path, destination: destination, chmod: nil}
     end
   end
 
-  def directories(app) do
-    for dir <- app.config.module.__directories__() do
-      destination = destination(dir, app, Rules.new([]))
-      %Eject.File{type: :dir, source: dir, destination: destination, chmod: nil}
+  def cp_r(app) do
+    for path <- app.config.module.__cp_r__() do
+      destination = destination(path, app, Rules.new([]))
+      %Eject.File{type: :cp_r, source: path, destination: destination, chmod: nil}
     end
   end
 
@@ -132,37 +132,49 @@ defmodule Eject.File do
       |> Keyword.take([:only, :except, :lib_directory])
       |> Rules.new()
 
-    for path <- lib_dir_files(app.name.snake, file_rules) do
-      %Eject.File{type: :text, source: path, destination: destination(path, app, file_rules)}
-    end
+    lib_dir_files(app, app.name.snake, file_rules)
   end
 
   @doc "Returns LibDeps as ejectables."
   @spec lib_dep_files(App.t()) :: [t]
   def lib_dep_files(app) do
     Enum.flat_map(app.deps.lib, fn {_, lib_dep} ->
-      for path <- lib_dir_files(to_string(lib_dep.name), lib_dep.file_rules) do
-        %Eject.File{
-          type: :text,
-          source: path,
-          destination: destination(path, app, lib_dep.file_rules),
-          chmod: lib_dep.file_rules.chmod
-        }
-      end
+      lib_dir_files(app, to_string(lib_dep.name), lib_dep.file_rules)
     end)
   end
 
   # Given a directory, return which paths to eject based on the rules
   # associated with that directory. Includes files in `lib/<lib_dir>`
   # as well as `test/<lib_dir>`
-  defp lib_dir_files(lib_dir, %Rules{associated_files: extra, only: only, except: except}) do
-    # location of lib and test directories is configurable for testing
+  @spec lib_dir_files(App.t(), String.t(), Rules.t()) :: [Eject.File.t()]
+  defp lib_dir_files(
+         app,
+         lib_dir,
+         %Rules{associated_files: associated_files, only: only, except: except} = rules
+       ) do
+    # location of lib and test cp_r is configurable for testing
     paths = Path.wildcard("lib/#{lib_dir}/**")
     paths = paths ++ Path.wildcard("test/#{lib_dir}/**")
     paths = if only, do: Enum.filter(paths, &filter_path(&1, only)), else: paths
     paths = if except, do: Enum.reject(paths, &filter_path(&1, except)), else: paths
-    paths = if extra, do: List.flatten(extra) ++ paths, else: paths
-    Enum.reject(paths, &File.dir?/1)
+    paths = Enum.reject(paths, &File.dir?/1)
+
+    lib_files = for path <- paths, do: build_file(app, {:text, path}, rules)
+
+    associated_files =
+      if associated_files do
+        Enum.map(associated_files, &build_file(app, &1, rules))
+      else
+        []
+      end
+
+    lib_files ++ associated_files
+  end
+
+  defp build_file(app, {type, path}, rules)
+       when type in [:text, :template, :cp, :cp_r] and is_binary(path) do
+    destination = destination(path, app, rules)
+    %Eject.File{type: type, source: path, destination: destination, chmod: rules.chmod}
   end
 
   defp destination(path, app, file_rules) do
@@ -228,10 +240,10 @@ defmodule Eject.File do
 
     # write the file
     case type do
-      :dir ->
+      :cp_r ->
         File.cp_r!(Path.expand(source), destination)
 
-      :binary ->
+      :cp ->
         File.cp!(Path.expand(source), destination)
 
       t when t in [:text, :template] ->

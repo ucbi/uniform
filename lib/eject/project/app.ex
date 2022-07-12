@@ -34,7 +34,7 @@ defmodule Eject.Project.App do
 
   def lib_dep(name), do: {:lib_dep, name}
   def mix_dep(name), do: {:mix_dep, name}
-  def file(path), do: {:file, path}
+  def file(path), do: {:text, path}
   def template(path), do: {:template, path}
   def cp_r(path), do: {:cp_r, path}
   def cp(path), do: {:cp, path}
