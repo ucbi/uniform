@@ -112,7 +112,7 @@ defmodule Eject.App do
     }
 
     # `extra/1` requires an app struct
-    %{app | extra: Keyword.merge(config.module.extra(app), manifest.extra)}
+    %{app | extra: Keyword.merge(config.plan.extra(app), manifest.extra)}
   end
 
   @doc """

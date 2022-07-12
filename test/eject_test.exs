@@ -19,8 +19,8 @@ defmodule EjectTest do
     # prepare app
     config = %Config{
       base_app: :test_project,
-      mix_module: TestProject.MixProject,
-      module: TestProject.Eject.Plan,
+      mix_project: TestProject.MixProject,
+      plan: TestProject.Eject.Plan,
       destination: "../../ejected"
     }
 

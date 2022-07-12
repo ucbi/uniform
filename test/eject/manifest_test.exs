@@ -9,8 +9,8 @@ defmodule Eject.ManifestTest do
       Manifest.new!(
         %Config{
           base_app: :test,
-          mix_module: TestProject.MixProject,
-          module: TestProject.Eject.Plan
+          mix_project: TestProject.MixProject,
+          plan: TestProject.Eject.Plan
         },
         mix_deps: [:included_mix],
         lib_deps: [:included_lib],
@@ -27,8 +27,8 @@ defmodule Eject.ManifestTest do
   test "new!/2 raises if mix_deps or lib_deps contain unspecified deps" do
     config = %Config{
       base_app: :test,
-      mix_module: TestProject.MixProject,
-      module: TestProject.Eject.Plan
+      mix_project: TestProject.MixProject,
+      plan: TestProject.Eject.Plan
     }
 
     assert_raise ArgumentError, fn ->

@@ -118,7 +118,7 @@ defmodule Eject do
   def clear_destination(app) do
     if File.exists?(app.destination) do
       preserve =
-        for {:preserve, filename} <- app.config.module.__eject__(app) do
+        for {:preserve, filename} <- app.config.plan.__eject__(app) do
           filename
         end
 

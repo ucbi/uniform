@@ -39,7 +39,7 @@ defmodule Eject.File do
   end
 
   def base_files(app) do
-    for item <- app.config.module.__eject__(app) do
+    for item <- app.config.plan.__eject__(app) do
       case item do
         {:text, path} ->
           destination = destination(path, app, Rules.new([]))
@@ -87,7 +87,7 @@ defmodule Eject.File do
   @spec app_lib_files(App.t()) :: [t]
   def app_lib_files(app) do
     manifest_path = Manifest.manifest_path(app.name.underscore)
-    opts = app.config.module.__app_lib__(app)
+    opts = app.config.plan.__app_lib__(app)
 
     file_rules =
       opts
@@ -214,7 +214,7 @@ defmodule Eject.File do
         contents =
           case t do
             :template ->
-              template_dir = app.config.module.__template_dir__()
+              template_dir = app.config.plan.__template_dir__()
 
               if !template_dir do
                 raise "`use Eject, templates: \"...\"` must specify a templates directory"
@@ -258,8 +258,7 @@ defmodule Eject.File do
   end
 
   defp apply_modifiers(contents, relative_path, app) do
-    project = app.config.module
-    modifiers = project.__modifiers__()
+    modifiers = app.config.plan.__modifiers__()
     modifiers = [{"mix.exs", {Eject.Modifiers, :remove_unused_mix_deps}} | modifiers]
 
     Enum.reduce(modifiers, contents, fn {path_or_regex, {module, function}}, contents ->
