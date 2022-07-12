@@ -302,10 +302,10 @@ defmodule Eject.Plan do
   end
 
   # Specifying files/directories to copy
-  def file(path), do: {:text, path}
-  def template(path), do: {:template, path}
-  def cp_r(path), do: {:cp_r, path}
-  def cp(path), do: {:cp, path}
+  def file(path, opts \\ []), do: {:text, {path, opts}}
+  def template(path, opts \\ []), do: {:template, {path, opts}}
+  def cp_r(path, opts \\ []), do: {:cp_r, {path, opts}}
+  def cp(path, opts \\ []), do: {:cp, {path, opts}}
 
   # Specifying files/directories to NOT delete when clearing the destination prior the ejection
   def preserve(path), do: {:preserve, path}

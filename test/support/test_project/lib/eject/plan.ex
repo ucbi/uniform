@@ -52,7 +52,7 @@ defmodule TestProject.Eject.Plan do
       cp_r "priv"
       cp "priv/associated.txt"
       file "priv/associated.txt"
-      template "priv/included_lib/template.txt"
+      template("priv/included_lib/template.txt", chmod: 0o555)
 
       except ~r/excluded/
     end
