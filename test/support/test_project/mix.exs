@@ -11,10 +11,14 @@ defmodule TestProject.MixProject do
   end
 
   defp deps do
+    # <eject:deps>
     [
       {:included_mix, ">= 0.1.0"},
       {:excluded_mix, ">= 0.1.0"},
-      {:indirectly_included_mix, ">= 0.1.0"}
+      {:indirectly_included_mix, ">= 0.1.0"},
+      {:always_included_mix, ">= 0.1.0"}
     ]
+
+    # </eject:deps>
   end
 end

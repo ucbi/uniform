@@ -16,24 +16,9 @@ defmodule Eject.MixExs do
     |> String.replace(~r/\n *# <eject:deps>(.+?)# <\/eject:deps>/s, fn deps ->
       deps
       |> Code.string_to_quoted!()
-      |> Enum.filter(&include_dep?(&1, app))
+      |> Enum.filter(&(dep_name(&1) in app.deps.included.mix))
       |> Macro.to_string()
     end)
-  end
-
-  # Return whether to include a dep.
-  @spec include_dep?(quoted :: Macro.t(), Eject.App.t()) :: boolean
-  defp include_dep?(quoted, app) do
-    dep_name = dep_name(quoted)
-
-    if dep_name in app.deps.all.mix do
-      # This is an excludable mix dep, so only include it if this app
-      # specifies to include it. This can happen via eject.exs,
-      # or by another mix dep or lib dep requiring it.
-      Map.has_key?(app.deps.mix, dep_name)
-    else
-      true
-    end
   end
 
   defp dep_name({dep, version}) when is_binary(version), do: dep

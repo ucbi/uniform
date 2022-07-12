@@ -90,6 +90,7 @@ defmodule Eject.Project.Deps do
     mix_dep =
       Eject.MixDep.new!(%{
         name: name,
+        always: Keyword.get(opts, :always, false),
         mix_deps: opts |> Keyword.get(:mix_deps, []) |> List.wrap()
       })
 

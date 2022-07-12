@@ -82,7 +82,7 @@ defmodule Eject.Deps do
   defp mix_deps_included_in_app(manifest, lib_deps, all_mix_deps) do
     root_deps =
       all_mix_deps
-      |> Enum.filter(fn {_, mix_dep} -> mix_dep.name in manifest.mix_deps end)
+      |> Enum.filter(fn {_, mix_dep} -> mix_dep.always || mix_dep.name in manifest.mix_deps end)
       |> Enum.into(%{})
 
     # gather nested mix deps required by manifest

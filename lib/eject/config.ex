@@ -105,7 +105,7 @@ defmodule Eject.Config do
 
     unregistered =
       for name <- mix_exs_deps, name not in names do
-        MixDep.new!(%{name: name, mix_deps: []})
+        MixDep.new!(%{name: name, always: false, mix_deps: []})
       end
 
     for mix_dep <- registered ++ unregistered, into: %{} do

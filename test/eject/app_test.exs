@@ -51,7 +51,11 @@ defmodule Eject.AppTest do
              :with_only
            ]
 
-    assert app.deps.included.mix == [:included_mix, :indirectly_included_mix]
+    assert app.deps.included.mix == [
+             :always_included_mix,
+             :included_mix,
+             :indirectly_included_mix
+           ]
 
     assert app.deps.all.lib == [
              :always_included_lib,
@@ -63,6 +67,11 @@ defmodule Eject.AppTest do
              :with_only
            ]
 
-    assert app.deps.all.mix == [:excluded_mix, :included_mix, :indirectly_included_mix]
+    assert app.deps.all.mix == [
+             :always_included_mix,
+             :excluded_mix,
+             :included_mix,
+             :indirectly_included_mix
+           ]
   end
 end

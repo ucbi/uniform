@@ -13,13 +13,10 @@ defmodule TestProject.Eject.Project do
     lib :with_only, only: [~r/included.txt/]
 
     mix :included_mix, mix_deps: [:indirectly_included_mix]
+    mix :always_included_mix, always: true
   end
 
-  eject do
-    mix_dep(:phoenix)
-    mix_dep(:phoenix_live_view)
-    mix_dep(:surface)
-
+  eject(app) do
     cp "assets/static/images/#{app.extra[:logo_file]}.png"
     template "config/runtime.exs"
     preserve ".gitignore"

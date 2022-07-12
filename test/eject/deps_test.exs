@@ -24,10 +24,16 @@ defmodule Eject.DepsTest do
              :with_only
            ]
 
-    assert result.all.mix == [:excluded_mix, :included_mix, :indirectly_included_mix]
+    assert result.all.mix == [
+             :always_included_mix,
+             :excluded_mix,
+             :included_mix,
+             :indirectly_included_mix
+           ]
 
     # only included mix/lib deps are included in the :mix and :lib keys
     assert Map.has_key?(result.mix, :included_mix)
+    assert Map.has_key?(result.mix, :always_included_mix)
     refute Map.has_key?(result.mix, :excluded_mix)
     assert Map.has_key?(result.lib, :included_lib)
     refute Map.has_key?(result.lib, :excluded_lib)

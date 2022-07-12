@@ -24,17 +24,22 @@ defmodule EjectTest do
       destination: "../../ejected"
     }
 
-    manifest = %Manifest{lib_deps: [:included_lib], mix_deps: [:included_mix]}
+    manifest = %Manifest{lib_deps: [:included_lib]}
     app = App.new!(config, manifest, Tweeter)
 
     Eject.eject(app)
 
     # check for files that are always ejected (read! will crash if missing)
-    read!("mix.exs")
     read!("mix.lock")
     read!(".gitignore")
     read!(".formatter.exs")
     read!("test/test_helper.exs")
+
+    # excluded mix deps are removed; included ones are kept
+    mix_exs = read!("mix.exs")
+    assert mix_exs =~ "included_mix"
+    assert mix_exs =~ "always_included_mix"
+    refute mix_exs =~ "excluded_mix"
 
     # files copied with `dir` should not be modified
     file_txt = read!("dir/file.txt")
