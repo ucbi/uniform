@@ -11,7 +11,7 @@ defmodule Eject.File do
 
   """
 
-  alias Eject.{App, CodeFence, Manifest, MixExs, Rules}
+  alias Eject.{App, CodeFence, Manifest, Rules}
 
   defstruct [:type, :source, :destination, :chmod]
 
@@ -260,7 +260,7 @@ defmodule Eject.File do
   defp apply_modifiers(contents, relative_path, app) do
     project = app.config.module
     modifiers = project.__modifiers__()
-    modifiers = [{"mix.exs", {MixExs, :remove_unused_deps}} | modifiers]
+    modifiers = [{"mix.exs", {Eject.Modifiers, :remove_unused_mix_deps}} | modifiers]
 
     Enum.reduce(modifiers, contents, fn {path_or_regex, {module, function}}, contents ->
       if apply_modifier?(path_or_regex, relative_path) do

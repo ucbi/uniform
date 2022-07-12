@@ -1,4 +1,4 @@
-defmodule Eject.MixExs do
+defmodule Eject.Modifiers do
   @doc """
   Given the contents of a mix.exs file and an `%App{}`,
   look for the following code fence that should be wrapping the mix deps:
@@ -11,7 +11,7 @@ defmodule Eject.MixExs do
 
   ...and filter out the deps that should not be included in this app.
   """
-  def remove_unused_deps(file_contents, app) do
+  def remove_unused_mix_deps(file_contents, app) do
     file_contents
     |> String.replace(~r/\n *# <eject:deps>(.+?)# <\/eject:deps>/s, fn deps ->
       deps
