@@ -32,18 +32,14 @@ defmodule Eject.File do
     # for our purposes, we keep `app_lib_files` last since sometimes the
     # ejected app wants to override phoenix-ish files in `lib/app_name_web`
     # (See `error_view.ex`)
-    base_files(app) ++
-      app_files(app) ++
-      files(app) ++
-      cp(app) ++
-      cp_r(app) ++
-      templates(app) ++
+    hardcoded_base_files(app) ++
+      base_files(app) ++
       lib_dep_files(app) ++
       app_lib_files(app)
   end
 
-  def app_files(app) do
-    for item <- app.config.module.__app__(app) do
+  def base_files(app) do
+    for item <- app.config.module.__eject__(app) do
       case item do
         {:text, path} ->
           destination = destination(path, app, Rules.new([]))
@@ -69,8 +65,8 @@ defmodule Eject.File do
   end
 
   @doc "Returns `base` ejectables for the app."
-  @spec base_files(App.t()) :: [t]
-  def base_files(app) do
+  @spec hardcoded_base_files(App.t()) :: [t]
+  def hardcoded_base_files(app) do
     files =
       [
         "mix.exs",
@@ -87,43 +83,11 @@ defmodule Eject.File do
     end
   end
 
-  def files(app) do
-    for path <- app.config.module.__files__() do
-      destination = destination(path, app, Rules.new([]))
-      %Eject.File{type: :text, source: path, destination: destination, chmod: nil}
-    end
-  end
-
-  @doc """
-  These will not go through text-file transformations but will instead be
-  copied over with a `cp` system call.
-  """
-  def cp(app) do
-    for path <- app.config.module.__cp__() do
-      destination = destination(path, app, Rules.new([]))
-      %Eject.File{type: :cp, source: path, destination: destination, chmod: nil}
-    end
-  end
-
-  def cp_r(app) do
-    for path <- app.config.module.__cp_r__() do
-      destination = destination(path, app, Rules.new([]))
-      %Eject.File{type: :cp_r, source: path, destination: destination, chmod: nil}
-    end
-  end
-
-  def templates(app) do
-    for path <- app.config.module.__templates__() do
-      destination = destination(path, app, Rules.new([]))
-      %Eject.File{type: :template, source: path, destination: destination, chmod: nil}
-    end
-  end
-
   @doc "Returns `lib/my_app` ejectables for the app."
   @spec app_lib_files(App.t()) :: [t]
   def app_lib_files(app) do
     manifest_path = Manifest.manifest_path(app.name.snake)
-    opts = app.config.module.__app_options__() || []
+    opts = app.config.module.__app_lib__(app)
 
     file_rules =
       opts

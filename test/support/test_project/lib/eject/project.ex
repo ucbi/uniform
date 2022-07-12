@@ -25,6 +25,21 @@ defmodule TestProject.Eject.Project do
     mix :included_mix, mix_deps: [:indirectly_included_mix]
   end
 
+  app_lib(_app) do
+    except ~r/excluded/
+
+    only [
+      ~r/dotfile/,
+      ~r/\/included/,
+      # add `excluded` to `only` so that we're truly testing whether
+      # `except` works (they can be layered)
+      ~r/excluded/,
+      ~r/lib_dir_changed/
+    ]
+
+    lib_directory &TestProject.Eject.Project.lib_dir_changed/2
+  end
+
   eject(app) do
     cp "assets/static/images/#{app.extra[:logo_file]}.png"
     template "config/runtime.exs"
@@ -41,23 +56,6 @@ defmodule TestProject.Eject.Project do
       file,
       "[REPLACE THIS LINE VIA modify/0]",
       "[REPLACED LINE WHILE EJECTING #{app.name.pascal}]"
-    )
-  end
-
-  project do
-    app_options(
-      except: [
-        ~r/excluded/
-      ],
-      only: [
-        ~r/dotfile/,
-        ~r/\/included/,
-        # add `excluded` to `only` so that we're truly testing whether
-        # `except` works (they can be layered)
-        ~r/excluded/,
-        ~r/lib_dir_changed/
-      ],
-      lib_directory: &TestProject.Eject.Project.lib_dir_changed/2
     )
   end
 

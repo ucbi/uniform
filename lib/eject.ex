@@ -1,3 +1,11 @@
+defmodule Eject.BeforeCompile do
+  defmacro __before_compile__(_env) do
+    quote do
+      def __modifiers__, do: @modifiers
+    end
+  end
+end
+
 defmodule Eject do
   @moduledoc """
   A tool for "ejecting" applications from a "base" Elixir project into separate,
@@ -53,65 +61,15 @@ defmodule Eject do
 
     quote do
       @behaviour Eject
+      @before_compile Eject.BeforeCompile
       require Eject
-      import Eject, only: [project: 1, modify: 4]
-      import Eject.App, only: [depends_on?: 3]
+      import Eject, only: [modify: 4]
       use Eject.Project.Deps
       use Eject.Project.App
 
       def __template_dir, do: unquote(templates)
 
-      Module.register_attribute(__MODULE__, :app_options, [])
       Module.register_attribute(__MODULE__, :modifiers, accumulate: true)
-      Module.register_attribute(__MODULE__, :files, accumulate: true)
-      Module.register_attribute(__MODULE__, :cp, accumulate: true)
-      Module.register_attribute(__MODULE__, :cp_r, accumulate: true)
-      Module.register_attribute(__MODULE__, :templates, accumulate: true)
-      Module.register_attribute(__MODULE__, :preserve, accumulate: true)
-    end
-  end
-
-  defmacro project(do: block) do
-    prelude =
-      quote do
-        try do
-          import Eject,
-            only: [
-              app_options: 1,
-              cp: 1,
-              cp_r: 1,
-              file: 1,
-              preserve: 1,
-              template: 1
-            ]
-
-          unquote(block)
-        after
-          :ok
-        end
-      end
-
-    postlude =
-      quote unquote: false do
-        app_options = @app_options
-        files = @files |> Enum.reverse()
-        cp = @cp |> Enum.reverse()
-        cp_r = @cp_r |> Enum.reverse()
-        templates = @templates |> Enum.reverse()
-        preserve = @preserve |> Enum.reverse()
-
-        def __app_options__, do: unquote(Macro.escape(app_options))
-        def __modifiers__, do: @modifiers
-        def __files__, do: unquote(Macro.escape(files))
-        def __cp__, do: unquote(Macro.escape(cp))
-        def __cp_r__, do: unquote(Macro.escape(cp_r))
-        def __templates__, do: unquote(Macro.escape(templates))
-        def __preserve__, do: unquote(Macro.escape(preserve))
-      end
-
-    quote do
-      unquote(prelude)
-      unquote(postlude)
     end
   end
 
@@ -154,47 +112,6 @@ defmodule Eject do
 
   def __register_modifier__(mod, path_or_regex, fn_name) do
     Module.put_attribute(mod, :modifiers, {path_or_regex, {mod, fn_name}})
-  end
-
-  @doc """
-  The following files are automatically ejected and should not be listed:
-
-    - files in the lib directory of the ejected app
-    - files packaged in a `lib` directory (refer to the `lib_deps` callback for details)
-
-  """
-  defmacro file(path) do
-    quote do
-      Module.put_attribute(__MODULE__, :files, unquote(path))
-    end
-  end
-
-  @doc """
-  These will not go through text-file transformations but will instead be
-  copied over with a `cp` system call.
-  """
-  defmacro cp(path) do
-    quote do
-      Module.put_attribute(__MODULE__, :cp, unquote(path))
-    end
-  end
-
-  defmacro cp_r(path) do
-    quote do
-      Module.put_attribute(__MODULE__, :cp_r, unquote(path))
-    end
-  end
-
-  defmacro template(path) do
-    quote do
-      Module.put_attribute(__MODULE__, :templates, unquote(path))
-    end
-  end
-
-  defmacro preserve(path) do
-    quote do
-      Module.put_attribute(__MODULE__, :preserve, unquote(path))
-    end
   end
 
   @doc """
@@ -301,11 +218,10 @@ defmodule Eject do
   def clear_destination(app) do
     if File.exists?(app.destination) do
       preserve =
-        for {:preserve, filename} <- app.config.module.__app__(app) do
+        for {:preserve, filename} <- app.config.module.__eject__(app) do
           filename
         end
 
-      preserve = preserve ++ app.config.module.__preserve__()
       preserve = [".git", "deps", "_build" | preserve]
 
       app.destination
