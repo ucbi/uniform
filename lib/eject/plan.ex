@@ -16,7 +16,7 @@ defmodule Eject.Plan do
 
       def extra(app) do
         theme =
-          case app.name.snake do
+          case app.name.underscore do
             "work_" <> _ -> :work
             "personal_" <> _ -> :personal
             _ -> raise "App name must start with Work or Personal to derive theme."

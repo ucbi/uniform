@@ -40,8 +40,8 @@ defmodule Eject.Manifest do
 
   @doc "Loads a manifest file into a `%Manifest{}` struct."
   @spec eval_and_parse(Config.t(), String.t() | atom) :: t
-  def eval_and_parse(config, app_name_snake_case) do
-    new!(config, eval(app_name_snake_case))
+  def eval_and_parse(config, app_name_underscore_case) do
+    new!(config, eval(app_name_underscore_case))
   end
 
   @doc "Initializes a new `%Manifest{}` struct."
@@ -75,14 +75,14 @@ defmodule Eject.Manifest do
     raise "eject.exs should contain a keyword list"
   end
 
-  defp eval(app_name_snake_case) do
-    manifest_path = manifest_path(app_name_snake_case)
+  defp eval(app_name_underscore_case) do
+    manifest_path = manifest_path(app_name_underscore_case)
 
     if File.exists?(manifest_path) do
       {manifest, _bindings} = Code.eval_file(manifest_path)
       manifest
     else
-      raise Eject.NotEjectableError, app_name: app_name_snake_case, manifest_path: manifest_path
+      raise Eject.NotEjectableError, app_name: app_name_underscore_case, manifest_path: manifest_path
     end
   end
 
@@ -96,7 +96,7 @@ defmodule Eject.Manifest do
 
   """
   @spec manifest_path(String.t() | atom) :: String.t()
-  def manifest_path(app_name_snake_case) do
-    "lib/#{app_name_snake_case}/eject.exs"
+  def manifest_path(app_name_underscore_case) do
+    "lib/#{app_name_underscore_case}/eject.exs"
   end
 end

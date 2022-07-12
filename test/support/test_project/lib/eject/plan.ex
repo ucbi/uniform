@@ -41,7 +41,7 @@ defmodule TestProject.Eject.Plan do
     String.replace(
       file,
       "[REPLACE THIS LINE VIA modify/0]",
-      "[REPLACED LINE WHILE EJECTING #{app.name.pascal}]"
+      "[REPLACED LINE WHILE EJECTING #{app.name.camel}]"
     )
   end
 

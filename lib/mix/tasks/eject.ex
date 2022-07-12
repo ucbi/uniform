@@ -62,7 +62,7 @@ defmodule Mix.Tasks.Eject do
       })
 
     IO.puts("")
-    IO.puts("🗺  Ejecting [#{app.name.pascal}] to [#{app.destination}]")
+    IO.puts("🗺  Ejecting [#{app.name.camel}] to [#{app.destination}]")
     IO.puts("")
     IO.puts("🤖 Mix Dependencies")
 
@@ -115,7 +115,7 @@ defmodule Mix.Tasks.Eject do
     if eject do
       IO.puts("")
       Eject.eject(app)
-      IO.puts("✅ #{app.name.pascal} ejected to #{app.destination}")
+      IO.puts("✅ #{app.name.camel} ejected to #{app.destination}")
     end
   end
 end

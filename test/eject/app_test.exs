@@ -21,10 +21,9 @@ defmodule Eject.AppTest do
 
     assert app.name == %{
              module: Tweeter,
-             web_module: TweeterWeb,
-             kebab: "tweeter",
-             snake: "tweeter",
-             pascal: "Tweeter"
+             hyphen: "tweeter",
+             underscore: "tweeter",
+             camel: "Tweeter"
            }
 
     assert app.config == %Config{

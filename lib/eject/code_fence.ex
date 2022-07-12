@@ -87,7 +87,7 @@ defmodule Eject.CodeFence do
   end
 
   defp code_fence_replacement(app, "app", app_name, inner_match) do
-    if to_string(app_name) == app.name.snake do
+    if to_string(app_name) == app.name.underscore do
       inner_match
     else
       ""

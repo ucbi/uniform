@@ -86,7 +86,7 @@ defmodule Eject.File do
   @doc "Returns `lib/my_app` ejectables for the app."
   @spec app_lib_files(App.t()) :: [t]
   def app_lib_files(app) do
-    manifest_path = Manifest.manifest_path(app.name.snake)
+    manifest_path = Manifest.manifest_path(app.name.underscore)
     opts = app.config.module.__app_lib__(app)
 
     file_rules =
@@ -96,7 +96,7 @@ defmodule Eject.File do
       |> Keyword.take([:only, :except, :lib_directory])
       |> Rules.new()
 
-    lib_dir_files(app, app.name.snake, file_rules)
+    lib_dir_files(app, app.name.underscore, file_rules)
   end
 
   @doc "Returns LibDeps as ejectables."
@@ -147,7 +147,7 @@ defmodule Eject.File do
         if dir = lib_dir.(app, path) do
           path
           |> String.replace(~r/^lib\/[^\/]+\//, "lib/#{dir}/")
-          |> String.replace(to_string(app.config.base_app), app.name.snake)
+          |> String.replace(to_string(app.config.base_app), app.name.underscore)
         else
           path
         end
@@ -159,7 +159,7 @@ defmodule Eject.File do
       String.replace(
         destination_relative_path,
         to_string(app.config.base_app),
-        app.name.snake
+        app.name.underscore
       )
 
     Path.join(app.destination, relative_path)
@@ -234,18 +234,18 @@ defmodule Eject.File do
               File.read!(Path.expand(source))
           end
 
-        snake = to_string(app.config.base_app)
+        underscore = to_string(app.config.base_app)
 
         transformed =
           contents
           # apply specified transformations in `Project.modify`
           |> apply_modifiers(source, app)
           # replace `base_project_name` with `ejected_app_name`
-          |> String.replace(snake, app.name.snake)
+          |> String.replace(underscore, app.name.underscore)
           # replace `base-project-name` with `ejected-app-name`
-          |> String.replace(String.replace(snake, "_", "-"), app.name.kebab)
+          |> String.replace(String.replace(underscore, "_", "-"), app.name.hyphen)
           # replace `BaseProjectName` with `EjectedAppName`
-          |> String.replace(Macro.camelize(snake), app.name.pascal)
+          |> String.replace(Macro.camelize(underscore), app.name.camel)
           |> CodeFence.apply_fences(app)
 
         File.write!(destination, transformed)

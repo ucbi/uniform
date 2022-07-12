@@ -44,10 +44,9 @@ defmodule Eject.App do
           config: Config.t(),
           name: %{
             module: module,
-            web_module: module,
-            kebab: String.t(),
-            snake: String.t(),
-            pascal: String.t()
+            hyphen: String.t(),
+            underscore: String.t(),
+            camel: String.t()
           },
           destination: Path.t(),
           deps: Deps.t(),
@@ -67,10 +66,9 @@ defmodule Eject.App do
         config: %Config{...},
         name: %{
           module: Tweeter,
-          web_module: TweeterWeb,
-          kebab: "tweeter",
-          snake: "tweeter",
-          pascal: "Tweeter"
+          hyphen: "tweeter",
+          underscore: "tweeter",
+          camel: "Tweeter"
         },
         destination: "...",
         deps: %Deps{
@@ -98,20 +96,18 @@ defmodule Eject.App do
   @spec new!(Config.t(), Manifest.t(), atom) :: t
   @spec new!(Config.t(), Manifest.t(), atom, [new_opt]) :: t
   def new!(%Config{} = config, %Manifest{} = manifest, name, opts \\ []) when is_atom(name) do
-    "Elixir." <> app_name_pascal_case = to_string(name)
-    app_name_snake_case = Macro.underscore(name)
+    "Elixir." <> app_name_camel_case = to_string(name)
+    app_name_underscore_case = Macro.underscore(name)
 
     app = %App{
       config: config,
       name: %{
         module: name,
-        # credo:disable-for-next-line Credo.Check.Warning.UnsafeToAtom
-        web_module: String.to_atom("Elixir." <> app_name_pascal_case <> "Web"),
-        pascal: app_name_pascal_case,
-        snake: app_name_snake_case,
-        kebab: String.replace(app_name_snake_case, "_", "-")
+        camel: app_name_camel_case,
+        underscore: app_name_underscore_case,
+        hyphen: String.replace(app_name_underscore_case, "_", "-")
       },
-      destination: destination(app_name_snake_case, config, opts),
+      destination: destination(app_name_underscore_case, config, opts),
       deps: deps(config, manifest)
     }
 
@@ -156,12 +152,12 @@ defmodule Eject.App do
     dep_name in app.deps.included[category]
   end
 
-  defp destination(app_name_snake_case, config, opts) do
+  defp destination(app_name_underscore_case, config, opts) do
     destination =
       case {config.destination, opts[:destination]} do
-        {nil, nil} -> "../" <> app_name_snake_case
+        {nil, nil} -> "../" <> app_name_underscore_case
         {nil, opt} -> opt
-        {config, nil} -> Path.join(config, app_name_snake_case)
+        {config, nil} -> Path.join(config, app_name_underscore_case)
       end
 
     Path.expand(destination)
