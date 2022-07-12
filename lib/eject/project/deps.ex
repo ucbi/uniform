@@ -11,7 +11,7 @@ defmodule Eject.Project.Deps do
     prelude =
       quote do
         try do
-          import Eject.Project.Deps
+          import Eject.Project.Deps, only: [lib: 1, lib: 2, mix: 1, mix: 2, always: 1]
           @deps_always_block false
           unquote(block)
         after
@@ -74,7 +74,12 @@ defmodule Eject.Project.Deps do
       end
 
     quote do
-      Eject.Project.Deps.__lib__(__MODULE__, unquote(name), unquote(opts), @deps_always_block)
+      try do
+        import Eject.Project.Deps
+        Eject.Project.Deps.__lib__(__MODULE__, unquote(name), unquote(opts), @deps_always_block)
+      after
+        :ok
+      end
     end
   end
 
@@ -103,9 +108,26 @@ defmodule Eject.Project.Deps do
     - `mix_deps: atom | [atom]` - other mix dependencies that the mix requires (i.e. nested dependencies).
       Note that each nested dependency itself must also have an entry on the "top" level of the list.
   """
-  defmacro mix(name, opts \\ []) do
+  defmacro mix(name, do: block) do
+    opts =
+      case block do
+        {:__block__, _meta, opts} -> opts
+        opt -> [opt]
+      end
+
     quote do
-      Eject.Project.Deps.__mix__(__MODULE__, unquote(name), unquote(opts), @deps_always_block)
+      try do
+        import Eject.Project.Deps, only: [mix_deps: 1]
+        Eject.Project.Deps.__mix__(__MODULE__, unquote(name), unquote(opts), @deps_always_block)
+      after
+        :ok
+      end
+    end
+  end
+
+  defmacro mix(name) do
+    quote do
+      Eject.Project.Deps.__mix__(__MODULE__, unquote(name), [], @deps_always_block)
     end
   end
 

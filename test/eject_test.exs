@@ -84,6 +84,7 @@ defmodule EjectTest do
     # when `except` option given, does not eject files matching `except` entry
     # (supported by both lib_deps() and options()[:ejected_app])
     refute file_exists?("lib/included_lib/excluded.txt")
+    refute file_exists?("lib/always_included_lib/excluded.txt")
     refute file_exists?("lib/tweeter/excluded.txt")
 
     # lib_directory option is able to modify lib directory of a given file

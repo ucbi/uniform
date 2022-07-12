@@ -3,7 +3,10 @@ defmodule TestProject.Eject.Project do
 
   deps do
     always do
-      lib :always_included_lib
+      lib :always_included_lib do
+        except ~r/excluded/
+      end
+
       mix :always_included_mix
     end
 
@@ -22,7 +25,9 @@ defmodule TestProject.Eject.Project do
       only ~r/included.txt/
     end
 
-    mix :included_mix, mix_deps: [:indirectly_included_mix]
+    mix :included_mix do
+      mix_deps [:indirectly_included_mix]
+    end
   end
 
   app_lib(_app) do
