@@ -78,7 +78,6 @@ defmodule EjectTest do
     assert file_exists?("lib/with_only/included.txt")
     refute file_exists?("lib/with_only/excluded.txt")
 
-
     # when `except` option given, does not eject files matching `except` entry
     # (supported by both lib_deps() and options()[:ejected_app])
     refute file_exists?("lib/included_lib/excluded.txt")
@@ -86,8 +85,7 @@ defmodule EjectTest do
     assert file_exists?("lib/tweeter/included.txt")
     refute file_exists?("lib/tweeter/excluded.txt")
 
-    # lib_directory option is able to modify lib directory of a given file
-    # (supported by both lib_deps() and options()[:ejected_app])
+    # target_path callback is able to modify path of a given file
     assert file_exists?("lib/included_lib_changed/lib_dir_changed.txt")
     assert file_exists?("lib/tweeter_changed/lib_dir_changed.txt")
 

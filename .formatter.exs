@@ -9,7 +9,6 @@ locals_without_parens = [
   lib: 1,
   lib: 2,
   lib_deps: 1,
-  lib_directory: 1,
   mix: 1,
   mix: 2,
   mix_deps: 1,

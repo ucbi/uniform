@@ -30,6 +30,20 @@ defmodule Eject.Plan do
   @callback extra(Eject.App.t()) :: keyword
 
   @doc """
+  Use this callback to modify the path of ejected files. It will be called for
+  every file in a lib directory, along with every file specified via `file`, `template`,
+  `cp`, and `cp_r`.
+
+  If you don't want to modify the `path`, just return it.
+
+  If not defined, the default implementation is:
+
+      def target_path(path, _app), do: path
+
+  """
+  @callback target_path(Path.t(), Eject.App.t()) :: Path.t()
+
+  @doc """
   A macro for defining an ejection plan.
 
   The required `templates` path points to the EEx templates used by `Eject`.
@@ -59,6 +73,10 @@ defmodule Eject.Plan do
       Module.register_attribute(__MODULE__, :modifiers, accumulate: true)
     end
   end
+
+  #
+  # Modifying the contents of a file
+  #
 
   @doc """
   Specify a file or regex pattern and a transformation function to apply to all files matching that pattern.
@@ -90,6 +108,10 @@ defmodule Eject.Plan do
     Module.put_attribute(mod, :modifiers, {path_or_regex, {mod, fn_name}})
   end
 
+  #
+  # Configuring which files to eject outside of the files in the app's `lib` directory.
+  #
+
   @doc """
   Specify various rules to apply to the ejected app `lib/` directory files. These are the
   same "file rules" that can be applied to a lib dep. See `Eject.Rules` for a full
@@ -109,7 +131,7 @@ defmodule Eject.Plan do
 
     quote do
       try do
-        import Eject.Plan, except: [eject: 1, only: 1, lib_directory: 1]
+        import Eject.Plan, except: [eject: 1, only: 1]
 
         def __eject__(unquote(app)),
           do: unquote(items) |> List.flatten() |> Enum.reject(&is_nil/1)
@@ -119,30 +141,9 @@ defmodule Eject.Plan do
     end
   end
 
-  def lib_dep(name), do: {:lib_dep, name}
-  def mix_dep(name), do: {:mix_dep, name}
-  def file(path), do: {:text, path}
-  def template(path), do: {:template, path}
-  def cp_r(path), do: {:cp_r, path}
-  def cp(path), do: {:cp, path}
-  def preserve(path), do: {:preserve, path}
-
-  def except(paths), do: {:except, List.wrap(paths)}
-  def only(paths), do: {:only, List.wrap(paths)}
-  def lib_directory(function), do: {:lib_directory, function}
-
-  def app_lib(do: block) do
-    {:__block__, [], items} = block
-
-    quote do
-      try do
-        import Eject.Plan, only: [except: 1, only: 1, lib_directory: 1]
-        unquote(items)
-      after
-        :ok
-      end
-    end
-  end
+  #
+  # Dependencies
+  #
 
   defmacro deps(do: block) do
     prelude =
@@ -299,4 +300,17 @@ defmodule Eject.Plan do
 
     Keyword.put(opts, :associated_files, associated_files)
   end
+
+  # Specifying files/directories to copy
+  def file(path), do: {:text, path}
+  def template(path), do: {:template, path}
+  def cp_r(path), do: {:cp_r, path}
+  def cp(path), do: {:cp, path}
+
+  # Specifying files/directories to NOT delete when clearing the destination prior the ejection
+  def preserve(path), do: {:preserve, path}
+
+  # Specifying allow/deny-lists that drive which files to include in a lib directory
+  def except(paths), do: {:except, List.wrap(paths)}
+  def only(paths), do: {:only, List.wrap(paths)}
 end

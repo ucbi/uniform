@@ -82,7 +82,9 @@ defmodule Eject.Manifest do
       {manifest, _bindings} = Code.eval_file(manifest_path)
       manifest
     else
-      raise Eject.NotEjectableError, app_name: app_name_underscore_case, manifest_path: manifest_path
+      raise Eject.NotEjectableError,
+        app_name: app_name_underscore_case,
+        manifest_path: manifest_path
     end
   end
 

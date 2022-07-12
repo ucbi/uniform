@@ -55,7 +55,6 @@ defmodule TestProject.Eject.Plan do
       template "priv/included_lib/template.txt"
 
       except ~r/excluded/
-      lib_directory &TestProject.Eject.Plan.included_lib_dir/2
     end
 
     lib :with_only do
@@ -64,12 +63,6 @@ defmodule TestProject.Eject.Plan do
 
     mix :included_mix do
       mix_deps [:indirectly_included_mix]
-    end
-  end
-
-  def included_lib_dir(_app, file_path) do
-    if String.contains?(file_path, "lib_dir_changed") do
-      "included_lib_changed"
     end
   end
 end
