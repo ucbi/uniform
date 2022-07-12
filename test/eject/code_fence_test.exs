@@ -7,7 +7,7 @@ defmodule Eject.CodeFenceTest do
     config = %Config{
       base_app: :test,
       mix_module: TestProject.MixProject,
-      module: TestProject.Eject.Project
+      module: TestProject.Eject.Plan
     }
 
     manifest =

@@ -1,4 +1,4 @@
-defmodule TestProject.Eject.Project do
+defmodule TestProject.Eject.Plan do
   use Eject.Plan, templates: "templates"
 
   def extra(_app) do
@@ -17,7 +17,7 @@ defmodule TestProject.Eject.Project do
       ~r/lib_dir_changed/
     ]
 
-    lib_directory &TestProject.Eject.Project.lib_dir_changed/2
+    lib_directory &TestProject.Eject.Plan.lib_dir_changed/2
   end
 
   def lib_dir_changed(_app, file_path) do
@@ -62,7 +62,7 @@ defmodule TestProject.Eject.Project do
       file "priv/associated.txt"
       template "priv/included_lib/template.txt"
       except ~r/excluded/
-      lib_directory &TestProject.Eject.Project.included_lib_dir/2
+      lib_directory &TestProject.Eject.Plan.included_lib_dir/2
     end
 
     lib :with_only do

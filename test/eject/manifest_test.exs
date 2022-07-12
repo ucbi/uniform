@@ -10,7 +10,7 @@ defmodule Eject.ManifestTest do
         %Config{
           base_app: :test,
           mix_module: TestProject.MixProject,
-          module: TestProject.Eject.Project
+          module: TestProject.Eject.Plan
         },
         mix_deps: [:included_mix],
         lib_deps: [:included_lib],
@@ -28,7 +28,7 @@ defmodule Eject.ManifestTest do
     config = %Config{
       base_app: :test,
       mix_module: TestProject.MixProject,
-      module: TestProject.Eject.Project
+      module: TestProject.Eject.Plan
     }
 
     assert_raise ArgumentError, fn ->

@@ -20,7 +20,7 @@ defmodule EjectTest do
     config = %Config{
       base_app: :test_project,
       mix_module: TestProject.MixProject,
-      module: TestProject.Eject.Project,
+      module: TestProject.Eject.Plan,
       destination: "../../ejected"
     }
 
@@ -93,7 +93,7 @@ defmodule EjectTest do
     assert file_exists?("lib/tweeter_changed/lib_dir_changed.txt")
 
     # `preserve`d files are never cleared
-    # (note: TestProject.Eject.Project specifies to preserve .gitignore)
+    # (note: TestProject.Eject.Plan specifies to preserve .gitignore)
     Eject.clear_destination(app)
     read!(".gitignore")
   end
