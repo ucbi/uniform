@@ -4,9 +4,41 @@ defmodule Eject.App do
   """
 
   alias __MODULE__
-  alias Eject.{Deps, Manifest, Config}
+  alias Eject.{Manifest, Config, LibDep, MixDep}
 
   defstruct [:config, :name, :destination, :deps, :extra]
+
+  defmodule Deps do
+    @moduledoc """
+    A struct containing all dependencies associated with an ejectable app.
+
+    Intended to be attached to the `deps` field of `t:Eject.App.t/0`.
+
+      - `:lib` – all included `%LibDeps{}`
+      - `:mix` – all included `%MixDeps{}`
+      - `:included` – all included lib and mix deps as atom names (same as pulling keys from above structs)
+      - `:all` – *all* mix and lib dep names that _could_ be included in an
+        app. The `all` field helps identify and warn on references to mix or
+        lib deps that are not in `mix.exs` or `lib/`.
+    """
+
+    defstruct [:lib, :mix, :included, :all]
+
+    alias Eject.{LibDep, MixDep, Manifest, Config}
+
+    @type t :: %__MODULE__{
+            lib: %{LibDep.name() => LibDep.t()},
+            mix: %{MixDep.name() => MixDep.t()},
+            included: %{
+              lib: [LibDep.name()],
+              mix: [MixDep.name()]
+            },
+            all: %{
+              lib: [LibDep.name()],
+              mix: [MixDep.name()]
+            }
+          }
+  end
 
   @type t :: %__MODULE__{
           config: Config.t(),
@@ -68,7 +100,6 @@ defmodule Eject.App do
   def new!(%Config{} = config, %Manifest{} = manifest, name, opts \\ []) when is_atom(name) do
     "Elixir." <> app_name_pascal_case = to_string(name)
     app_name_snake_case = Macro.underscore(name)
-    deps = Deps.discover!(config, manifest)
 
     app = %App{
       config: config,
@@ -81,7 +112,7 @@ defmodule Eject.App do
         kebab: String.replace(app_name_snake_case, "_", "-")
       },
       destination: destination(app_name_snake_case, config, opts),
-      deps: deps
+      deps: deps(config, manifest)
     }
 
     # `extra/1` requires an app struct
@@ -134,5 +165,96 @@ defmodule Eject.App do
       end
 
     Path.expand(destination)
+  end
+
+  @doc """
+  Given a manifest struct, returns a `%Deps{}` struct containing
+  information about lib and mix dependencies.
+  """
+  @spec deps(Config.t(), Manifest.t()) :: t
+  def deps(config, manifest) do
+    all_libs = Config.lib_deps(config)
+    all_mixs = Config.mix_deps(config)
+    included_libs = included_libs(manifest, all_libs)
+    included_mixs = included_mixs(manifest, included_libs, all_mixs)
+
+    %Deps{
+      lib: included_libs,
+      mix: included_mixs,
+      included: %{
+        lib: Map.keys(included_libs),
+        mix: Map.keys(included_mixs)
+      },
+      all: %{
+        lib: Map.keys(all_libs),
+        mix: Map.keys(all_mixs)
+      }
+    }
+  end
+
+  @spec included_libs(Manifest.t(), %{atom => LibDep.t()}) :: %{atom => LibDep.t()}
+  defp included_libs(manifest, all) do
+    root_deps =
+      all
+      |> Enum.filter(fn {_, lib_dep} -> lib_dep.always || lib_dep.name in manifest.lib_deps end)
+      |> Enum.into(%{})
+
+    root_deps
+    |> Map.values()
+    |> Enum.reduce(root_deps, &gather_child_deps(&1, :lib_deps, &2, all))
+  end
+
+  @spec included_mixs(Manifest.t(), %{atom => LibDep.t()}, %{atom => MixDep.t()}) :: %{
+          atom => MixDep.t()
+        }
+  defp included_mixs(manifest, included_libs, all_mixs) do
+    root_deps =
+      all_mixs
+      |> Enum.filter(fn {_, mix_dep} -> mix_dep.always || mix_dep.name in manifest.mix_deps end)
+      |> Enum.into(%{})
+
+    # gather nested mix deps required by manifest
+    root_deps =
+      root_deps
+      |> Enum.map(fn {_name, dep} -> dep end)
+      |> Enum.reduce(
+        root_deps,
+        &gather_child_deps(&1, :mix_deps, &2, all_mixs)
+      )
+
+    # gather mix deps required by lib deps, which have already been flattened
+    included_libs
+    |> Map.values()
+    |> Enum.reduce(root_deps, &gather_child_deps(&1, :mix_deps, &2, all_mixs))
+  end
+
+  @type dep :: LibDep.t() | MixDep.t()
+  @spec gather_child_deps(dep, :lib_deps | :mix_deps, %{atom => dep}, %{atom => dep}) :: %{
+          atom => dep
+        }
+  defp gather_child_deps(dep, children_field, gathered, all_of_type) do
+    dep
+    |> Map.get(children_field, [])
+    |> Enum.reduce(gathered, fn child_name, gathered ->
+      if Map.has_key?(gathered, child_name) do
+        # already gathered this one
+        gathered
+      else
+        if Map.has_key?(all_of_type, child_name) do
+          nested_dep = all_of_type[child_name]
+          gathered = Map.put(gathered, child_name, nested_dep)
+          # recurse to ensure we capture infinite potential levels of nesting
+          gather_child_deps(nested_dep, children_field, gathered, all_of_type)
+        else
+          type =
+            case dep do
+              %LibDep{} -> :lib
+              %MixDep{} -> :mix
+            end
+
+          raise "Could not find #{type} dependency #{child_name} which is a dependency of #{dep.name}"
+        end
+      end
+    end)
   end
 end
