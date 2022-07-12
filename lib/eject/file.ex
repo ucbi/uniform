@@ -42,19 +42,19 @@ defmodule Eject.File do
     for item <- app.config.plan.__eject__(app) do
       case item do
         {:text, path} ->
-          destination = destination(path, app, Rules.new([]))
+          destination = destination(path, app)
           %Eject.File{type: :text, source: path, destination: destination, chmod: nil}
 
         {:cp, path} ->
-          destination = destination(path, app, Rules.new([]))
+          destination = destination(path, app)
           %Eject.File{type: :cp, source: path, destination: destination, chmod: nil}
 
         {:cp_r, path} ->
-          destination = destination(path, app, Rules.new([]))
+          destination = destination(path, app)
           %Eject.File{type: :cp_r, source: path, destination: destination, chmod: nil}
 
         {:template, path} ->
-          destination = destination(path, app, Rules.new([]))
+          destination = destination(path, app)
           %Eject.File{type: :template, source: path, destination: destination, chmod: nil}
 
         _ ->
@@ -78,7 +78,7 @@ defmodule Eject.File do
       |> Enum.filter(&File.exists?/1)
 
     for path <- files do
-      destination = destination(path, app, Rules.new([]))
+      destination = destination(path, app)
       %Eject.File{type: :text, source: path, destination: destination, chmod: nil}
     end
   end
@@ -94,9 +94,7 @@ defmodule Eject.File do
       # never eject the Eject manifest
       |> Keyword.update(:except, [manifest_path], fn except -> [manifest_path | except] end)
       |> Keyword.take([:except])
-      |> IO.inspect()
       |> Rules.new()
-      |> IO.inspect()
 
     lib_dir_files(app, app.name.underscore, file_rules)
   end
@@ -139,30 +137,16 @@ defmodule Eject.File do
 
   defp build_file(app, {type, path}, rules)
        when type in [:text, :template, :cp, :cp_r] and is_binary(path) do
-    destination = destination(path, app, rules)
+    destination = destination(path, app)
     %Eject.File{type: type, source: path, destination: destination, chmod: rules.chmod}
   end
 
-  defp destination(path, app, file_rules) do
-    destination_relative_path =
-      if lib_dir = file_rules.lib_directory do
-        if dir = lib_dir.(app, path) do
-          path
-          |> String.replace(~r/^lib\/[^\/]+\//, "lib/#{dir}/")
-          |> String.replace(to_string(app.config.mix_project_app), app.name.underscore)
-        else
-          path
-        end
-      else
-        path
-      end
-
+  defp destination(path, app) do
     relative_path =
-      String.replace(
-        destination_relative_path,
-        to_string(app.config.mix_project_app),
-        app.name.underscore
-      )
+      path
+      # call target_path callback, giving the developer a chance to modify the final path
+      |> app.config.plan.target_path(app)
+      |> String.replace(to_string(app.config.mix_project_app), app.name.underscore)
 
     Path.join(app.destination, relative_path)
   end
@@ -219,11 +203,11 @@ defmodule Eject.File do
               template_dir = app.config.plan.__template_dir__()
 
               if !template_dir do
-                raise "`use Eject, templates: \"...\"` must specify a templates directory"
+                raise "`use Eject.Path, templates: \"...\"` must specify a templates directory"
               end
 
               if !File.dir?(Path.expand(template_dir)) do
-                raise "String given to `use Eject, templates: \"...\"` is not a directory (Expands to #{Path.expand(template_dir)})"
+                raise "String given to `use Eject.Path, templates: \"...\"` is not a directory (Expands to #{Path.expand(template_dir)})"
               end
 
               EEx.eval_file(

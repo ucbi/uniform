@@ -39,8 +39,7 @@ defmodule Eject.LibDep do
       ...>     only: nil,
       ...>     except: [~r/regex-of-files-not-to-eject/],
       ...>     associated_files: ["priv/path/to/associated/file"],
-      ...>     chmod: nil,
-      ...>     lib_directory: nil
+      ...>     chmod: nil
       ...>   }
       ...> })
       %Eject.LibDep{
@@ -49,7 +48,6 @@ defmodule Eject.LibDep do
           associated_files: ["priv/path/to/associated/file"],
           chmod: nil,
           except: [~r/regex-of-files-not-to-eject/],
-          lib_directory: nil,
           only: nil
         },
         lib_deps: [:my_graph_dep],

@@ -1,5 +1,5 @@
 defmodule EjectTest do
-  use Eject.ProjectCase
+  use Eject.TestProjectCase
 
   alias Eject.{Config, Manifest, App}
 
@@ -94,6 +94,6 @@ defmodule EjectTest do
     # `preserve`d files are never cleared
     # (note: TestProject.Eject.Plan specifies to preserve .gitignore)
     Eject.clear_destination(app)
-    read!(".gitignore")
+    assert file_exists?(".gitignore")
   end
 end

@@ -5,25 +5,18 @@ defmodule TestProject.Eject.Plan do
     [company: :fake_co, logo_file: "pixel"]
   end
 
-  # TODO: Implement this callback as a replacement to lib_directory
-  # (Does it affect files / cp / cp_r / template???)
-  def target_path("lib/foo/my/dir" <> source, _app) do
-    # some specific, pointed modification
-    source
+  def target_path("lib/tweeter/lib_dir_changed.txt", _app) do
+    "lib/tweeter_changed/lib_dir_changed.txt"
+  end
+
+  def target_path("lib/included_lib/lib_dir_changed.txt", _app) do
+    "lib/included_lib_changed/lib_dir_changed.txt"
   end
 
   def target_path(source, _app), do: source
 
-  # TODO: Get rid of app_lib (move `except` to `eject(app)` and remove `only`)
-    # lib_directory &TestProject.Eject.Plan.lib_dir_changed/2
-
-  def lib_dir_changed(_app, file_path) do
-    if String.contains?(file_path, "lib_dir_changed") do
-      "tweeter_changed"
-    end
-  end
-
   eject(app) do
+    preserve ".gitignore"
     cp "assets/static/images/#{app.extra[:logo_file]}.png"
     template "config/runtime.exs"
 

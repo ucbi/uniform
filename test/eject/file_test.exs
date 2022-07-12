@@ -1,5 +1,5 @@
 defmodule Eject.FileTest do
-  use Eject.ProjectCase
+  use Eject.TestProjectCase
 
   alias Eject.{App, Manifest, Config}
 

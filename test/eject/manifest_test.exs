@@ -1,5 +1,5 @@
 defmodule Eject.ManifestTest do
-  use Eject.ProjectCase
+  use Eject.TestProjectCase
   doctest Eject.Manifest, import: true
 
   alias Eject.{Manifest, Config}

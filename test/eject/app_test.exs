@@ -1,5 +1,5 @@
 defmodule Eject.AppTest do
-  use Eject.ProjectCase
+  use Eject.TestProjectCase
   doctest Eject.App, import: true
 
   alias Eject.{Config, Manifest, App, LibDep, MixDep}

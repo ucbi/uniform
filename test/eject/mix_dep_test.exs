@@ -1,4 +1,4 @@
 defmodule Eject.MixDepTest do
-  use Eject.ProjectCase
+  use Eject.TestProjectCase
   doctest Eject.MixDep, import: true
 end

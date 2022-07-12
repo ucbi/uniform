@@ -1,5 +1,5 @@
 defmodule Eject.CodeFenceTest do
-  use Eject.ProjectCase
+  use Eject.TestProjectCase
 
   alias Eject.{App, CodeFence, Manifest, Config}
 

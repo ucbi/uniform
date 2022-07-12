@@ -1,4 +1,4 @@
 defmodule Eject.LibDepTest do
-  use Eject.ProjectCase
+  use Eject.TestProjectCase
   doctest Eject.LibDep, import: true
 end

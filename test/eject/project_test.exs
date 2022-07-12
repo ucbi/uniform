@@ -1,5 +1,5 @@
 defmodule Eject.ConfigTest do
-  use Eject.ProjectCase
+  use Eject.TestProjectCase
 
   alias Eject.{LibDep, MixDep, Config}
 
