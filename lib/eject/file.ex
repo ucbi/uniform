@@ -33,12 +33,39 @@ defmodule Eject.File do
     # ejected app wants to override phoenix-ish files in `lib/app_name_web`
     # (See `error_view.ex`)
     base_files(app) ++
+      app_files(app) ++
       files(app) ++
       binaries(app) ++
       directories(app) ++
       templates(app) ++
       lib_dep_files(app) ++
       app_lib_files(app)
+  end
+
+  def app_files(app) do
+    for item <- app.config.module.__app__(app) do
+      case item do
+        {:file, path} ->
+          destination = destination(path, app, Rules.new([]))
+          %Eject.File{type: :text, source: path, destination: destination, chmod: nil}
+
+        {:cp, path} ->
+          destination = destination(path, app, Rules.new([]))
+          %Eject.File{type: :binary, source: path, destination: destination, chmod: nil}
+
+        {:cp_r, path} ->
+          destination = destination(path, app, Rules.new([]))
+          %Eject.File{type: :dir, source: path, destination: destination, chmod: nil}
+
+        {:template, path} ->
+          destination = destination(path, app, Rules.new([]))
+          %Eject.File{type: :template, source: path, destination: destination, chmod: nil}
+
+        _ ->
+          nil
+      end
+    end
+    |> Enum.reject(&is_nil/1)
   end
 
   @doc "Returns `base` ejectables for the app."

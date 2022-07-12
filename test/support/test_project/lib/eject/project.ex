@@ -15,42 +15,48 @@ defmodule TestProject.Eject.Project do
     mix :included_mix, mix_deps: [:indirectly_included_mix]
   end
 
-  app do
-    IO.puts("foo")
-  end
+  eject do
+    mix_dep(:phoenix)
+    mix_dep(:phoenix_live_view)
+    mix_dep(:surface)
 
-  project do
-    app except: [
-          ~r/excluded/
-        ],
-        only: [
-          ~r/dotfile/,
-          ~r/\/included/,
-          # add `excluded` to `only` so that we're truly testing whether
-          # `except` works (they can be layered)
-          ~r/excluded/,
-          ~r/lib_dir_changed/
-        ],
-        lib_directory: &TestProject.Eject.Project.lib_dir_changed/2
-
-    file ".dotfile"
-    binary "assets/static/images/pixel.png"
-    cp_r "dir"
+    cp "assets/static/images/#{app.extra[:logo_file]}.png"
     template "config/runtime.exs"
-
     preserve ".gitignore"
 
-    modify ~r/\.dotfile/, file, app do
-      String.replace(
-        file,
-        "[REPLACE THIS LINE VIA modify/0]",
-        "[REPLACED LINE WHILE EJECTING #{app.name.pascal}]"
-      )
+    if app.extra[:company] == :fake_co do
+      file ".dotfile"
+      cp_r "dir"
     end
   end
 
+  modify ~r/\.dotfile/, file, app do
+    String.replace(
+      file,
+      "[REPLACE THIS LINE VIA modify/0]",
+      "[REPLACED LINE WHILE EJECTING #{app.name.pascal}]"
+    )
+  end
+
+  project do
+    app_options(
+      except: [
+        ~r/excluded/
+      ],
+      only: [
+        ~r/dotfile/,
+        ~r/\/included/,
+        # add `excluded` to `only` so that we're truly testing whether
+        # `except` works (they can be layered)
+        ~r/excluded/,
+        ~r/lib_dir_changed/
+      ],
+      lib_directory: &TestProject.Eject.Project.lib_dir_changed/2
+    )
+  end
+
   def extra(_app) do
-    []
+    [company: :fake_co, logo_file: "pixel"]
   end
 
   def included_lib_dir(_app, file_path) do

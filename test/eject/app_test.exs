@@ -35,7 +35,7 @@ defmodule Eject.AppTest do
            }
 
     assert app.destination == "/Users/me/code/tweeter"
-    assert app.extra == [some_data: "from eject.exs"]
+    assert app.extra == [company: :fake_co, logo_file: "pixel", some_data: "from eject.exs"]
 
     assert %LibDep{mix_deps: [:included_mix], lib_deps: [:indirectly_included_lib, :with_only]} =
              app.deps.lib.included_lib

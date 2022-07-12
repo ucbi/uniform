@@ -1,6 +1,6 @@
 locals_without_parens = [
   app: 1,
-  binary: 1,
+  cp: 1,
   cp_r: 1,
   file: 1,
   lib: 2,
