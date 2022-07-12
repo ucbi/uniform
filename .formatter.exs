@@ -3,7 +3,9 @@ locals_without_parens = [
   cp: 1,
   cp_r: 1,
   file: 1,
+  lib: 1,
   lib: 2,
+  mix: 1,
   mix: 2,
   preserve: 1,
   template: 1

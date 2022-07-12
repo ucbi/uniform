@@ -2,6 +2,11 @@ defmodule TestProject.Eject.Project do
   use Eject, templates: "templates"
 
   deps do
+    always do
+      lib :always_included_lib
+      mix :always_included_mix
+    end
+
     lib :included_lib,
       mix_deps: [:included_mix],
       lib_deps: [:indirectly_included_lib, :with_only],
@@ -9,11 +14,9 @@ defmodule TestProject.Eject.Project do
       except: [~r/excluded/],
       lib_directory: &TestProject.Eject.Project.included_lib_dir/2
 
-    lib :always_included_lib, always: true
     lib :with_only, only: [~r/included.txt/]
 
     mix :included_mix, mix_deps: [:indirectly_included_mix]
-    mix :always_included_mix, always: true
   end
 
   eject(app) do

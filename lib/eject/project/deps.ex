@@ -12,6 +12,7 @@ defmodule Eject.Project.Deps do
       quote do
         try do
           import Eject.Project.Deps
+          @deps_always_block false
           unquote(block)
         after
           :ok
@@ -30,6 +31,17 @@ defmodule Eject.Project.Deps do
     quote do
       unquote(prelude)
       unquote(postlude)
+    end
+  end
+
+  defmacro always(do: block) do
+    quote do
+      try do
+        @deps_always_block true
+        unquote(block)
+      after
+        @deps_always_block false
+      end
     end
   end
 
@@ -54,20 +66,20 @@ defmodule Eject.Project.Deps do
     - `except` - exclude specific files from the lib directory.
 
   """
-  defmacro lib(name, opts) do
+  defmacro lib(name, opts \\ []) do
     quote do
-      Eject.Project.Deps.__lib__(__MODULE__, unquote(name), unquote(opts))
+      Eject.Project.Deps.__lib__(__MODULE__, unquote(name), unquote(opts), @deps_always_block)
     end
   end
 
   @doc false
-  def __lib__(mod, name, opts) when is_atom(name) and is_list(opts) do
+  def __lib__(mod, name, opts, always) when is_atom(name) and is_list(opts) do
     lib_dep =
       Eject.LibDep.new!(%{
         name: name,
         lib_deps: opts |> Keyword.get(:lib_deps, []) |> List.wrap(),
         mix_deps: opts |> Keyword.get(:mix_deps, []) |> List.wrap(),
-        always: Keyword.get(opts, :always, false),
+        always: always,
         file_rules: Eject.Rules.new(opts)
       })
 
@@ -79,18 +91,18 @@ defmodule Eject.Project.Deps do
     - `mix_deps: atom | [atom]` - other mix dependencies that the mix requires (i.e. nested dependencies).
       Note that each nested dependency itself must also have an entry on the "top" level of the list.
   """
-  defmacro mix(name, opts) do
+  defmacro mix(name, opts \\ []) do
     quote do
-      Eject.Project.Deps.__mix__(__MODULE__, unquote(name), unquote(opts))
+      Eject.Project.Deps.__mix__(__MODULE__, unquote(name), unquote(opts), @deps_always_block)
     end
   end
 
   @doc false
-  def __mix__(mod, name, opts) when is_atom(name) and is_list(opts) do
+  def __mix__(mod, name, opts, always) when is_atom(name) and is_list(opts) do
     mix_dep =
       Eject.MixDep.new!(%{
         name: name,
-        always: Keyword.get(opts, :always, false),
+        always: always,
         mix_deps: opts |> Keyword.get(:mix_deps, []) |> List.wrap()
       })
 
