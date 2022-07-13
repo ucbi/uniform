@@ -88,11 +88,11 @@ defmodule Eject do
           "🤖 Please pass in a module name corresponding to a directory in `lib` containing an `eject.exs` file. E.g. Tweeter (received #{inspect(name)})"
     end
 
-    config = Eject.Config.build()
+    Mix.Task.run("compile", [])
 
-    config
-    |> Eject.Manifest.eval_and_parse(Macro.underscore(name))
-    |> Eject.App.new!(config, name, opts)
+    config = Eject.Config.build()
+    manifest = Eject.Manifest.eval_and_parse(config, Macro.underscore(name))
+    Eject.App.new!(config, manifest, name, opts)
   end
 
   @doc """
