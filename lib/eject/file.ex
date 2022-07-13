@@ -137,13 +137,14 @@ defmodule Eject.File do
 
     lib_files = for path <- paths, do: new(:text, app, path, rules)
 
-    associated_files = Enum.flat_map(
-      rules.associated_files || [],
-      fn {type, {path_or_paths, opts}} ->
-        rules = Rules.new(opts)
-        for path <- List.wrap(path_or_paths), do: new(type, app, path, rules)
-      end
-    )
+    associated_files =
+      Enum.flat_map(
+        rules.associated_files || [],
+        fn {type, {path_or_paths, opts}} ->
+          rules = Rules.new(opts)
+          for path <- List.wrap(path_or_paths), do: new(type, app, path, rules)
+        end
+      )
 
     lib_files ++ associated_files
   end
