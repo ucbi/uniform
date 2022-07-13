@@ -61,7 +61,8 @@ defmodule Eject.Plan do
     quote do
       @behaviour Eject.Plan
       @before_compile Eject.Plan.BeforeCompile
-      import Eject.Plan, only: [modify: 4, deps: 1, eject: 2]
+      import Eject.Plan, only: [modify: 4, modify: 3, deps: 1, eject: 2]
+      import Eject.App, only: [depends_on?: 3]
 
       def __template_dir__, do: unquote(templates)
 
@@ -94,8 +95,8 @@ defmodule Eject.Plan do
       end
 
   """
-  defmacro modify(path_or_regex, file, app, do: block) do
-    line = __ENV__.line
+  defmacro modify(path_or_regex, file, app \\ nil, do: block) do
+    line = __CALLER__.line
     fn_name = String.to_atom("modify_#{line}")
 
     quote do
