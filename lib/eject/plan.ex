@@ -95,7 +95,18 @@ defmodule Eject.Plan do
       end
 
   """
-  defmacro modify(path_or_regex, file, app \\ nil, do: block) do
+  defmacro modify(path_or_regex, file, app, do: block) do
+    line = __CALLER__.line
+    fn_name = String.to_atom("modify_#{line}")
+
+    quote do
+      Eject.Plan.__register_modifier__(__MODULE__, unquote(path_or_regex), unquote(fn_name))
+      def unquote(fn_name)(unquote(file), unquote(app)), do: unquote(block)
+    end
+  end
+
+  defmacro modify(path_or_regex, file, do: block) do
+    app = quote generated: true, do: var!(app)
     line = __CALLER__.line
     fn_name = String.to_atom("modify_#{line}")
 
