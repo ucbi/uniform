@@ -64,15 +64,18 @@ defmodule Eject.File do
 
   # Returns all files specified with file/template/cp/cp_r in the `eject` macro
   def base_files(app) do
-    for item <- app.config.plan.__eject__(app) do
+    app
+    |> app.config.plan.__eject__()
+    |> Enum.flat_map(fn item ->
       case item do
-        {type, {path, opts}} when type in [:text, :template, :cp, :cp_r] ->
-          new(type, app, path, Rules.new(opts))
+        {type, {path_or_paths, opts}} when type in [:text, :template, :cp, :cp_r] ->
+          rules = Rules.new(opts)
+          for path <- List.wrap(path_or_paths), do: new(type, app, path, rules)
 
         _ ->
-          nil
+          []
       end
-    end
+    end)
     |> Enum.reject(&is_nil/1)
   end
 
@@ -134,10 +137,13 @@ defmodule Eject.File do
 
     lib_files = for path <- paths, do: new(:text, app, path, rules)
 
-    associated_files =
-      for {type, {path, opts}} <- rules.associated_files || [] do
-        new(type, app, path, Rules.new(opts))
+    associated_files = Enum.flat_map(
+      rules.associated_files || [],
+      fn {type, {path_or_paths, opts}} ->
+        rules = Rules.new(opts)
+        for path <- List.wrap(path_or_paths), do: new(type, app, path, rules)
       end
+    )
 
     lib_files ++ associated_files
   end

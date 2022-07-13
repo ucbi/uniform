@@ -23,7 +23,7 @@ defmodule TestProject.Eject.Plan do
     except ~r/excluded/
 
     if app.extra[:company] == :fake_co do
-      file ".dotfile"
+      file [".dotfile", ".another-dotfile"]
       cp_r "dir"
     end
   end
