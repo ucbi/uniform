@@ -1,4 +1,4 @@
 defmodule Eject.MixDepTest do
-  use ExUnit.Case, async: true
+  use Eject.TestProjectCase
   doctest Eject.MixDep, import: true
 end

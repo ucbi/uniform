@@ -36,131 +36,6 @@ defmodule Eject do
 
   require Logger
 
-  @doc """
-  A macro for using the eject in a project.
-
-  The required `templates` path points to the EEx templates used by `Eject`.
-
-  ### Examples
-
-      defmodule MyBaseApp.Eject.Project do
-        use Eject, templates: "lib/my_base_app/eject/templates"
-      ...
-
-  """
-  defmacro __using__(opts) do
-    templates = opts[:templates]
-
-    quote do
-      @behaviour Eject
-      import Eject.App, only: [depends_on?: 3]
-      def __templates__, do: unquote(templates)
-    end
-  end
-
-  @doc """
-  Lists additional 'base files' to be ejected.
-
-  The following files are automatically ejected and should not be listed:
-    - files in the lib directory of the ejected app
-    - files packaged in a `lib` directory (refer to the `lib_deps` callback for details)
-  """
-  @callback base_files(Eject.App.t()) :: [Path.t() | {:dir | :template | :binary, Path.t()}]
-
-  @doc """
-  Lists all available local lib (not hex) dependencies an ejected app may use.
-
-  Lib dependencies are identified by an atom that corresponds to the lib directory. For
-  example, `:my_cool_utilities` ejects _all_ files in the `lib/my_cool_utilities` directory.
-  If additional files from a different directory are needed, use the `associated_files` option.
-  If you only need selected files from the `lib` directory, use the `only` option.
-
-  Once listed, each ejectable app may elect to include the lib dependency by adding it
-  to its `Eject` manifest (see `Eject.Manifest`).
-
-  Options include:
-
-    - `always: true` - _always_ include the lib dependency. In this case, there is no need
-      to also list the dependency in its `Eject` manifest.
-    - `lib_deps: atom | [atom]`  - other lib dependencies that the lib requires (i.e. nested dependencies).
-      Note that each nested dependency itself must also have an entry on the "top" level of the list.
-    - `mix_deps` - mix dependencies that the lib requires.
-    - `associated_files` - files in another directory to also include with the lib directory (e.g. mocks).
-    - `only` - only include _specific_ files from the lib directory, as opposed to _all_ files (the default behavior).
-    - `except` - exclude specific files from the lib directory.
-
-  """
-  @callback lib_deps :: [LibDep.name() | {LibDep.name(), keyword}]
-
-  @doc """
-  Lists mix.exs dependencies NOT to always include. In other words, mix dependencies that
-  may optionally be excluded.
-
-  Unlike `lib_deps`, which are _excluded_ by default, `mix_deps` are _included_ by default.
-  As such, the mix dependency must be added to this list in order to allow each ejectable app
-  to exclude the dependency.
-
-  Once listed, each ejectable app may elect to exclude (i.e. don't eject) the mix dependency
-  by adding it to its `Eject` manifest (see `Eject.Manifest`).
-
-  Options include:
-    - `mix_deps: atom | [atom]` - other mix dependencies that the mix requires (i.e. nested dependencies).
-      Note that each nested dependency itself must also have an entry on the "top" level of the list.
-  """
-  @callback mix_deps :: [MixDep.name() | {MixDep.name(), keyword}]
-
-  @doc """
-  Returns a list of tuples, with each tuple containing a file or regex pattern and a transformation function.
-
-  ### Example
-
-      [
-        {
-          ~r/lib\/.+_(worker|cron).ex/,
-          &Modify.worker_cron/2
-        },
-        {
-          "lib/my_app_web/router.ex",
-          &Modify.router/2
-        }
-      ]
-
-  """
-  @callback modify :: [{Path.t() | Regex.t(), (String.t(), Eject.App.t() -> String.t())}]
-
-  @doc """
-  Lists various options or settings that control the ejection process, including:
-
-    - `preserve` - Preserve (i.e. do not delete) the specified root-level files/directories
-      when clearing ejection destination.
-    - `ejected_app` - Specify various rules to apply to the ejected app `lib/` directory files. These
-    are the same "file rules" that can be applied to a lib dep. See `Eject.Rules` for a full list of options.
-
-  """
-  @callback options(Eject.App.t()) :: keyword
-
-  @doc """
-  Returns a keyword list of additional key value pairs available to _all_ ejectable apps.
-
-  As an example, you may want to set the theme based on the name of the ejectable app.
-  In this case, add an 'extra' entry called 'theme', which will then be available through the
-  app struct:
-
-      def extra(app) do
-        theme =
-          case app.name.snake do
-            "work_" <> _ -> :work
-            "personal_" <> _ -> :personal
-            _ -> raise "App name must start with Work or Personal to derive theme."
-          end
-
-        [theme: theme]
-      end
-
-  For app specific pairs, use the `extra` option in the app's manifest. See `Eject.Manifest`.
-  """
-  @callback extra(Eject.App.t()) :: keyword
-
   @type prepare_opt :: {:destination, String.t()}
 
   @doc """
@@ -213,11 +88,11 @@ defmodule Eject do
           "🤖 Please pass in a module name corresponding to a directory in `lib` containing an `eject.exs` file. E.g. Tweeter (received #{inspect(name)})"
     end
 
-    project = project()
+    Mix.Task.run("compile", [])
 
-    project
-    |> Eject.Manifest.eval_and_parse(Macro.underscore(name))
-    |> Eject.App.new!(project, name, opts)
+    config = Eject.Config.build()
+    manifest = Eject.Manifest.eval_and_parse(config, Macro.underscore(name))
+    Eject.App.new!(config, manifest, name, opts)
   end
 
   @doc """
@@ -242,7 +117,11 @@ defmodule Eject do
   # Clear the destination folder where the app will be ejected.
   def clear_destination(app) do
     if File.exists?(app.destination) do
-      preserve = Keyword.get(app.project.module.options(app), :preserve, [])
+      preserve =
+        for {:preserve, filename} <- app.config.plan.__eject__(app) do
+          filename
+        end
+
       preserve = [".git", "deps", "_build" | preserve]
 
       app.destination
@@ -254,10 +133,5 @@ defmodule Eject do
         File.rm_rf(path)
       end)
     end
-  end
-
-  defp project do
-    base_app = Keyword.fetch!(Mix.Project.config(), :app)
-    Eject.Project.from_config_key(base_app)
   end
 end

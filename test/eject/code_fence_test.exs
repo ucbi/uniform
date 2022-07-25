@@ -1,20 +1,24 @@
 defmodule Eject.CodeFenceTest do
-  use ExUnit.Case, async: true
+  use Eject.TestProjectCase
 
-  alias Eject.{App, CodeFence, Manifest, Project}
+  alias Eject.{App, CodeFence, Manifest, Config}
 
   setup do
-    project = %Project{base_app: :test, module: TestApp.Project}
+    config = %Config{
+      mix_project_app: :test,
+      mix_project: TestProject.MixProject,
+      plan: TestProject.Eject.Plan
+    }
 
     manifest =
       Manifest.new!(
-        project,
+        config,
         mix_deps: [:included_mix],
         lib_deps: [:included_lib],
         extra: []
       )
 
-    %{app: App.new!(project, manifest, CodeFenceApp)}
+    %{app: App.new!(config, manifest, CodeFenceApp)}
   end
 
   test "eject:lib", %{app: app} do

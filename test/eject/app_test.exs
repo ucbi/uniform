@@ -1,13 +1,14 @@
 defmodule Eject.AppTest do
-  use ExUnit.Case, async: true
+  use Eject.TestProjectCase
   doctest Eject.App, import: true
 
-  alias Eject.{Project, Manifest, App, LibDep, MixDep}
+  alias Eject.{Config, Manifest, App, LibDep, MixDep}
 
   test "new!/3" do
-    project = %Project{
-      base_app: :test_app,
-      module: TestApp.Project,
+    config = %Config{
+      mix_project_app: :test_project,
+      mix_project: TestProject.MixProject,
+      plan: TestProject.Eject.Plan,
       destination: "/Users/me/code"
     }
 
@@ -16,24 +17,24 @@ defmodule Eject.AppTest do
       extra: [some_data: "from eject.exs"]
     }
 
-    %App{} = app = App.new!(project, manifest, Tweeter)
+    %App{} = app = App.new!(config, manifest, Tweeter)
 
     assert app.name == %{
              module: Tweeter,
-             web_module: TweeterWeb,
-             kebab: "tweeter",
-             snake: "tweeter",
-             pascal: "Tweeter"
+             hyphen: "tweeter",
+             underscore: "tweeter",
+             camel: "Tweeter"
            }
 
-    assert app.project == %Project{
-             base_app: :test_app,
-             module: TestApp.Project,
+    assert app.config == %Config{
+             mix_project_app: :test_project,
+             mix_project: TestProject.MixProject,
+             plan: TestProject.Eject.Plan,
              destination: "/Users/me/code"
            }
 
     assert app.destination == "/Users/me/code/tweeter"
-    assert app.extra == [some_data: "from eject.exs"]
+    assert app.extra == [company: :fake_co, logo_file: "pixel", some_data: "from eject.exs"]
 
     assert %LibDep{mix_deps: [:included_mix], lib_deps: [:indirectly_included_lib, :with_only]} =
              app.deps.lib.included_lib
@@ -49,16 +50,27 @@ defmodule Eject.AppTest do
              :with_only
            ]
 
-    assert app.deps.included.mix == [:included_mix, :indirectly_included_mix]
+    assert app.deps.included.mix == [
+             :always_included_mix,
+             :included_mix,
+             :indirectly_included_mix
+           ]
 
     assert app.deps.all.lib == [
              :always_included_lib,
+             :eject,
              :excluded_lib,
              :included_lib,
              :indirectly_included_lib,
+             :tweeter,
              :with_only
            ]
 
-    assert app.deps.all.mix == [:excluded_mix, :included_mix, :indirectly_included_mix]
+    assert app.deps.all.mix == [
+             :always_included_mix,
+             :excluded_mix,
+             :included_mix,
+             :indirectly_included_mix
+           ]
   end
 end

@@ -1,5 +1,5 @@
 # 1 + 1 = <%= 1 + 1 %>
-# App name is <%= app.name.snake %>
+# App name is <%= app.name.underscore %>
 
 <%= if depends_on?.(app, :mix, :included_mix) do %>
   # Depends on included_mix

@@ -4,23 +4,47 @@ defmodule Eject.File do
 
   An `t:Eject.File.t/0` can be any of the following:
 
-  - A text file to copy (such as a `.ex`, `.exs`, or `.json` file)
-  - A directory to copy
+  - A text file to copy with modifications (such as a `.ex`, `.exs`, or `.json` file)
+  - A file to copy without modifications (such as a `.png` file)
+  - A directory to copy without modifications
   - An EEx template used to generate a file
-  - A binary file to copy
 
   """
 
-  alias Eject.{App, CodeFence, Manifest, MixExs, Rules}
+  alias Eject.{App, CodeFence, Manifest, Rules}
 
   defstruct [:type, :source, :destination, :chmod]
 
+  @typedoc """
+  A file to be ejected. (In true POSIX form, may be a directory, in which case the full contents are copied.)
+  """
   @type t :: %__MODULE__{
-          type: :text | :template | :dir | :binary,
+          type: :text | :template | :cp_r | :cp,
           source: Path.t(),
           destination: Path.t(),
           chmod: nil | non_neg_integer
         }
+
+  #
+  # Functions for creating a File struct
+  #
+
+  def new(type, %App{} = app, source, rules \\ nil)
+      when type in [:text, :template, :cp, :cp_r] and is_binary(source) do
+    path =
+      source
+      # call target_path callback, giving the developer a chance to modify the final path
+      |> app.config.plan.target_path(app)
+      |> String.replace(to_string(app.config.mix_project_app), app.name.underscore)
+
+    struct!(
+      __MODULE__,
+      type: type,
+      source: source,
+      destination: Path.join(app.destination, path),
+      chmod: rules && rules.chmod
+    )
+  end
 
   #
   # Functions for gathering all Eject.Files for a given app
@@ -32,18 +56,33 @@ defmodule Eject.File do
     # for our purposes, we keep `app_lib_files` last since sometimes the
     # ejected app wants to override phoenix-ish files in `lib/app_name_web`
     # (See `error_view.ex`)
-    base_files(app) ++
+    hardcoded_base_files(app) ++
+      base_files(app) ++
       lib_dep_files(app) ++
       app_lib_files(app)
   end
 
-  @doc "Returns `base` ejectables for the app."
-  @spec base_files(App.t()) :: [t]
+  # Returns all files specified with file/template/cp/cp_r in the `eject` macro
   def base_files(app) do
-    project = app.project.module
-    base_files = app |> project.base_files() |> List.flatten()
+    app
+    |> app.config.plan.__eject__()
+    |> Enum.flat_map(fn item ->
+      case item do
+        {type, {path_or_paths, opts}} when type in [:text, :template, :cp, :cp_r] ->
+          rules = Rules.new(opts)
+          for path <- List.wrap(path_or_paths), do: new(type, app, path, rules)
 
-    base_files =
+        _ ->
+          []
+      end
+    end)
+    |> Enum.reject(&is_nil/1)
+  end
+
+  # Returns hardcoded base files that don't need to be specified
+  @spec hardcoded_base_files(App.t()) :: [t]
+  defp hardcoded_base_files(app) do
+    files =
       [
         "mix.exs",
         "mix.lock",
@@ -52,109 +91,62 @@ defmodule Eject.File do
         "test/test_helper.exs"
       ]
       |> Enum.filter(&File.exists?/1)
-      |> Enum.concat(base_files)
 
-    for file <- base_files, not is_nil(file) do
-      {type, path, opts} =
-        case file do
-          {type, path, opts} when is_atom(type) and is_binary(path) -> {type, path, opts}
-          {type, path} when is_atom(type) and is_binary(path) -> {type, path, []}
-          {path, opts} when is_binary(path) -> {nil, path, opts}
-          path -> {nil, path, []}
-        end
-
-      type = type || detect_base_file_type(path)
-      file_rules = Rules.new(opts)
-      destination = destination(path, app, file_rules)
-      %Eject.File{type: type, source: path, destination: destination, chmod: file_rules.chmod}
-    end
+    for path <- files, do: new(:text, app, path)
   end
 
-  # extensions of binary files; these will not go through text-file
-  # transformations but will instead be copied over with a `cp` system call
-  @binary_extensions ["ico", "jpg", "bmp", "png"]
-
-  defp detect_base_file_type(path) do
-    if File.dir?(path) do
-      :dir
-    else
-      if Path.extname(path) in @binary_extensions do
-        :binary
-      else
-        :text
-      end
-    end
-  end
-
-  @doc "Returns `lib/my_app` ejectables for the app."
+  # Returns `lib/my_app` ejectables for the app
   @spec app_lib_files(App.t()) :: [t]
-  def app_lib_files(app) do
-    manifest_path = Manifest.manifest_path(app.name.snake)
-    project = app.project.module
+  defp app_lib_files(app) do
+    manifest_path = Manifest.manifest_path(app.name.underscore)
 
     file_rules =
       app
-      |> project.options()
-      |> Keyword.get(:ejected_app, [])
+      |> app.config.plan.__eject__()
       # never eject the Eject manifest
       |> Keyword.update(:except, [manifest_path], fn except -> [manifest_path | except] end)
+      |> Keyword.take([:except])
       |> Rules.new()
 
-    for path <- lib_dir_files(app.name.snake, file_rules) do
-      %Eject.File{type: :text, source: path, destination: destination(path, app, file_rules)}
-    end
+    lib_dir_files(app, app.name.underscore, file_rules)
   end
 
-  @doc "Returns LibDeps as ejectables."
+  # Returns all files required by all the lib deps of this app
   @spec lib_dep_files(App.t()) :: [t]
-  def lib_dep_files(app) do
+  defp lib_dep_files(app) do
     Enum.flat_map(app.deps.lib, fn {_, lib_dep} ->
-      for path <- lib_dir_files(to_string(lib_dep.name), lib_dep.file_rules) do
-        %Eject.File{
-          type: :text,
-          source: path,
-          destination: destination(path, app, lib_dep.file_rules),
-          chmod: lib_dep.file_rules.chmod
-        }
-      end
+      lib_dir_files(app, to_string(lib_dep.name), lib_dep.file_rules)
     end)
   end
 
   # Given a directory, return which paths to eject based on the rules
   # associated with that directory. Includes files in `lib/<lib_dir>`
   # as well as `test/<lib_dir>`
-  defp lib_dir_files(lib_dir, %Rules{associated_files: extra, only: only, except: except}) do
-    # location of lib and test directories is configurable for testing
+  @spec lib_dir_files(App.t(), String.t(), Rules.t()) :: [Eject.File.t()]
+  defp lib_dir_files(
+         app,
+         lib_dir,
+         %Rules{only: only, except: except} = rules
+       ) do
+    # location of lib and test cp_r is configurable for testing
     paths = Path.wildcard("lib/#{lib_dir}/**")
     paths = paths ++ Path.wildcard("test/#{lib_dir}/**")
     paths = if only, do: Enum.filter(paths, &filter_path(&1, only)), else: paths
     paths = if except, do: Enum.reject(paths, &filter_path(&1, except)), else: paths
-    paths = if extra, do: List.flatten(extra) ++ paths, else: paths
-    Enum.reject(paths, &File.dir?/1)
-  end
+    paths = Enum.reject(paths, &File.dir?/1)
 
-  defp destination(path, app, file_rules) do
-    destination_relative_path =
-      if lib_dir = file_rules.lib_directory do
-        if dir = lib_dir.(app, path) do
-          path
-          |> String.replace(~r/^lib\/[^\/]+\//, "lib/#{dir}/")
-          |> String.replace(to_string(app.project.base_app), app.name.snake)
-        else
-          path
+    lib_files = for path <- paths, do: new(:text, app, path, rules)
+
+    associated_files =
+      Enum.flat_map(
+        rules.associated_files || [],
+        fn {type, {path_or_paths, opts}} ->
+          rules = Rules.new(opts)
+          for path <- List.wrap(path_or_paths), do: new(type, app, path, rules)
         end
-      else
-        path
-      end
-
-    relative_path =
-      String.replace(
-        destination_relative_path,
-        to_string(app.project.base_app),
-        app.name.snake
       )
 
-    Path.join(app.destination, relative_path)
+    lib_files ++ associated_files
   end
 
   # returns true if any of the given regexes match or strings match exactly
@@ -196,24 +188,24 @@ defmodule Eject.File do
 
     # write the file
     case type do
-      :dir ->
+      :cp_r ->
         File.cp_r!(Path.expand(source), destination)
 
-      :binary ->
+      :cp ->
         File.cp!(Path.expand(source), destination)
 
       t when t in [:text, :template] ->
         contents =
           case t do
             :template ->
-              template_dir = app.project.module.__templates__()
+              template_dir = app.config.plan.__template_dir__()
 
               if !template_dir do
-                raise "`use Eject, templates: \"...\"` must specify a templates directory"
+                raise "`use Eject.Path, templates: \"...\"` must specify a templates directory"
               end
 
               if !File.dir?(Path.expand(template_dir)) do
-                raise "String given to `use Eject, templates: \"...\"` is not a directory (Expands to #{Path.expand(template_dir)})"
+                raise "String given to `use Eject.Path, templates: \"...\"` is not a directory (Expands to #{Path.expand(template_dir)})"
               end
 
               EEx.eval_file(
@@ -226,18 +218,18 @@ defmodule Eject.File do
               File.read!(Path.expand(source))
           end
 
-        snake = to_string(app.project.base_app)
+        underscore = to_string(app.config.mix_project_app)
 
         transformed =
           contents
           # apply specified transformations in `Project.modify`
           |> apply_modifiers(source, app)
           # replace `base_project_name` with `ejected_app_name`
-          |> String.replace(snake, app.name.snake)
+          |> String.replace(underscore, app.name.underscore)
           # replace `base-project-name` with `ejected-app-name`
-          |> String.replace(String.replace(snake, "_", "-"), app.name.kebab)
+          |> String.replace(String.replace(underscore, "_", "-"), app.name.hyphen)
           # replace `BaseProjectName` with `EjectedAppName`
-          |> String.replace(Macro.camelize(snake), app.name.pascal)
+          |> String.replace(Macro.camelize(underscore), app.name.camel)
           |> CodeFence.apply_fences(app)
 
         File.write!(destination, transformed)
@@ -249,14 +241,15 @@ defmodule Eject.File do
     end
   end
 
-  defp apply_modifiers(contents, relative_path, app) do
-    project = app.project.module
-    modifiers = project.modify()
-    modifiers = [{"mix.exs", &MixExs.remove_unused_deps/2} | modifiers]
+  @default_modifier {"mix.exs", {Eject.Modifiers, :remove_unused_mix_deps}}
 
-    Enum.reduce(modifiers, contents, fn {path_or_regex, modifier}, contents ->
+  defp apply_modifiers(contents, relative_path, app) do
+    modifiers = app.config.plan.__modifiers__()
+    modifiers = [@default_modifier | modifiers]
+
+    Enum.reduce(modifiers, contents, fn {path_or_regex, {module, function}}, contents ->
       if apply_modifier?(path_or_regex, relative_path) do
-        modifier.(contents, app)
+        apply(module, function, [contents, app])
       else
         contents
       end

@@ -1,6 +1,6 @@
-defmodule TestApp.Included do
+defmodule TestProject.Included do
   # comments containing base project name in all replaced formats:
-  # TestApp
-  # test_app
-  # test-app
+  # TestProject
+  # test_project
+  # test-project
 end

@@ -3,8 +3,8 @@ defmodule Eject.Manifest do
   A struct containing the `Eject` manifest for an app, parsed from `lib/<my_ejectable_app>/eject.exs`.
 
   The `eject.exs` manifest specifies required dependencies and configuration values:
-    - `mix_deps` - mix dependencies; each must exist in the `c:Eject.mix_deps/0` callback implementation.
-    - `lib_deps` - lib dependencies; each must exist in the `c:Eject.lib_deps/0` callback implementation.
+    - `mix_deps` - mix dependencies; each must exist in `mix.exs`.
+    - `lib_deps` - lib dependencies; each must exist as a folder in `lib/`.
     - `extra` - additional key value pairs specific to the ejectable app. For 'global' values available
       to _all_ ejectable apps, use the `c:Eject.extra/1` callback implementation.
 
@@ -29,7 +29,7 @@ defmodule Eject.Manifest do
   """
   defstruct mix_deps: [], lib_deps: [], extra: []
 
-  alias Eject.{Project, LibDep, MixDep}
+  alias Eject.{Config, LibDep, MixDep}
 
   @typedoc "A struct containing the `Eject` manifest for an app."
   @type t :: %__MODULE__{
@@ -39,18 +39,18 @@ defmodule Eject.Manifest do
         }
 
   @doc "Loads a manifest file into a `%Manifest{}` struct."
-  @spec eval_and_parse(Project.t(), String.t() | atom) :: t
-  def eval_and_parse(project, app_name_snake_case) do
-    new!(project, eval(app_name_snake_case))
+  @spec eval_and_parse(Config.t(), String.t() | atom) :: t
+  def eval_and_parse(config, app_name_underscore_case) do
+    new!(config, eval(app_name_underscore_case))
   end
 
   @doc "Initializes a new `%Manifest{}` struct."
-  @spec new!(Project.t(), keyword) :: t
-  def new!(%Project{} = project, params) when is_list(params) do
+  @spec new!(Config.t(), keyword) :: t
+  def new!(%Config{} = config, params) when is_list(params) do
     manifest = struct!(__MODULE__, params)
 
-    lib_deps = Map.keys(Project.lib_deps(project))
-    mix_deps = Map.keys(Project.mix_deps(project))
+    lib_deps = Map.keys(Config.lib_deps(config))
+    mix_deps = Map.keys(Config.mix_deps(config))
     missing_lib_deps = Enum.filter(manifest.lib_deps, &(&1 not in lib_deps))
     missing_mix_deps = Enum.filter(manifest.mix_deps, &(&1 not in mix_deps))
 
@@ -71,18 +71,20 @@ defmodule Eject.Manifest do
     manifest
   end
 
-  def new!(_project, _) do
+  def new!(_config, _) do
     raise "eject.exs should contain a keyword list"
   end
 
-  defp eval(app_name_snake_case) do
-    manifest_path = manifest_path(app_name_snake_case)
+  defp eval(app_name_underscore_case) do
+    manifest_path = manifest_path(app_name_underscore_case)
 
     if File.exists?(manifest_path) do
       {manifest, _bindings} = Code.eval_file(manifest_path)
       manifest
     else
-      raise Eject.NotEjectableError, app_name: app_name_snake_case, manifest_path: manifest_path
+      raise Eject.NotEjectableError,
+        app_name: app_name_underscore_case,
+        manifest_path: manifest_path
     end
   end
 
@@ -96,7 +98,7 @@ defmodule Eject.Manifest do
 
   """
   @spec manifest_path(String.t() | atom) :: String.t()
-  def manifest_path(app_name_snake_case) do
-    "lib/#{app_name_snake_case}/eject.exs"
+  def manifest_path(app_name_underscore_case) do
+    "lib/#{app_name_underscore_case}/eject.exs"
   end
 end

@@ -1,0 +1,1 @@
+this lib directly is indirectly included because it's a dependency of included_lib

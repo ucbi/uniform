@@ -4,18 +4,49 @@ defmodule Eject.App do
   """
 
   alias __MODULE__
-  alias Eject.{Deps, Manifest, Project}
+  alias Eject.{Manifest, Config, LibDep, MixDep}
 
-  defstruct [:project, :name, :destination, :deps, :extra]
+  defstruct [:config, :name, :destination, :deps, :extra]
+
+  defmodule Deps do
+    @moduledoc """
+    A struct containing all dependencies associated with an ejectable app.
+
+    Intended to be attached to the `deps` field of `t:Eject.App.t/0`.
+
+      - `:lib` – all included `%LibDeps{}`
+      - `:mix` – all included `%MixDeps{}`
+      - `:included` – all included lib and mix deps as atom names (same as pulling keys from above structs)
+      - `:all` – *all* mix and lib dep names that _could_ be included in an
+        app. The `all` field helps identify and warn on references to mix or
+        lib deps that are not in `mix.exs` or `lib/`.
+    """
+
+    defstruct [:lib, :mix, :included, :all]
+
+    alias Eject.{LibDep, MixDep, Manifest, Config}
+
+    @type t :: %__MODULE__{
+            lib: %{LibDep.name() => LibDep.t()},
+            mix: %{MixDep.name() => MixDep.t()},
+            included: %{
+              lib: [LibDep.name()],
+              mix: [MixDep.name()]
+            },
+            all: %{
+              lib: [LibDep.name()],
+              mix: [MixDep.name()]
+            }
+          }
+  end
 
   @type t :: %__MODULE__{
-          project: Project.t(),
+          config: Config.t(),
           name: %{
             module: module,
-            web_module: module,
-            kebab: String.t(),
-            snake: String.t(),
-            pascal: String.t()
+            hyphen: String.t(),
+            underscore: String.t(),
+            camel: String.t()
           },
           destination: Path.t(),
           deps: Deps.t(),
@@ -29,16 +60,15 @@ defmodule Eject.App do
 
   ### Example
 
-      new!(project, manifest, Tweeter)
+      new!(config, manifest, Tweeter)
 
       %Eject.App{
-        project: %Project{...},
+        config: %Config{...},
         name: %{
           module: Tweeter,
-          web_module: TweeterWeb,
-          kebab: "tweeter",
-          snake: "tweeter",
-          pascal: "Tweeter"
+          hyphen: "tweeter",
+          underscore: "tweeter",
+          camel: "Tweeter"
         },
         destination: "...",
         deps: %Deps{
@@ -63,29 +93,26 @@ defmodule Eject.App do
       }
 
   """
-  @spec new!(Project.t(), Manifest.t(), atom) :: t
-  @spec new!(Project.t(), Manifest.t(), atom, [new_opt]) :: t
-  def new!(%Project{} = project, %Manifest{} = manifest, name, opts \\ []) when is_atom(name) do
-    "Elixir." <> app_name_pascal_case = to_string(name)
-    app_name_snake_case = Macro.underscore(name)
-    deps = Deps.discover!(project, manifest)
+  @spec new!(Config.t(), Manifest.t(), atom) :: t
+  @spec new!(Config.t(), Manifest.t(), atom, [new_opt]) :: t
+  def new!(%Config{} = config, %Manifest{} = manifest, name, opts \\ []) when is_atom(name) do
+    "Elixir." <> app_name_camel_case = to_string(name)
+    app_name_underscore_case = Macro.underscore(name)
 
     app = %App{
-      project: project,
+      config: config,
       name: %{
         module: name,
-        # credo:disable-for-next-line Credo.Check.Warning.UnsafeToAtom
-        web_module: String.to_atom("Elixir." <> app_name_pascal_case <> "Web"),
-        pascal: app_name_pascal_case,
-        snake: app_name_snake_case,
-        kebab: String.replace(app_name_snake_case, "_", "-")
+        camel: app_name_camel_case,
+        underscore: app_name_underscore_case,
+        hyphen: String.replace(app_name_underscore_case, "_", "-")
       },
-      destination: destination(app_name_snake_case, project, opts),
-      deps: deps
+      destination: destination(app_name_underscore_case, config, opts),
+      deps: deps(config, manifest)
     }
 
     # `extra/1` requires an app struct
-    %{app | extra: Keyword.merge(project.module.extra(app), manifest.extra)}
+    %{app | extra: Keyword.merge(config.plan.extra(app), manifest.extra)}
   end
 
   @doc """
@@ -125,14 +152,105 @@ defmodule Eject.App do
     dep_name in app.deps.included[category]
   end
 
-  defp destination(app_name_snake_case, project, opts) do
+  defp destination(app_name_underscore_case, config, opts) do
     destination =
-      case {project.destination, opts[:destination]} do
-        {nil, nil} -> "../" <> app_name_snake_case
+      case {config.destination, opts[:destination]} do
+        {nil, nil} -> "../" <> app_name_underscore_case
         {nil, opt} -> opt
-        {config, nil} -> Path.join(config, app_name_snake_case)
+        {config, nil} -> Path.join(config, app_name_underscore_case)
       end
 
     Path.expand(destination)
+  end
+
+  @doc """
+  Given a manifest struct, returns a `%Deps{}` struct containing
+  information about lib and mix dependencies.
+  """
+  @spec deps(Config.t(), Manifest.t()) :: t
+  def deps(config, manifest) do
+    all_libs = Config.lib_deps(config)
+    all_mixs = Config.mix_deps(config)
+    included_libs = included_libs(manifest, all_libs)
+    included_mixs = included_mixs(manifest, included_libs, all_mixs)
+
+    %Deps{
+      lib: included_libs,
+      mix: included_mixs,
+      included: %{
+        lib: Map.keys(included_libs),
+        mix: Map.keys(included_mixs)
+      },
+      all: %{
+        lib: Map.keys(all_libs),
+        mix: Map.keys(all_mixs)
+      }
+    }
+  end
+
+  @spec included_libs(Manifest.t(), %{atom => LibDep.t()}) :: %{atom => LibDep.t()}
+  defp included_libs(manifest, all) do
+    root_deps =
+      all
+      |> Enum.filter(fn {_, lib_dep} -> lib_dep.always || lib_dep.name in manifest.lib_deps end)
+      |> Enum.into(%{})
+
+    root_deps
+    |> Map.values()
+    |> Enum.reduce(root_deps, &gather_child_deps(&1, :lib_deps, &2, all))
+  end
+
+  @spec included_mixs(Manifest.t(), %{atom => LibDep.t()}, %{atom => MixDep.t()}) :: %{
+          atom => MixDep.t()
+        }
+  defp included_mixs(manifest, included_libs, all_mixs) do
+    root_deps =
+      all_mixs
+      |> Enum.filter(fn {_, mix_dep} -> mix_dep.always || mix_dep.name in manifest.mix_deps end)
+      |> Enum.into(%{})
+
+    # gather nested mix deps required by manifest
+    root_deps =
+      root_deps
+      |> Enum.map(fn {_name, dep} -> dep end)
+      |> Enum.reduce(
+        root_deps,
+        &gather_child_deps(&1, :mix_deps, &2, all_mixs)
+      )
+
+    # gather mix deps required by lib deps, which have already been flattened
+    included_libs
+    |> Map.values()
+    |> Enum.reduce(root_deps, &gather_child_deps(&1, :mix_deps, &2, all_mixs))
+  end
+
+  @type dep :: LibDep.t() | MixDep.t()
+  @spec gather_child_deps(dep, :lib_deps | :mix_deps, %{atom => dep}, %{atom => dep}) :: %{
+          atom => dep
+        }
+  defp gather_child_deps(dep, children_field, gathered, all_of_type) do
+    dep
+    |> Map.get(children_field, [])
+    |> Enum.reduce(gathered, fn child_name, gathered ->
+      if Map.has_key?(gathered, child_name) do
+        # already gathered this one
+        gathered
+      else
+        if Map.has_key?(all_of_type, child_name) do
+          nested_dep = all_of_type[child_name]
+          gathered = Map.put(gathered, child_name, nested_dep)
+          # recurse to ensure we capture infinite potential levels of nesting
+          gather_child_deps(nested_dep, children_field, gathered, all_of_type)
+        else
+          type =
+            case dep do
+              %LibDep{} -> :lib
+              %MixDep{} -> :mix
+            end
+
+          raise "Could not find #{type} dependency #{child_name} which is a dependency of #{dep.name}"
+        end
+      end
+    end)
   end
 end

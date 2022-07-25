@@ -1,13 +1,17 @@
 defmodule Eject.ManifestTest do
-  use ExUnit.Case, async: true
+  use Eject.TestProjectCase
   doctest Eject.Manifest, import: true
 
-  alias Eject.{Manifest, Project}
+  alias Eject.{Manifest, Config}
 
   test "new!/2 creates a new Manifest struct" do
     result =
       Manifest.new!(
-        %Project{base_app: :test, module: TestApp.Project},
+        %Config{
+          mix_project_app: :test,
+          mix_project: TestProject.MixProject,
+          plan: TestProject.Eject.Plan
+        },
         mix_deps: [:included_mix],
         lib_deps: [:included_lib],
         extra: [foo: [bar: [baz: :qux]]]
@@ -21,14 +25,18 @@ defmodule Eject.ManifestTest do
   end
 
   test "new!/2 raises if mix_deps or lib_deps contain unspecified deps" do
-    project = %Project{base_app: :test, module: TestApp.Project}
+    config = %Config{
+      mix_project_app: :test,
+      mix_project: TestProject.MixProject,
+      plan: TestProject.Eject.Plan
+    }
 
     assert_raise ArgumentError, fn ->
-      Manifest.new!(project, mix_deps: [:unspecified_mix_dep], lib_deps: [], extra: [])
+      Manifest.new!(config, mix_deps: [:unspecified_mix_dep], lib_deps: [], extra: [])
     end
 
     assert_raise ArgumentError, fn ->
-      Manifest.new!(project, mix_deps: [], lib_deps: [:unspecified_lib_dep], extra: [])
+      Manifest.new!(config, mix_deps: [], lib_deps: [:unspecified_lib_dep], extra: [])
     end
   end
 end
