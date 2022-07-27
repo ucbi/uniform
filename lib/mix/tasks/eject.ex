@@ -66,7 +66,7 @@ defmodule Mix.Tasks.Eject do
     IO.puts("")
     IO.puts("🤖 Mix Dependencies")
 
-    app.deps.included.mix
+    app.internal.deps.included.mix
     |> Enum.chunk_every(6)
     |> Enum.each(fn mix_deps ->
       IO.puts("   " <> Enum.join(mix_deps, " "))
@@ -75,7 +75,7 @@ defmodule Mix.Tasks.Eject do
     IO.puts("")
     IO.puts("🤓 Lib Dependencies")
 
-    app.deps.included.lib
+    app.internal.deps.included.lib
     |> Enum.chunk_every(6)
     |> Enum.each(fn lib_deps ->
       IO.puts("   " <> Enum.join(lib_deps, " "))

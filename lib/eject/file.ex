@@ -34,8 +34,8 @@ defmodule Eject.File do
     path =
       source
       # call target_path callback, giving the developer a chance to modify the final path
-      |> app.config.plan.target_path(app)
-      |> String.replace(to_string(app.config.mix_project_app), app.name.underscore)
+      |> app.internal.config.plan.target_path(app)
+      |> String.replace(to_string(app.internal.config.mix_project_app), app.name.underscore)
 
     struct!(
       __MODULE__,
@@ -65,7 +65,7 @@ defmodule Eject.File do
   # Returns all files specified with file/template/cp/cp_r in the `eject` macro
   def base_files(app) do
     app
-    |> app.config.plan.__eject__()
+    |> app.internal.config.plan.__eject__()
     |> Enum.flat_map(fn item ->
       case item do
         {type, {path_or_paths, opts}} when type in [:text, :template, :cp, :cp_r] ->
@@ -102,7 +102,7 @@ defmodule Eject.File do
 
     file_rules =
       app
-      |> app.config.plan.__eject__()
+      |> app.internal.config.plan.__eject__()
       # never eject the Eject manifest
       |> Keyword.update(:except, [manifest_path], fn except -> [manifest_path | except] end)
       |> Keyword.take([:except])
@@ -114,7 +114,7 @@ defmodule Eject.File do
   # Returns all files required by all the lib deps of this app
   @spec lib_dep_files(App.t()) :: [t]
   defp lib_dep_files(app) do
-    Enum.flat_map(app.deps.lib, fn {_, lib_dep} ->
+    Enum.flat_map(app.internal.deps.lib, fn {_, lib_dep} ->
       lib_dir_files(app, to_string(lib_dep.name), lib_dep.file_rules)
     end)
   end
@@ -198,7 +198,7 @@ defmodule Eject.File do
         contents =
           case t do
             :template ->
-              template_dir = app.config.plan.__template_dir__()
+              template_dir = app.internal.config.plan.__template_dir__()
 
               if !template_dir do
                 raise "`use Eject.Path, templates: \"...\"` must specify a templates directory"
@@ -218,7 +218,7 @@ defmodule Eject.File do
               File.read!(Path.expand(source))
           end
 
-        underscore = to_string(app.config.mix_project_app)
+        underscore = to_string(app.internal.config.mix_project_app)
 
         transformed =
           contents
@@ -244,7 +244,7 @@ defmodule Eject.File do
   @default_modifier {"mix.exs", {Eject.Modifiers, :remove_unused_mix_deps}}
 
   defp apply_modifiers(contents, relative_path, app) do
-    modifiers = app.config.plan.__modifiers__()
+    modifiers = app.internal.config.plan.__modifiers__()
     modifiers = [@default_modifier | modifiers]
 
     Enum.reduce(modifiers, contents, fn {path_or_regex, {module, function}}, contents ->

@@ -6,7 +6,8 @@ defmodule Eject.App do
   alias __MODULE__
   alias Eject.{Manifest, Config, LibDep, MixDep}
 
-  defstruct [:config, :name, :destination, :deps, :extra]
+  @derive {Inspect, except: [:internal]}
+  defstruct [:internal, :name, :destination, :extra]
 
   defmodule Deps do
     @moduledoc """
@@ -51,7 +52,7 @@ defmodule Eject.App do
           extra: keyword
         }
 
-  @type new_opt :: {:destination, String.t()}
+  @typep new_opt :: {:destination, String.t()}
 
   @doc """
        Initializes a new `%App{}` struct.
@@ -98,7 +99,10 @@ defmodule Eject.App do
     app_name_underscore_case = Macro.underscore(name)
 
     app = %App{
-      config: config,
+      internal: %{
+        config: config,
+        deps: deps(config, manifest)
+      },
       name: %{
         module: name,
         camel: app_name_camel_case,
@@ -106,7 +110,6 @@ defmodule Eject.App do
         hyphen: String.replace(app_name_underscore_case, "_", "-")
       },
       destination: destination(app_name_underscore_case, config, opts),
-      deps: deps(config, manifest)
     }
 
     # `extra/1` requires an app struct
@@ -120,9 +123,11 @@ defmodule Eject.App do
 
       iex> depends_on?(
       ...>   %Eject.App{
-      ...>     deps: %{
-      ...>       included: %{
-      ...>         mix: [:some_included_mix_dep]
+      ...>     internal: %{
+      ...>       deps: %{
+      ...>         included: %{
+      ...>           mix: [:some_included_mix_dep]
+      ...>         }
       ...>       }
       ...>     }
       ...>   },
@@ -132,14 +137,14 @@ defmodule Eject.App do
       true
 
       iex> depends_on?(
-      ...>   %Eject.App{deps: %{included: %{mix: [:included]}}},
+      ...>   %Eject.App{internal: %{deps: %{included: %{mix: [:included]}}}},
       ...>   :mix,
       ...>   :not_included_dep
       ...> )
       false
 
       iex> depends_on?(
-      ...>   %Eject.App{deps: %{included: %{lib: [:some_included_lib]}}},
+      ...>   %Eject.App{internal: %{deps: %{included: %{lib: [:some_included_lib]}}}},
       ...>   :lib,
       ...>   :some_included_lib
       ...> )
@@ -147,7 +152,7 @@ defmodule Eject.App do
 
   """
   def depends_on?(app, category, dep_name) when category in [:lib, :mix] and is_atom(dep_name) do
-    dep_name in app.deps.included[category]
+    dep_name in app.internal.deps.included[category]
   end
 
   defp destination(app_name_underscore_case, config, opts) do
