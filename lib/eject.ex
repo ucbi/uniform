@@ -65,24 +65,24 @@ defmodule Eject do
 
   require Logger
 
-  @type prepare_opt :: {:destination, String.t()}
+  @typep prepare_opt :: {:destination, String.t()}
 
   @doc """
-  Returns a list of ejectable application names.
+       Returns a list of ejectable application names.
 
-  Identified by the existence of a `lib/<my_app>/ejector.exs` file.
+       Identified by the existence of a `lib/<my_app>/ejector.exs` file.
 
-  ### Examples
+       ### Examples
 
-      $ fd eject.exs
-      lib/tweeter/eject.exs
-      lib/trillo/eject.exs
-      lib/hatmail/eject.exs
+           $ fd eject.exs
+           lib/tweeter/eject.exs
+           lib/trillo/eject.exs
+           lib/hatmail/eject.exs
 
-      iex> ejectables()
-      ["Tweeter", "Trillo", "Hatmail"]
+           iex> ejectables()
+           ["Tweeter", "Trillo", "Hatmail"]
 
-  """
+       """ && false
   @spec ejectables :: [String.t()]
   def ejectables do
     "lib/*/eject.exs"
@@ -91,6 +91,7 @@ defmodule Eject do
     |> Enum.sort()
   end
 
+  @doc "Return a list of all ejectable `%App{}`s" && false
   @spec ejectable_apps :: [Eject.App.t()]
   def ejectable_apps do
     for name <- ejectables() do
@@ -101,14 +102,14 @@ defmodule Eject do
   end
 
   @doc """
-  Prepares the `t:Eject.App.t/0` struct with all information needed for ejection.
+       Prepares the `t:Eject.App.t/0` struct with all information needed for ejection.
 
-  When ejecting an app, this step runs prior to the actual `eject/1` process,
-  allowing the user to see pertinent information about what decisions will be made
-  during ejection: (e.g. which dependencies will be included, where on
-  disk the ejected app will be written, etc.). If there is a mistake, the user will
-  have a chance to abort before performing a potentially destructive action.
-  """
+       When ejecting an app, this step runs prior to the actual `eject/1` process,
+       allowing the user to see pertinent information about what decisions will be made
+       during ejection: (e.g. which dependencies will be included, where on
+       disk the ejected app will be written, etc.). If there is a mistake, the user will
+       have a chance to abort before performing a potentially destructive action.
+       """ && false
   @spec prepare(init :: %{name: atom, opts: [prepare_opt]}) :: Eject.App.t()
   def prepare(%{name: name, opts: opts}) do
     if not is_atom(name) do
@@ -125,9 +126,9 @@ defmodule Eject do
   end
 
   @doc """
-  Ejects an app. That is, deletes the files in the destination and copies a fresh
-  set of files for that app.
-  """
+       Ejects an app. That is, deletes the files in the destination and copies a fresh
+       set of files for that app.
+       """ && false
   def eject(app) do
     clear_destination(app)
     Logger.info("📂 #{app.destination}")
@@ -143,7 +144,7 @@ defmodule Eject do
     System.cmd("mix", ["format"], cd: app.destination)
   end
 
-  # Clear the destination folder where the app will be ejected.
+  @doc "Clear the destination folder where the app will be ejected." && false
   def clear_destination(app) do
     if File.exists?(app.destination) do
       preserve =
