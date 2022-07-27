@@ -1,4 +1,6 @@
 defmodule Eject.Modifiers do
+  @moduledoc false
+
   @doc """
   Given the contents of a mix.exs file and an `%App{}`,
   look for the following code fence that should be wrapping the mix deps:

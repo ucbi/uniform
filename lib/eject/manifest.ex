@@ -1,32 +1,33 @@
 defmodule Eject.Manifest do
   @moduledoc """
-  A struct containing the `Eject` manifest for an app, parsed from `lib/<my_ejectable_app>/eject.exs`.
+             A struct containing the `Eject` manifest for an app, parsed from `lib/<my_ejectable_app>/eject.exs`.
 
-  The `eject.exs` manifest specifies required dependencies and configuration values:
-    - `mix_deps` - mix dependencies; each must exist in `mix.exs`.
-    - `lib_deps` - lib dependencies; each must exist as a folder in `lib/`.
-    - `extra` - additional key value pairs specific to the ejectable app. For 'global' values available
-      to _all_ ejectable apps, use the `c:Eject.extra/1` callback implementation.
+             The `eject.exs` manifest specifies required dependencies and configuration values:
+               - `mix_deps` - mix dependencies; each must exist in `mix.exs`.
+               - `lib_deps` - lib dependencies; each must exist as a folder in `lib/`.
+               - `extra` - additional key value pairs specific to the ejectable app. For 'global' values available
+                 to _all_ ejectable apps, use the `c:Eject.extra/1` callback implementation.
 
-  Required for each ejectable app.
+             Required for each ejectable app.
 
-      # Example `eject.exs`
-      [
-        mix_deps: [:ex_aws_s3],
-        lib_deps: [:my_utilities],
-        extra: [
-          sentry: [...],
-          deployment: [
-            target: :heroku,
-            options: [...],
-              buildpacks: [...],
-              addons: [...],
-              domains: [...]
-          ]
-        ]
-      ]
+                 # Example `eject.exs`
+                 [
+                   mix_deps: [:ex_aws_s3],
+                   lib_deps: [:my_utilities],
+                   extra: [
+                     sentry: [...],
+                     deployment: [
+                       target: :heroku,
+                       options: [...],
+                         buildpacks: [...],
+                         addons: [...],
+                         domains: [...]
+                     ]
+                   ]
+                 ]
 
-  """
+             """ && false
+
   defstruct mix_deps: [], lib_deps: [], extra: []
 
   alias Eject.{Config, LibDep, MixDep}

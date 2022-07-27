@@ -10,17 +10,17 @@ defmodule Eject.App do
 
   defmodule Deps do
     @moduledoc """
-    A struct containing all dependencies associated with an ejectable app.
+               A struct containing all dependencies associated with an ejectable app.
 
-    Intended to be attached to the `deps` field of `t:Eject.App.t/0`.
+               Intended to be attached to the `deps` field of `t:Eject.App.t/0`.
 
-      - `:lib` – all included `%LibDeps{}`
-      - `:mix` – all included `%MixDeps{}`
-      - `:included` – all included lib and mix deps as atom names (same as pulling keys from above structs)
-      - `:all` – *all* mix and lib dep names that _could_ be included in an
-        app. The `all` field helps identify and warn on references to mix or
-        lib deps that are not in `mix.exs` or `lib/`.
-    """
+                 - `:lib` – all included `%LibDeps{}`
+                 - `:mix` – all included `%MixDeps{}`
+                 - `:included` – all included lib and mix deps as atom names (same as pulling keys from above structs)
+                 - `:all` – *all* mix and lib dep names that _could_ be included in an
+                   app. The `all` field helps identify and warn on references to mix or
+                   lib deps that are not in `mix.exs` or `lib/`.
+               """ && false
 
     defstruct [:lib, :mix, :included, :all]
 
@@ -41,7 +41,6 @@ defmodule Eject.App do
   end
 
   @type t :: %__MODULE__{
-          config: Config.t(),
           name: %{
             module: module,
             hyphen: String.t(),
@@ -49,50 +48,49 @@ defmodule Eject.App do
             camel: String.t()
           },
           destination: Path.t(),
-          deps: Deps.t(),
           extra: keyword
         }
 
   @type new_opt :: {:destination, String.t()}
 
   @doc """
-  Initializes a new `%App{}` struct.
+       Initializes a new `%App{}` struct.
 
-  ### Example
+       ### Example
 
-      new!(config, manifest, Tweeter)
+           new!(config, manifest, Tweeter)
 
-      %Eject.App{
-        config: %Config{...},
-        name: %{
-          module: Tweeter,
-          hyphen: "tweeter",
-          underscore: "tweeter",
-          camel: "Tweeter"
-        },
-        destination: "...",
-        deps: %Deps{
-          lib: %{
-            included_lib: %LibDep{...},
-            indirectly_included_lib: %LibDep{...}
-          },
-          mix: %{
-            included_mix: %MixDep{...},
-            indirectly_included_mix: %MixDep{...}
-          },
-          included: %{
-            lib: [:included_lib, :indirectly_included_lib],
-            mix: [:included_mix, :indirectly_included_mix]
-          },
-          all: %{
-            lib: [:excluded_lib, :included_lib, :indirectly_included_lib],
-            mix: [:excluded_mix, :included_mix, :indirectly_included_mix]
-          }
-        },
-        extra: [...]
-      }
+           %Eject.App{
+             config: %Config{...},
+             name: %{
+               module: Tweeter,
+               hyphen: "tweeter",
+               underscore: "tweeter",
+               camel: "Tweeter"
+             },
+             destination: "...",
+             deps: %Deps{
+               lib: %{
+                 included_lib: %LibDep{...},
+                 indirectly_included_lib: %LibDep{...}
+               },
+               mix: %{
+                 included_mix: %MixDep{...},
+                 indirectly_included_mix: %MixDep{...}
+               },
+               included: %{
+                 lib: [:included_lib, :indirectly_included_lib],
+                 mix: [:included_mix, :indirectly_included_mix]
+               },
+               all: %{
+                 lib: [:excluded_lib, :included_lib, :indirectly_included_lib],
+                 mix: [:excluded_mix, :included_mix, :indirectly_included_mix]
+               }
+             },
+             extra: [...]
+           }
 
-  """
+       """ && false
   @spec new!(Config.t(), Manifest.t(), atom) :: t
   @spec new!(Config.t(), Manifest.t(), atom, [new_opt]) :: t
   def new!(%Config{} = config, %Manifest{} = manifest, name, opts \\ []) when is_atom(name) do
@@ -163,12 +161,10 @@ defmodule Eject.App do
     Path.expand(destination)
   end
 
-  @doc """
-  Given a manifest struct, returns a `%Deps{}` struct containing
-  information about lib and mix dependencies.
-  """
+  # Given a manifest struct, returns a `%Deps{}` struct containing
+  # information about lib and mix dependencies.
   @spec deps(Config.t(), Manifest.t()) :: t
-  def deps(config, manifest) do
+  defp deps(config, manifest) do
     all_libs = Config.lib_deps(config)
     all_mixs = Config.mix_deps(config)
     included_libs = included_libs(manifest, all_libs)
@@ -224,7 +220,8 @@ defmodule Eject.App do
     |> Enum.reduce(root_deps, &gather_child_deps(&1, :mix_deps, &2, all_mixs))
   end
 
-  @type dep :: LibDep.t() | MixDep.t()
+  @typep dep :: LibDep.t() | MixDep.t()
+
   @spec gather_child_deps(dep, :lib_deps | :mix_deps, %{atom => dep}, %{atom => dep}) :: %{
           atom => dep
         }

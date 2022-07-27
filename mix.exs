@@ -46,28 +46,7 @@ defmodule Eject.MixProject do
     [
       main: "Eject",
       source_ref: "v#{@version}",
-      source_url: @source_url,
-      groups_for_modules: [
-        "Ejectable Apps": [
-          Eject.App,
-          Eject.Project,
-          Eject.File,
-          Eject.Manifest
-        ],
-        Transformation: [
-          Eject.CodeFence,
-          Eject.MixExs,
-          Eject.Rules
-        ],
-        Dependencies: [
-          Eject.Deps,
-          Eject.LibDep,
-          Eject.MixDep
-        ],
-        Errors: [
-          Eject.NotEjectableError
-        ]
-      ]
+      source_url: @source_url
     ]
   end
 

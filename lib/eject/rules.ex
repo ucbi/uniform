@@ -1,5 +1,7 @@
 defmodule Eject.Rules do
-  @moduledoc "A struct representing 'rules' to apply while ejecting files."
+  @moduledoc """
+             A struct representing 'rules' to apply while ejecting files.
+             """ && false
 
   defstruct [:only, :except, :associated_files, :chmod]
 

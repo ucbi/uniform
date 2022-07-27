@@ -1,4 +1,5 @@
 defmodule Eject.Plan.BeforeCompile do
+  @moduledoc false
   defmacro __before_compile__(_env) do
     quote do
       def __modifiers__, do: @modifiers
@@ -25,7 +26,7 @@ defmodule Eject.Plan do
         [theme: theme]
       end
 
-  For app specific pairs, use the `extra` option in the app's manifest. See `Eject.Manifest`.
+  For app specific pairs, use the `extra` option in the app's manifest. See Eject.Manifest.
   """
   @callback extra(Eject.App.t()) :: keyword
 
@@ -126,7 +127,7 @@ defmodule Eject.Plan do
 
   @doc """
   Specify various rules to apply to the ejected app `lib/` directory files. These are the
-  same "file rules" that can be applied to a lib dep. See `Eject.Rules` for a full
+  same "file rules" that can be applied to a lib dep. See Eject.Rules for a full
   list of options.
   """
   defmacro eject(app, do: block) do
@@ -202,7 +203,7 @@ defmodule Eject.Plan do
   If you only need selected files from the `lib` directory, use the `only` option.
 
   Each ejectable app may elect to include the lib dependency by adding it
-  to its `Eject` manifest (see `Eject.Manifest`).
+  to its `Eject` manifest (see Eject.Manifest).
 
   Options include:
 

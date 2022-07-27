@@ -1,15 +1,15 @@
 defmodule Eject.File do
   @moduledoc """
-  Functions for writing files to an ejection destination.
+             Functions for writing files to an ejection destination.
 
-  An `t:Eject.File.t/0` can be any of the following:
+             An `t:Eject.File.t/0` can be any of the following:
 
-  - A text file to copy with modifications (such as a `.ex`, `.exs`, or `.json` file)
-  - A file to copy without modifications (such as a `.png` file)
-  - A directory to copy without modifications
-  - An EEx template used to generate a file
+             - A text file to copy with modifications (such as a `.ex`, `.exs`, or `.json` file)
+             - A file to copy without modifications (such as a `.png` file)
+             - A directory to copy without modifications
+             - An EEx template used to generate a file
 
-  """
+             """ && false
 
   alias Eject.{App, CodeFence, Manifest, Rules}
 
