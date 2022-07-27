@@ -26,6 +26,35 @@ defmodule Eject do
 
       config :my_base_app, Eject, project: MyBaseApp.Eject.Project
 
+  ### Marking a `lib/` Directory as an Ejectable App
+
+  To designate a directory in `lib/` as an ejectable app, place a file
+  called `eject.exs` directly inside that directory.
+
+  The `eject.exs` manifest specifies required dependencies and configuration values:
+    - `mix_deps` - mix dependencies; each must exist in `mix.exs`.
+    - `lib_deps` - lib dependencies; each must exist as a folder in `lib/`.
+    - `extra` - additional key value pairs specific to the ejectable app. For 'global' values available
+      to _all_ ejectable apps, use the `c:Eject.Plan.extra/1` callback implementation.
+
+  Required for each ejectable app.
+
+      # Example `eject.exs`
+      [
+        mix_deps: [:ex_aws_s3],
+        lib_deps: [:my_utilities],
+        extra: [
+          sentry: [...],
+          deployment: [
+            target: :heroku,
+            options: [...],
+              buildpacks: [...],
+              addons: [...],
+              domains: [...]
+          ]
+        ]
+      ]
+
   ### Usage
 
       $ mix eject Tweeter
