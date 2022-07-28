@@ -220,19 +220,31 @@ defmodule Eject.Plan do
   #
 
   @doc """
-  Specify a file or regex pattern and a transformation function to apply to all files matching that pattern.
+  Specify a file or regex pattern and a transformation function to apply to all
+  files matching that pattern.
 
-  ### Example
+  ### Examples
 
       modify ~r/lib\/.+_(worker|cron).ex/, file, app do
         # Return modified `file` string
         # Only ran on files matching the regex
       end
 
-      modify "lib/my_app_web/router.ex", file, app do
+      modify "lib/my_app_web/router.ex", file do
         # Return modified `file` string
         # Only ran on files with the exact path "lib/my_app_web/router.ex"
       end
+
+
+  > #### Variable names {: .info}
+  >
+  > In the above examples, `file` and `app` work as function parameters,
+  > which are available to the "function body" in between `do` and `end`.
+  > The macro turns them into variables under the hood. As such, they can
+  > be given different names.
+  >
+  > **Note that the final parameter (`app`) is optional, and can be excluded
+  > if the `modify` function does not need it.**
 
   """
   defmacro modify(path_or_regex, file, app, do: block) do
@@ -245,6 +257,7 @@ defmodule Eject.Plan do
     end
   end
 
+  @doc false
   defmacro modify(path_or_regex, file, do: block) do
     app = quote generated: true, do: var!(app)
     line = __CALLER__.line
@@ -383,7 +396,57 @@ defmodule Eject.Plan do
   end
 
   @doc """
-  Foo
+  Eject considers all directories in the project root's `lib/` directory
+  to be "lib dependencies".
+
+  Since Eject is aware of all lib dependencies in `lib/`, you don't need to
+  tell it about them.
+
+  However, there are a few scenarios where you do need to list them in your `Plan` module:
+
+  1. Specifying which lib dependencies should _always_ be ejected. (See
+  `Eject.Plan.always/1`.)
+  2. To specify that a lib dependency has other mix or lib dependencies. (I.e.
+  Other mix packages or lib directories should always be ejected along with
+  it.)
+  3. To specify to eject other files that aren't in a `lib/` directory
+  alongside a lib dependency.
+
+  > #### Including Lib Dependencies in an App {: .info}
+  >
+  > To eject a lib dependency with a specific app (but not all), make sure to
+  > put it in the app's
+  > [Eject Manifest file](./Eject.html#module-the-eject-manifest-eject-exs),
+  > or make it a `lib_dependency` of another dependency in the Manifest.
+
+  ### Examples
+
+      deps do
+        always do
+          # every app will have lib/utilities
+          lib :utilities
+
+          # every app will have lib/mix, but only my_app.some_task.ex will be ejected
+          lib :mix do
+            only ["lib/mix/tasks/my_app.some_task.ex"]
+          end
+        end
+
+        # If eject.exs says to include sso_auth, then `lib/sso_auth` will be copied
+        # along with `lib/other_utilities`. However, `some_file.ex` will never be
+        # included. Also, the tesla mix dep will be included.
+        lib :sso_auth do
+          mix_deps [:tesla]
+          lib_deps [:other_utilities]
+          except ["lib/sso_auth/some_file.ex"]
+        end
+
+        mix :oban do
+          # any app that is ejected with oban will also have oban_pro and oban_web
+          mix_deps [:oban_pro, :oban_web]
+        end
+      end
+
   """
   defmacro lib(name, do: block) do
     opts =
@@ -424,7 +487,38 @@ defmodule Eject.Plan do
   end
 
   @doc """
-  Mix
+  Since Eject is aware of all mix dependencies in `mix.exs`, you don't need to
+  tell it about them.
+
+  However, there are two scenarios where you do need to list out mix dependencies:
+
+  1. Specifying which mix dependencies should _always_ be ejected. (See
+  `Eject.Plan.always/1`.)
+  2. Whenever a mix dependency has other mix dependencies. (I.e. Other mix
+  packages should always be ejected with it.)
+
+  > #### Including Mix Dependencies in an App {: .info}
+  >
+  > To eject a mix dependency with a specific app (but not all), make sure to
+  > include it as a dependency of lib dependencies (see `lib/2`) or put it in the
+  > app's [Eject Manifest
+  > file](./Eject.html#module-the-eject-manifest-eject-exs).
+
+  ### Examples
+
+      deps do
+        always do
+          # every app will have credo and ex_doc
+          mix :credo
+          mix :ex_doc
+        end
+
+        mix :oban do
+          # any app that is ejected with oban will also have oban_pro and oban_web
+          mix_deps [:oban_pro, :oban_web]
+        end
+      end
+
   """
   defmacro mix(name, do: block) do
     opts =
@@ -485,16 +579,90 @@ defmodule Eject.Plan do
     Keyword.put(opts, :associated_files, associated_files)
   end
 
-  # Specifying files/directories to copy
+  @doc """
+  In the `eject(app) do` block and `lib :lib_name do` blocks,
+  `file` is used to specify **files that are not in a `lib/` directory**
+  which should be ejected in the app or along with the lib.
+
+  ### Examples
+
+      eject(app) do
+        # every ejected app will include app.js
+        file "assets/js/app.js"
+      end
+
+      deps do
+        lib :aws do
+          # for every app that includes the aws lib dependency,
+          # some_aws_fixture.xml will also be included
+          file "test/support/fixtures/some_aws_fixture.xml"
+        end
+      end
+  """
   def file(path, opts \\ []), do: {:text, {path, opts}}
+
+  @doc """
+  In the `eject(app) do` block and `lib :lib_name do` blocks,
+  `template` is used to specify EEx templates that should be
+  rendered and then ejected.
+
+  ### Template Directory and Destination Path
+
+  Eject templates use a "convention over configuration" model
+  that works like this:
+
+  1. At the top of your `Plan` module, you specify a template directory
+  like this:
+
+      `use Eject, templates: "lib/eject/templates"`
+
+  2. Templates must be placed in this directory at the relative path
+  that they should be placed in, in the ejected directory.
+  3. Templates must have the destination filename, appended with `.eex`.
+
+  See the code snippet below for an example.
+
+  ### Examples
+
+      use Eject, templates: "priv/eject-templates"
+
+      eject(app) do
+        # priv/eject-templates/config/runtime.exs.eex will be rendered, and the
+        # result will be placed in `config/runtime.exs` in every ejected app
+        template "config/runtime.exs"
+      end
+
+      deps do
+        lib :datadog do
+          # for every app that includes `lib/datadog`,
+          # priv/eject-templates/datadog/prerun.sh.eex will be rendered, and
+          # the result will be placed in `datadog/prerun.sh`
+          template "datadog/prerun.sh"
+        end
+      end
+  """
   def template(path, opts \\ []), do: {:template, {path, opts}}
+
   def cp_r(path, opts \\ []), do: {:cp_r, {path, opts}}
   def cp(path, opts \\ []), do: {:cp, {path, opts}}
 
-  # Specifying files/directories to NOT delete when clearing the destination prior the ejection
+  @doc """
+  Whenever running `mix eject`, the contents in the destination directory will
+  be deleted except for the `.git`, `deps`, and `_build` directories.
+
+  If there are any other files or directories that you would like to
+  **preserve** (by not deleting them), specify them with `preserve`:
+
+      eject(app) do
+        # .env will not be deleted immediately before ejection
+        preserve ".env"
+      end
+  """
   def preserve(path), do: {:preserve, path}
 
   # Specifying allow/deny-lists that drive which files to include in a lib directory
+  @doc false
   def except(paths), do: {:except, List.wrap(paths)}
+  @doc false
   def only(paths), do: {:only, List.wrap(paths)}
 end
