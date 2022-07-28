@@ -3,8 +3,7 @@ defmodule Eject.App do
   An App struct, representing an application to be ejected. See the [type
   definition](`t:t/0`) for more details.
 
-  The `depends_on?/3` utility can be used to determine whether a app depends on
-  a mix or lib dependency.
+  ## App Struct Availability
 
   This struct is available in the Plan module in these locations:
 
@@ -13,8 +12,17 @@ defmodule Eject.App do
   - `Eject.Plan.eject/2` macro
   - `Eject.Plan.modify/4` macros
 
-  In all of these locations, you can make decisions about what to eject or how
-  files should be modified using the `app`.
+  In these callbacks and macros, you can make decisions about what to eject or
+  how files should be modified using the `app`.
+
+  ## Checking App Dependencies
+
+  The `depends_on?/3` utility can be used to determine whether a app depends on
+  a mix or lib dependency.
+
+      depends_on?(app, :mix, :norm)
+
+  See `depends_on?/3` for more information.
 
   """
 
@@ -162,11 +170,31 @@ defmodule Eject.App do
   function will return `true` if the dependency will be ejected along with the
   app.
 
-  ## Example
+  ## Examples
 
       depends_on?(app, :mix, :some_included_mix_dep)
       depends_on?(app, :mix, :not_included_dep)
       depends_on?(app, :lib, :some_included_lib)
+
+  ## Examples in Context
+
+      eject(app) do
+        if depends_on?(app, :mix, :some_hex_dependency) do
+          file "file_needed_by_some_hex_dependency"
+        end
+      end
+
+      modify ~r/^test\/.+_(test).exs/, file, app do
+        if depends_on?(app, :lib, :my_data_lib) do
+          file
+        else
+          String.replace(
+            file,
+            "use Oban.Testing, repo: MyDataLib.Repo",
+            "use Oban.Testing, repo: OtherDataLib.Repo"
+          )
+        end
+      end
 
   """
   @spec depends_on?(app :: t, category :: :lib | :mix, dep_name :: atom) :: boolean

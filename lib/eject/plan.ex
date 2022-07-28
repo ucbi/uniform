@@ -20,7 +20,7 @@ defmodule Eject.Plan do
   Would search for templates in the `priv/eject-templates` directory. See
   `template/2` for more information.
 
-  ## Basic Structure
+  ## `eject` Block
 
   At minimum, the plan requires an `eject` block:
 
@@ -37,37 +37,53 @@ defmodule Eject.Plan do
   The `eject` block specifies files that should be ejected which aren't in the
   `lib/` directory of the app being ejected.
 
-  Besides the `eject` block, the plan can also contain:
+  See `eject/2` for more information.
 
-  1. A `deps` block to configure dependencies
-  2. Code modifiers specified with `modify`
+  ## `deps` Block
 
-  ```elixir
-  defmodule Plan do
-    use Eject.Plan, templates: "..."
+  Besides the `eject` block, the plan can also contain a `deps` block to
+  configure dependencies.
 
-    deps do
-      always do
-        mix :phoenix
-        lib :my_component_library
+      defmodule Plan do
+        use Eject.Plan, templates: "..."
+
+        deps do
+          always do
+            mix :phoenix
+            lib :my_component_library
+          end
+
+          mix :absinthe do
+            mix_deps [:absinthe_plug, :dataloader]
+          end
+        end
       end
 
-      mix :absinthe do
-        mix_deps [:absinthe_plug, :dataloader]
-      end
-    end
+  See `deps/1` for more information.
 
-    modify "assets/js/app.js", file, app do
-      String.replace(file, "SOME_VALUE_PER_APP", app.extra[:some_value])
-    end
-  end
-  ```
+  ## `modify` Blocks
+
+  Lastly, `modify` blocks can be used whenever you want to transform
+  file contents during ejection. You can specify a specific filepath
+  or use a regex to match multiple files.
+
+      defmodule Plan do
+        use Eject.Plan, templates: "..."
+
+        modify "assets/js/app.js", file, app do
+          String.replace(file, "SOME_VALUE_PER_APP", app.extra[:some_value])
+        end
+
+        modify ~r/_worker.ex/, file, app do
+          # ...
+        end
+      end
+
+  See `modify/4` for more information.
 
   ## Full Example
 
   Below is an example `Plan` module that shows off a majority of the features that can be used.
-
-  Below the example, we will go into detail on each of the callbacks and macros.
 
       defmodule MyApp.Eject.Plan do
         use Eject.Plan, templates: "lib/eject/templates"
@@ -180,10 +196,8 @@ defmodule Eject.Plan do
   """
 
   @doc """
-  Returns a keyword list of additional key value pairs available to _all_ ejectable apps.
-
-  To configure `extra` for a single app, use the `extra` option in the app's
-  [Eject Manifest file](./Eject.html#module-the-eject-manifest-eject-exs).
+  A hook to add more data to `app.extra`, beyond what's in the [Eject Manifest
+  file](./Eject.html#module-the-eject-manifest-eject-exs).
 
   ### Example
 
@@ -333,9 +347,31 @@ defmodule Eject.Plan do
   #
 
   @doc """
-  Specify various rules to apply to the ejected app `lib/` directory files. These are the
-  same "file rules" that can be applied to a lib dep. See Eject.Rules for a full
-  list of options.
+  The `eject` block "receives" an `app` (see `Eject.App.t`) like a function.
+
+  It is where you specify files which aren't in an included `lib/` directory
+  that should be ejected.
+
+  ## Files Tied to Lib Dependencies
+
+  If a file or template should only be ejected in the case that a certain Lib
+  Dependency is included, we recommend placing that in `lib/2` inside the
+  `deps/1` block instead of in the `eject` block.
+
+      # ❌ Don't do this
+      eject(app) do
+        if depends_on?(app, :lib, :my_lib) do
+          file "some_file"
+        end
+      end
+
+      # ✅ Instead, do this
+      deps do
+        lib :my_lib do
+          file "some_file"
+        end
+      end
+
   """
   defmacro eject(app, do: block) do
     {:__block__, [], items} = block
@@ -635,9 +671,9 @@ defmodule Eject.Plan do
   end
 
   @doc """
-  In the `eject(app) do` block and `lib :lib_name do` blocks,
-  `file` is used to specify **files that are not in a `lib/` directory**
-  which should be ejected in the app or along with the lib.
+  In `eject` and `lib` blocks, `file` is used to specify **files that are not
+  in a `lib/` directory** which should be ejected in the app or along with the
+  lib.
 
   ### Examples
 
@@ -657,9 +693,8 @@ defmodule Eject.Plan do
   def file(path, opts \\ []), do: {:text, {path, opts}}
 
   @doc """
-  In the `eject(app) do` block and `lib :lib_name do` blocks,
-  `template` is used to specify EEx templates that should be
-  rendered and then ejected.
+  In `eject` and `lib` blocks, `template` is used to specify EEx templates that
+  should be rendered and then ejected.
 
   ### Template Directory and Destination Path
 
