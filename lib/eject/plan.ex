@@ -28,7 +28,7 @@ defmodule Eject.Plan do
 
   For app specific pairs, use the `extra` option in the app's manifest. See Eject.Manifest.
   """
-  @callback extra(Eject.App.t()) :: keyword
+  @callback extra(app :: Eject.App.t()) :: keyword
 
   @doc """
   Use this callback to modify the path of ejected files. It will be called for
@@ -42,7 +42,7 @@ defmodule Eject.Plan do
       def target_path(path, _app), do: path
 
   """
-  @callback target_path(Path.t(), Eject.App.t()) :: Path.t()
+  @callback target_path(path :: Path.t(), app :: Eject.App.t()) :: Path.t()
 
   @doc """
   A macro for defining an ejection plan.

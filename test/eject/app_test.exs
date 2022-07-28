@@ -73,4 +73,32 @@ defmodule Eject.AppTest do
              :indirectly_included_mix
            ]
   end
+
+  test "depends_on?/1" do
+    assert App.depends_on?(
+             %Eject.App{
+               internal: %{
+                 deps: %{
+                   included: %{
+                     mix: [:some_included_mix_dep]
+                   }
+                 }
+               }
+             },
+             :mix,
+             :some_included_mix_dep
+           )
+
+    refute App.depends_on?(
+             %Eject.App{internal: %{deps: %{included: %{mix: [:included]}}}},
+             :mix,
+             :not_included_dep
+           )
+
+    assert App.depends_on?(
+             %Eject.App{internal: %{deps: %{included: %{lib: [:some_included_lib]}}}},
+             :lib,
+             :some_included_lib
+           )
+  end
 end

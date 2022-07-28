@@ -1,6 +1,10 @@
 defmodule Eject.App do
   @moduledoc """
-  A struct representing a discrete, self-contained application to be ejected by `Eject`.
+  An App struct, representing a discrete, self-contained application to be
+  ejected. See the [type definition](`t:t/0`) for more details.
+
+  The `depends_on?/3` utility can be used to determine whether a given app
+  depends on a given mix or lib dependency.
   """
 
   alias __MODULE__
@@ -41,6 +45,39 @@ defmodule Eject.App do
           }
   end
 
+  @typedoc """
+  An App struct, representing a discrete, self-contained application to be
+  ejected.
+
+  This struct is available in the Plan module in these locations:
+
+  - `c:Eject.Plan.extra/1` callback
+  - `c:Eject.Plan.target_path/2` callback
+  - `Eject.Plan.eject/2` macro
+  - `Eject.Plan.modify/3` macros
+
+  You can make decisions about what to eject or how files should be modified
+  using the `app`.
+
+  ## Example
+
+  Note that the `extra` key contains everything you put in `extra` in
+  `eject.exs` for the given app. It also contains anything returned by
+  `c:Eject.Plan.extra/1`.
+
+      #Eject.App<
+        destination: "/Users/me/code/tweeter",
+        extra: [company: :fake_co, logo_file: "pixel", some_data: "from eject.exs"],
+        name: %{
+          camel: "Tweeter",
+          hyphen: "tweeter",
+          module: Tweeter,
+          underscore: "tweeter"
+        },
+        ...
+      >
+
+  """
   @type t :: %__MODULE__{
           name: %{
             module: module,
@@ -109,7 +146,7 @@ defmodule Eject.App do
         underscore: app_name_underscore_case,
         hyphen: String.replace(app_name_underscore_case, "_", "-")
       },
-      destination: destination(app_name_underscore_case, config, opts),
+      destination: destination(app_name_underscore_case, config, opts)
     }
 
     # `extra/1` requires an app struct
@@ -119,38 +156,19 @@ defmodule Eject.App do
   @doc """
   Indicates if an app requires a given dependency.
 
-  ### Examples
+  Pass in the `app`, the dependency type (either `:lib` or `:mix`), and the
+  name of the dependency (like `:tesla` or `:my_lib_directory`) and the
+  function will return `true` if the dependency will be ejected along with the
+  app.
 
-      iex> depends_on?(
-      ...>   %Eject.App{
-      ...>     internal: %{
-      ...>       deps: %{
-      ...>         included: %{
-      ...>           mix: [:some_included_mix_dep]
-      ...>         }
-      ...>       }
-      ...>     }
-      ...>   },
-      ...>   :mix,
-      ...>   :some_included_mix_dep
-      ...> )
-      true
+  ## Example
 
-      iex> depends_on?(
-      ...>   %Eject.App{internal: %{deps: %{included: %{mix: [:included]}}}},
-      ...>   :mix,
-      ...>   :not_included_dep
-      ...> )
-      false
-
-      iex> depends_on?(
-      ...>   %Eject.App{internal: %{deps: %{included: %{lib: [:some_included_lib]}}}},
-      ...>   :lib,
-      ...>   :some_included_lib
-      ...> )
-      true
+      depends_on?(app, :mix, :some_included_mix_dep)
+      depends_on?(app, :mix, :not_included_dep)
+      depends_on?(app, :lib, :some_included_lib)
 
   """
+  @spec depends_on?(app :: t, category :: :lib | :mix, dep_name :: atom) :: boolean
   def depends_on?(app, category, dep_name) when category in [:lib, :mix] and is_atom(dep_name) do
     dep_name in app.internal.deps.included[category]
   end
