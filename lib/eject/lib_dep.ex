@@ -1,5 +1,7 @@
 defmodule Eject.LibDep do
-  @moduledoc "A struct for a dependency within a sub folder in the `lib/` directory."
+  @moduledoc """
+             A struct for a dependency within a sub folder in the `lib/` directory.
+             """ && false
 
   @enforce_keys [:name, :always, :mix_deps, :lib_deps, :file_rules]
   defstruct [:name, :always, :mix_deps, :lib_deps, :file_rules]

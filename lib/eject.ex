@@ -26,6 +26,49 @@ defmodule Eject do
 
       config :my_base_app, Eject, project: MyBaseApp.Eject.Project
 
+  ### The Eject Manifest – `eject.exs`
+
+  To designate a directory in `lib/` as an ejectable app, place a file
+  called `eject.exs` directly inside that directory.
+
+  The `eject.exs` manifest specifies required dependencies and configuration values:
+    - `mix_deps` - mix dependencies; each must exist in `mix.exs`.
+    - `lib_deps` - lib dependencies; each must exist as a folder in `lib/`.
+    - `extra` - additional key value pairs specific to the ejectable app. For 'global' values available
+      to _all_ ejectable apps, use the `c:Eject.Plan.extra/1` callback implementation.
+
+  Required for each ejectable app.
+
+      # Example `eject.exs`
+      [
+        mix_deps: [:ex_aws_s3],
+        lib_deps: [:my_utilities],
+        extra: [
+          sentry: [...],
+          deployment: [
+            target: :heroku,
+            options: [...],
+              buildpacks: [...],
+              addons: [...],
+              domains: [...]
+          ]
+        ]
+      ]
+
+  ### Dependencies
+
+  Eject is aware of and automatically catalogs all Mix dependencies from `mix.exs`.
+
+  Any directory in side the `lib/` directory of your project root can be considered
+  a "Lib dependency".
+
+  There are three ways to tell Eject to include a dependency when a specific app is ejected:
+
+  1. Include the dependency by [saying so in `eject.exs`](#module-the-eject-manifest-eject-exs).
+  2. In your `Plan` module, configure another dependency to require it as a "sub-dependency".
+     (See `Eject.Plan.deps/1`.)
+  3. In your `Plan` module, place the dependency in the `always` block. (See `Eject.Plan.always/1`.)
+
   ### Usage
 
       $ mix eject Tweeter
@@ -36,24 +79,24 @@ defmodule Eject do
 
   require Logger
 
-  @type prepare_opt :: {:destination, String.t()}
+  @typep prepare_opt :: {:destination, String.t()}
 
   @doc """
-  Returns a list of ejectable application names.
+       Returns a list of ejectable application names.
 
-  Identified by the existence of a `lib/<my_app>/ejector.exs` file.
+       Identified by the existence of a `lib/<my_app>/ejector.exs` file.
 
-  ### Examples
+       ### Examples
 
-      $ fd eject.exs
-      lib/tweeter/eject.exs
-      lib/trillo/eject.exs
-      lib/hatmail/eject.exs
+           $ fd eject.exs
+           lib/tweeter/eject.exs
+           lib/trillo/eject.exs
+           lib/hatmail/eject.exs
 
-      iex> ejectables()
-      ["Tweeter", "Trillo", "Hatmail"]
+           iex> ejectables()
+           ["Tweeter", "Trillo", "Hatmail"]
 
-  """
+       """ && false
   @spec ejectables :: [String.t()]
   def ejectables do
     "lib/*/eject.exs"
@@ -62,6 +105,7 @@ defmodule Eject do
     |> Enum.sort()
   end
 
+  @doc "Return a list of all ejectable `%App{}`s" && false
   @spec ejectable_apps :: [Eject.App.t()]
   def ejectable_apps do
     for name <- ejectables() do
@@ -72,14 +116,14 @@ defmodule Eject do
   end
 
   @doc """
-  Prepares the `t:Eject.App.t/0` struct with all information needed for ejection.
+       Prepares the `t:Eject.App.t/0` struct with all information needed for ejection.
 
-  When ejecting an app, this step runs prior to the actual `eject/1` process,
-  allowing the user to see pertinent information about what decisions will be made
-  during ejection: (e.g. which dependencies will be included, where on
-  disk the ejected app will be written, etc.). If there is a mistake, the user will
-  have a chance to abort before performing a potentially destructive action.
-  """
+       When ejecting an app, this step runs prior to the actual `eject/1` process,
+       allowing the user to see pertinent information about what decisions will be made
+       during ejection: (e.g. which dependencies will be included, where on
+       disk the ejected app will be written, etc.). If there is a mistake, the user will
+       have a chance to abort before performing a potentially destructive action.
+       """ && false
   @spec prepare(init :: %{name: atom, opts: [prepare_opt]}) :: Eject.App.t()
   def prepare(%{name: name, opts: opts}) do
     if not is_atom(name) do
@@ -96,9 +140,9 @@ defmodule Eject do
   end
 
   @doc """
-  Ejects an app. That is, deletes the files in the destination and copies a fresh
-  set of files for that app.
-  """
+       Ejects an app. That is, deletes the files in the destination and copies a fresh
+       set of files for that app.
+       """ && false
   def eject(app) do
     clear_destination(app)
     Logger.info("📂 #{app.destination}")
@@ -114,11 +158,11 @@ defmodule Eject do
     System.cmd("mix", ["format"], cd: app.destination)
   end
 
-  # Clear the destination folder where the app will be ejected.
+  @doc "Clear the destination folder where the app will be ejected." && false
   def clear_destination(app) do
     if File.exists?(app.destination) do
       preserve =
-        for {:preserve, filename} <- app.config.plan.__eject__(app) do
+        for {:preserve, filename} <- app.internal.config.plan.__eject__(app) do
           filename
         end
 

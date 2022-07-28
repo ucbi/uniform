@@ -1,26 +1,50 @@
 defmodule Eject.App do
   @moduledoc """
-  A struct representing a discrete, self-contained application to be ejected by `Eject`.
+  An App struct, representing an application to be ejected. See the [type
+  definition](`t:t/0`) for more details.
+
+  ## App Struct Availability
+
+  This struct is available in the Plan module in these locations:
+
+  - `c:Eject.Plan.extra/1` callback
+  - `c:Eject.Plan.target_path/2` callback
+  - `Eject.Plan.eject/2` macro
+  - `Eject.Plan.modify/4` macros
+
+  In these callbacks and macros, you can make decisions about what to eject or
+  how files should be modified using the `app`.
+
+  ## Checking App Dependencies
+
+  The `depends_on?/3` utility can be used to determine whether a app depends on
+  a mix or lib dependency.
+
+      depends_on?(app, :mix, :norm)
+
+  See `depends_on?/3` for more information.
+
   """
 
   alias __MODULE__
   alias Eject.{Manifest, Config, LibDep, MixDep}
 
-  defstruct [:config, :name, :destination, :deps, :extra]
+  @derive {Inspect, except: [:internal]}
+  defstruct [:internal, :name, :destination, :extra]
 
   defmodule Deps do
     @moduledoc """
-    A struct containing all dependencies associated with an ejectable app.
+               A struct containing all dependencies associated with an ejectable app.
 
-    Intended to be attached to the `deps` field of `t:Eject.App.t/0`.
+               Intended to be attached to the `deps` field of `t:Eject.App.t/0`.
 
-      - `:lib` – all included `%LibDeps{}`
-      - `:mix` – all included `%MixDeps{}`
-      - `:included` – all included lib and mix deps as atom names (same as pulling keys from above structs)
-      - `:all` – *all* mix and lib dep names that _could_ be included in an
-        app. The `all` field helps identify and warn on references to mix or
-        lib deps that are not in `mix.exs` or `lib/`.
-    """
+                 - `:lib` – all included `%LibDeps{}`
+                 - `:mix` – all included `%MixDeps{}`
+                 - `:included` – all included lib and mix deps as atom names (same as pulling keys from above structs)
+                 - `:all` – *all* mix and lib dep names that _could_ be included in an
+                   app. The `all` field helps identify and warn on references to mix or
+                   lib deps that are not in `mix.exs` or `lib/`.
+               """ && false
 
     defstruct [:lib, :mix, :included, :all]
 
@@ -40,8 +64,30 @@ defmodule Eject.App do
           }
   end
 
+  @typedoc """
+  An App struct, representing a discrete, self-contained application to be
+  ejected.
+
+  ## Example
+
+  Note that the `extra` key contains everything you put in `extra` in
+  `eject.exs` for the given app. It also contains anything returned by
+  `c:Eject.Plan.extra/1`.
+
+      #Eject.App<
+        destination: "/Users/me/code/tweeter",
+        extra: [company: :fake_co, logo_file: "pixel", some_data: "from eject.exs"],
+        name: %{
+          camel: "Tweeter",
+          hyphen: "tweeter",
+          module: Tweeter,
+          underscore: "tweeter"
+        },
+        ...
+      >
+
+  """
   @type t :: %__MODULE__{
-          config: Config.t(),
           name: %{
             module: module,
             hyphen: String.t(),
@@ -49,50 +95,49 @@ defmodule Eject.App do
             camel: String.t()
           },
           destination: Path.t(),
-          deps: Deps.t(),
           extra: keyword
         }
 
-  @type new_opt :: {:destination, String.t()}
+  @typep new_opt :: {:destination, String.t()}
 
   @doc """
-  Initializes a new `%App{}` struct.
+       Initializes a new `%App{}` struct.
 
-  ### Example
+       ### Example
 
-      new!(config, manifest, Tweeter)
+           new!(config, manifest, Tweeter)
 
-      %Eject.App{
-        config: %Config{...},
-        name: %{
-          module: Tweeter,
-          hyphen: "tweeter",
-          underscore: "tweeter",
-          camel: "Tweeter"
-        },
-        destination: "...",
-        deps: %Deps{
-          lib: %{
-            included_lib: %LibDep{...},
-            indirectly_included_lib: %LibDep{...}
-          },
-          mix: %{
-            included_mix: %MixDep{...},
-            indirectly_included_mix: %MixDep{...}
-          },
-          included: %{
-            lib: [:included_lib, :indirectly_included_lib],
-            mix: [:included_mix, :indirectly_included_mix]
-          },
-          all: %{
-            lib: [:excluded_lib, :included_lib, :indirectly_included_lib],
-            mix: [:excluded_mix, :included_mix, :indirectly_included_mix]
-          }
-        },
-        extra: [...]
-      }
+           %Eject.App{
+             config: %Config{...},
+             name: %{
+               module: Tweeter,
+               hyphen: "tweeter",
+               underscore: "tweeter",
+               camel: "Tweeter"
+             },
+             destination: "...",
+             deps: %Deps{
+               lib: %{
+                 included_lib: %LibDep{...},
+                 indirectly_included_lib: %LibDep{...}
+               },
+               mix: %{
+                 included_mix: %MixDep{...},
+                 indirectly_included_mix: %MixDep{...}
+               },
+               included: %{
+                 lib: [:included_lib, :indirectly_included_lib],
+                 mix: [:included_mix, :indirectly_included_mix]
+               },
+               all: %{
+                 lib: [:excluded_lib, :included_lib, :indirectly_included_lib],
+                 mix: [:excluded_mix, :included_mix, :indirectly_included_mix]
+               }
+             },
+             extra: [...]
+           }
 
-  """
+       """ && false
   @spec new!(Config.t(), Manifest.t(), atom) :: t
   @spec new!(Config.t(), Manifest.t(), atom, [new_opt]) :: t
   def new!(%Config{} = config, %Manifest{} = manifest, name, opts \\ []) when is_atom(name) do
@@ -100,15 +145,17 @@ defmodule Eject.App do
     app_name_underscore_case = Macro.underscore(name)
 
     app = %App{
-      config: config,
+      internal: %{
+        config: config,
+        deps: deps(config, manifest)
+      },
       name: %{
         module: name,
         camel: app_name_camel_case,
         underscore: app_name_underscore_case,
         hyphen: String.replace(app_name_underscore_case, "_", "-")
       },
-      destination: destination(app_name_underscore_case, config, opts),
-      deps: deps(config, manifest)
+      destination: destination(app_name_underscore_case, config, opts)
     }
 
     # `extra/1` requires an app struct
@@ -118,38 +165,41 @@ defmodule Eject.App do
   @doc """
   Indicates if an app requires a given dependency.
 
-  ### Examples
+  Pass in the `app`, the dependency type (either `:lib` or `:mix`), and the
+  name of the dependency (like `:tesla` or `:my_lib_directory`) and the
+  function will return `true` if the dependency will be ejected along with the
+  app.
 
-      iex> depends_on?(
-      ...>   %Eject.App{
-      ...>     deps: %{
-      ...>       included: %{
-      ...>         mix: [:some_included_mix_dep]
-      ...>       }
-      ...>     }
-      ...>   },
-      ...>   :mix,
-      ...>   :some_included_mix_dep
-      ...> )
-      true
+  ## Examples
 
-      iex> depends_on?(
-      ...>   %Eject.App{deps: %{included: %{mix: [:included]}}},
-      ...>   :mix,
-      ...>   :not_included_dep
-      ...> )
-      false
+      depends_on?(app, :mix, :some_included_mix_dep)
+      depends_on?(app, :mix, :not_included_dep)
+      depends_on?(app, :lib, :some_included_lib)
 
-      iex> depends_on?(
-      ...>   %Eject.App{deps: %{included: %{lib: [:some_included_lib]}}},
-      ...>   :lib,
-      ...>   :some_included_lib
-      ...> )
-      true
+  ## Examples in Context
+
+      eject(app) do
+        if depends_on?(app, :mix, :some_hex_dependency) do
+          file "file_needed_by_some_hex_dependency"
+        end
+      end
+
+      modify ~r/^test\/.+_(test).exs/, file, app do
+        if depends_on?(app, :lib, :my_data_lib) do
+          file
+        else
+          String.replace(
+            file,
+            "use Oban.Testing, repo: MyDataLib.Repo",
+            "use Oban.Testing, repo: OtherDataLib.Repo"
+          )
+        end
+      end
 
   """
+  @spec depends_on?(app :: t, category :: :lib | :mix, dep_name :: atom) :: boolean
   def depends_on?(app, category, dep_name) when category in [:lib, :mix] and is_atom(dep_name) do
-    dep_name in app.deps.included[category]
+    dep_name in app.internal.deps.included[category]
   end
 
   defp destination(app_name_underscore_case, config, opts) do
@@ -163,12 +213,10 @@ defmodule Eject.App do
     Path.expand(destination)
   end
 
-  @doc """
-  Given a manifest struct, returns a `%Deps{}` struct containing
-  information about lib and mix dependencies.
-  """
+  # Given a manifest struct, returns a `%Deps{}` struct containing
+  # information about lib and mix dependencies.
   @spec deps(Config.t(), Manifest.t()) :: t
-  def deps(config, manifest) do
+  defp deps(config, manifest) do
     all_libs = Config.lib_deps(config)
     all_mixs = Config.mix_deps(config)
     included_libs = included_libs(manifest, all_libs)
@@ -224,7 +272,8 @@ defmodule Eject.App do
     |> Enum.reduce(root_deps, &gather_child_deps(&1, :mix_deps, &2, all_mixs))
   end
 
-  @type dep :: LibDep.t() | MixDep.t()
+  @typep dep :: LibDep.t() | MixDep.t()
+
   @spec gather_child_deps(dep, :lib_deps | :mix_deps, %{atom => dep}, %{atom => dep}) :: %{
           atom => dep
         }

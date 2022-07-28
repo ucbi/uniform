@@ -1,4 +1,6 @@
 defmodule Eject.Config do
+  @moduledoc false
+
   defstruct [:mix_project_app, :mix_project, :plan, :templates, :destination]
 
   alias Eject.{LibDep, MixDep}

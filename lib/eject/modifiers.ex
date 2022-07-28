@@ -1,4 +1,6 @@
 defmodule Eject.Modifiers do
+  @moduledoc false
+
   @doc """
   Given the contents of a mix.exs file and an `%App{}`,
   look for the following code fence that should be wrapping the mix deps:
@@ -16,7 +18,7 @@ defmodule Eject.Modifiers do
     |> String.replace(~r/\n *# <eject:deps>(.+?)# <\/eject:deps>/s, fn deps ->
       deps
       |> Code.string_to_quoted!()
-      |> Enum.filter(&(dep_name(&1) in app.deps.included.mix))
+      |> Enum.filter(&(dep_name(&1) in app.internal.deps.included.mix))
       |> Macro.to_string()
     end)
   end

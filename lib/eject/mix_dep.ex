@@ -1,5 +1,5 @@
 defmodule Eject.MixDep do
-  @moduledoc "A struct for a dependency in mix.exs."
+  @moduledoc "A struct for a dependency in mix.exs." && false
 
   @enforce_keys [:name, :always, :mix_deps]
   defstruct [:name, :always, :mix_deps]

@@ -26,7 +26,7 @@ defmodule Eject.AppTest do
              camel: "Tweeter"
            }
 
-    assert app.config == %Config{
+    assert app.internal.config == %Config{
              mix_project_app: :test_project,
              mix_project: TestProject.MixProject,
              plan: TestProject.Eject.Plan,
@@ -37,26 +37,26 @@ defmodule Eject.AppTest do
     assert app.extra == [company: :fake_co, logo_file: "pixel", some_data: "from eject.exs"]
 
     assert %LibDep{mix_deps: [:included_mix], lib_deps: [:indirectly_included_lib, :with_only]} =
-             app.deps.lib.included_lib
+             app.internal.deps.lib.included_lib
 
-    assert %LibDep{mix_deps: [], lib_deps: []} = app.deps.lib.indirectly_included_lib
-    assert %MixDep{mix_deps: [:indirectly_included_mix]} = app.deps.mix.included_mix
-    assert %MixDep{mix_deps: []} = app.deps.mix.indirectly_included_mix
+    assert %LibDep{mix_deps: [], lib_deps: []} = app.internal.deps.lib.indirectly_included_lib
+    assert %MixDep{mix_deps: [:indirectly_included_mix]} = app.internal.deps.mix.included_mix
+    assert %MixDep{mix_deps: []} = app.internal.deps.mix.indirectly_included_mix
 
-    assert app.deps.included.lib == [
+    assert app.internal.deps.included.lib == [
              :always_included_lib,
              :included_lib,
              :indirectly_included_lib,
              :with_only
            ]
 
-    assert app.deps.included.mix == [
+    assert app.internal.deps.included.mix == [
              :always_included_mix,
              :included_mix,
              :indirectly_included_mix
            ]
 
-    assert app.deps.all.lib == [
+    assert app.internal.deps.all.lib == [
              :always_included_lib,
              :eject,
              :excluded_lib,
@@ -66,11 +66,39 @@ defmodule Eject.AppTest do
              :with_only
            ]
 
-    assert app.deps.all.mix == [
+    assert app.internal.deps.all.mix == [
              :always_included_mix,
              :excluded_mix,
              :included_mix,
              :indirectly_included_mix
            ]
+  end
+
+  test "depends_on?/1" do
+    assert App.depends_on?(
+             %Eject.App{
+               internal: %{
+                 deps: %{
+                   included: %{
+                     mix: [:some_included_mix_dep]
+                   }
+                 }
+               }
+             },
+             :mix,
+             :some_included_mix_dep
+           )
+
+    refute App.depends_on?(
+             %Eject.App{internal: %{deps: %{included: %{mix: [:included]}}}},
+             :mix,
+             :not_included_dep
+           )
+
+    assert App.depends_on?(
+             %Eject.App{internal: %{deps: %{included: %{lib: [:some_included_lib]}}}},
+             :lib,
+             :some_included_lib
+           )
   end
 end

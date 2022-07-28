@@ -1,4 +1,6 @@
 defmodule Eject.CodeFence do
+  @moduledoc false
+
   # A regex that detects code fences
   @code_fence_regex ~r/\n *# <eject:(lib|mix|app):([a-z0-9_]+)>(.+?)# <\/eject:\1:\2>/s
 
@@ -63,8 +65,8 @@ defmodule Eject.CodeFence do
   end
 
   defp code_fence_replacement(app, "lib", dep_name, inner_match) do
-    if dep_name in app.deps.all.lib do
-      if dep_name in app.deps.included.lib do
+    if dep_name in app.internal.deps.all.lib do
+      if dep_name in app.internal.deps.included.lib do
         String.trim_trailing(inner_match)
       else
         ""
@@ -75,8 +77,8 @@ defmodule Eject.CodeFence do
   end
 
   defp code_fence_replacement(app, "mix", dep_name, inner_match) do
-    if dep_name in app.deps.all.mix do
-      if dep_name in app.deps.included.mix do
+    if dep_name in app.internal.deps.all.mix do
+      if dep_name in app.internal.deps.included.mix do
         String.trim_trailing(inner_match)
       else
         ""

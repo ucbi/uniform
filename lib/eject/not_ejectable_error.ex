@@ -1,4 +1,6 @@
 defmodule Eject.NotEjectableError do
+  @moduledoc false
+
   defexception [:app_name, :manifest_path]
 
   def message(error) do
