@@ -26,7 +26,7 @@ defmodule Eject do
 
       config :my_base_app, Eject, project: MyBaseApp.Eject.Project
 
-  ### Marking a `lib/` Directory as an Ejectable App
+  ### The Eject Manifest – `eject.exs`
 
   To designate a directory in `lib/` as an ejectable app, place a file
   called `eject.exs` directly inside that directory.
@@ -54,6 +54,20 @@ defmodule Eject do
           ]
         ]
       ]
+
+  ### Dependencies
+
+  Eject is aware of and automatically catalogs all Mix dependencies from `mix.exs`.
+
+  Any directory in side the `lib/` directory of your project root can be considered
+  a "Lib dependency".
+
+  There are three ways to tell Eject to include a dependency when a specific app is ejected:
+
+  1. Include the dependency by [saying so in `eject.exs`](#module-the-eject-manifest-eject-exs).
+  2. In your `Plan` module, configure another dependency to require it as a "sub-dependency".
+     (See `Eject.Plan.deps/1`.)
+  3. In your `Plan` module, place the dependency in the `always` block. (See `Eject.Plan.always/1`.)
 
   ### Usage
 

@@ -8,12 +8,137 @@ defmodule Eject.Plan.BeforeCompile do
 end
 
 defmodule Eject.Plan do
+  @moduledoc ~S"""
+  Aside from `eject.exs`, a `Plan` module is where all of the details of
+  ejection are configured for a given app.
+
+  ## Full Example
+
+  Below is an example `Plan` module that shows off a majority of the features that can be used.
+
+  Below the example, we will go into detail on each of the callbacks and macros.
+
+      defmodule MyApp.Eject.Plan do
+        use Eject.Plan, templates: "lib/eject/templates"
+
+        @impl Eject.Plan
+        def extra(app) do
+          theme =
+            case app.name.underscore do
+              "empire_" <> _ -> :empire
+              "rebel_" <> _ -> :rebel
+            end
+
+          # set `app.extra[:theme]`
+          [theme: theme]
+        end
+
+        @impl Eject.Plan
+        def target_path(path, app) do
+          if is_web_file?(path) do
+            # modify the path to put it in `lib/some_app_web`
+            String.replace(path, "lib/#{app.name.underscore}/", "lib/#{app.name.underscore}_web/")
+          else
+            path
+          end
+        end
+
+        # files to eject in every app, which are outside `lib/that_app`
+        eject(app) do
+          # do not delete this root file when clearing the destination
+          preserve ".env"
+
+          # copy these directories wholesale; do NOT run them through code modifiers
+          cp_r "assets"
+
+          # eject these files which aren't in lib/the_app_directory
+          file ".credo.exs"
+          file ".github/workflows/elixir.yml"
+          file "priv/static/#{app.extra[:theme]}-favicon.ico"
+          file "lib/my_app_web.ex"
+
+          # eject a file from an EEx template at "lib/eject/templates/config/runtime.exs.eex"
+          # configure the templates directory on line 2
+          template "config/runtime.exs"
+
+          # conditionally eject some files
+          if deploys_to_aws?(app) do
+            file "file/required/by/aws"
+            template "dynamic/file/required/by/aws"
+          end
+
+          if depends_on?(app, :lib, :some_lib) do
+            template "dynamic/file/required/by/some_lib"
+          end
+        end
+
+        # run the file contents through this modifier if the file is ejected
+        modify "lib/my_app_web/templates/layout/root.html.heex", file, app do
+          file
+          |> String.replace("empire-favicon.ico", "#{app.extra[:theme]}-favicon.ico")
+          |> String.replace("empire-apple-touch-icon.png", "#{app.extra[:theme]}-apple-touch-icon.png")
+        end
+
+        # configure dependencies from mix.exs and `lib/`
+        deps do
+          # always eject the dependencies in the `always do` block;
+          # don't require adding them to eject.exs
+          always do
+            lib :my_app do
+              # only eject the following files in `lib/my_app`
+              only ["lib/my_app/application.ex"]
+            end
+
+            lib :my_app_web do
+              # only eject the following files in `lib/my_app_web`
+              only [
+                "lib/my_app_web/endpoint.ex",
+                "lib/my_app_web/router.ex",
+                "lib/my_app_web/channels/user_socket.ex",
+                "lib/my_app_web/views/error_view.ex",
+                "lib/my_app_web/templates/layout/root.html.heex",
+                "lib/my_app_web/templates/layout/app.html.heex",
+                "lib/my_app_web/templates/layout/live.html.heex"
+              ]
+            end
+
+            # always include these mix dependencies
+            mix :credo
+            mix :ex_doc
+            mix :phoenix
+            mix :phoenix_html
+          end
+
+          # if absinthe is included, also include absinthe_plug and dataloader
+          mix :absinthe do
+            mix_deps [:absinthe_plug, :dataloader]
+          end
+
+          lib :my_data_lib do
+            # if my_data_lib is included, also include other_lib, faker, and norm
+            lib_deps [:other_lib]
+            mix_deps [:faker, :norm]
+
+            # if my_data_lib is included, also eject these files
+            file Path.wildcard("priv/my_data_repo/**/*.exs", match_dot: true)
+            file Path.wildcard("test/support/fixtures/my_data_lib/**/*.ex")
+          end
+        end
+      end
+
+  """
+
   @doc """
   Returns a keyword list of additional key value pairs available to _all_ ejectable apps.
 
-  As an example, you may want to set the theme based on the name of the ejectable app.
-  In this case, add an 'extra' entry called 'theme', which will then be available through the
-  app struct:
+  To configure `extra` for a single app, use the `extra` option in the app's
+  [Eject Manifest file](./Eject.html#module-the-eject-manifest-eject-exs).
+
+  ### Example
+
+  You may want to set the theme based on the name of the ejectable app.  In
+  this case, add an 'extra' entry called 'theme', which will then be available
+  through the app struct:
 
       def extra(app) do
         theme =
@@ -26,11 +151,10 @@ defmodule Eject.Plan do
         [theme: theme]
       end
 
-  For app specific pairs, use the `extra` option in the app's manifest. See Eject.Manifest.
   """
   @callback extra(app :: Eject.App.t()) :: keyword
 
-  @doc """
+  @doc ~S"""
   Use this callback to modify the path of ejected files. It will be called for
   every file in a lib directory, along with every file specified via `file`, `template`,
   `cp`, and `cp_r`.
@@ -40,6 +164,21 @@ defmodule Eject.Plan do
   If not defined, the default implementation is:
 
       def target_path(path, _app), do: path
+
+  ### Example
+
+  You may want to place certain files in `lib/ejected_app_web` instead of `lib/ejected_app`.
+  Let's say you have an `is_web_file?` function that identifies whether the file belongs in
+  the `_web` directory. `target_path` might be something like this:
+
+      def target_path(path, app) do
+        if is_web_file?(path) do
+          # modify the path to put it in `lib/some_app_web`
+          String.replace(path, "lib/#{app.name.underscore}/", "lib/#{app.name.underscore}_web/")
+        else
+          path
+        end
+      end
 
   """
   @callback target_path(path :: Path.t(), app :: Eject.App.t()) :: Path.t()
@@ -158,7 +297,39 @@ defmodule Eject.Plan do
   # Dependencies
   #
 
-  defmacro deps(do: block) do
+  @doc """
+  Eject automatically catalogs all Mix deps by looking into `mix.exs` to discover all Mix deps.
+  It also catalogs all Lib deps by scanning the `lib/` directory.
+
+  If you need to configure anything about a Mix or Lib dep, such as other dependencies
+  that must be bundled along with it, use the `deps` block.
+
+  See `mix/2`, `lib/2`, and `always/1` for more details.
+
+  ### Example
+
+      deps do
+        always do
+          lib :my_app do
+            only ["lib/my_app/application.ex"]
+          end
+
+          mix :phoenix
+        end
+
+        mix :absinthe do
+          mix_deps [:absinthe_plug, :dataloader]
+        end
+
+        lib :my_custom_aws_lib do
+          lib_deps [:my_utilities_lib]
+          mix_deps [:ex_aws, :ex_aws_ec2]
+        end
+      end
+
+  """
+  @spec deps(block :: term) :: term
+  defmacro deps(_block = [do: block]) do
     prelude =
       quote do
         try do
@@ -185,6 +356,21 @@ defmodule Eject.Plan do
     end
   end
 
+  @doc """
+  Inside of a `deps do` block, any Mix or Lib dependencies that should be
+  included in every ejected app should be wrapped in an `always do` block:
+
+      deps do
+        always do
+          # always eject the contents of `lib/some_lib`
+          lib :some_lib
+
+          # always eject the some_mix Mix dependency
+          mix :some_mix
+        end
+      end
+
+  """
   defmacro always(do: block) do
     quote do
       try do
@@ -197,25 +383,7 @@ defmodule Eject.Plan do
   end
 
   @doc """
-  Lib dependencies are identified by an atom that corresponds to the lib directory. For
-  example, `:my_cool_utilities` ejects _all_ files in the `lib/my_cool_utilities` directory.
-  If additional files from a different directory are needed, use the `associated_files` option.
-  If you only need selected files from the `lib` directory, use the `only` option.
-
-  Each ejectable app may elect to include the lib dependency by adding it
-  to its `Eject` manifest (see Eject.Manifest).
-
-  Options include:
-
-    - `always: true` - _always_ include the lib dependency. In this case, there is no need
-      to also list the dependency in its `Eject` manifest.
-    - `lib_deps: atom | [atom]`  - other lib dependencies that the lib requires (i.e. nested dependencies).
-      Note that each nested dependency itself must also have an entry on the "top" level of the list.
-    - `mix_deps` - mix dependencies that the lib requires.
-    - `associated_files` - files in another directory to also include with the lib directory (e.g. mocks).
-    - `only` - only include _specific_ files from the lib directory, as opposed to _all_ files (the default behavior).
-    - `except` - exclude specific files from the lib directory.
-
+  Foo
   """
   defmacro lib(name, do: block) do
     opts =
@@ -234,6 +402,7 @@ defmodule Eject.Plan do
     end
   end
 
+  @doc false
   defmacro lib(name) do
     quote do
       Eject.Plan.__lib__(__MODULE__, unquote(name), [], @deps_always_block)
@@ -255,9 +424,7 @@ defmodule Eject.Plan do
   end
 
   @doc """
-  Options include:
-    - `mix_deps: atom | [atom]` - other mix dependencies that the mix requires (i.e. nested dependencies).
-      Note that each nested dependency itself must also have an entry on the "top" level of the list.
+  Mix
   """
   defmacro mix(name, do: block) do
     opts =
@@ -276,6 +443,7 @@ defmodule Eject.Plan do
     end
   end
 
+  @doc false
   defmacro mix(name) do
     quote do
       Eject.Plan.__mix__(__MODULE__, unquote(name), [], @deps_always_block)
@@ -294,7 +462,10 @@ defmodule Eject.Plan do
     Module.put_attribute(mod, :mix_deps, mix_dep)
   end
 
+  @doc false
   defmacro mix_deps(deps), do: {:mix_deps, List.wrap(deps)}
+
+  @doc false
   defmacro lib_deps(deps), do: {:lib_deps, List.wrap(deps)}
 
   defp rule_opts(opts) do
