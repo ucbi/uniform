@@ -9,8 +9,59 @@ end
 
 defmodule Eject.Plan do
   @moduledoc ~S"""
-  Aside from `eject.exs`, a `Plan` module is where all of the details of
-  ejection are configured for a given app.
+  Defines the ejection plan for your project.
+
+  When used, the plan expects the `:templates` option. For example, the plan:
+
+      defmodule Plan do
+        use Eject.Plan, templates: "priv/eject-templates"
+      end
+
+  Would search for templates in the `priv/eject-templates` directory. See
+  `template/2` for more information.
+
+  ## Basic Structure
+
+  At minimum, the plan requires an `eject` block:
+
+      defmodule Plan do
+        use Eject.Plan, templates: "..."
+
+        eject(app) do
+          file "my_main_app/application.ex"
+          cp_r "assets"
+          # ...
+        end
+      end
+
+  The `eject` block specifies files that should be ejected which aren't in the
+  `lib/` directory of the app being ejected.
+
+  Besides the `eject` block, the plan can also contain:
+
+  1. A `deps` block to configure dependencies
+  2. Code modifiers specified with `modify`
+
+  ```elixir
+  defmodule Plan do
+    use Eject.Plan, templates: "..."
+
+    deps do
+      always do
+        mix :phoenix
+        lib :my_component_library
+      end
+
+      mix :absinthe do
+        mix_deps [:absinthe_plug, :dataloader]
+      end
+    end
+
+    modify "assets/js/app.js", file, app do
+      String.replace(file, "SOME_VALUE_PER_APP", app.extra[:some_value])
+    end
+  end
+  ```
 
   ## Full Example
 
@@ -184,17 +235,16 @@ defmodule Eject.Plan do
   @callback target_path(path :: Path.t(), app :: Eject.App.t()) :: Path.t()
 
   @doc """
-  A macro for defining an ejection plan.
+       A macro for defining an ejection plan.
 
-  The required `templates` path points to the EEx templates used by `Eject`.
+       The required `templates` path points to the EEx templates used by `Eject`.
 
-  ### Examples
+       ### Examples
 
-      defmodule MyBaseApp.Eject.Project do
-        use Eject.Plan, templates: "lib/my_base_app/eject/templates"
-      ...
+           defmodule MyBaseApp.Eject.Project do
+             use Eject.Plan, templates: "lib/my_base_app/eject/templates"
 
-  """
+       """ && false
   defmacro __using__(opts) do
     templates = opts[:templates]
 
@@ -225,7 +275,7 @@ defmodule Eject.Plan do
 
   ### Examples
 
-      modify ~r/lib\/.+_(worker|cron).ex/, file, app do
+      modify ~r/.+_worker.ex/, file, app do
         # Return modified `file` string
         # Only ran on files matching the regex
       end
@@ -235,8 +285,7 @@ defmodule Eject.Plan do
         # Only ran on files with the exact path "lib/my_app_web/router.ex"
       end
 
-
-  > #### Variable names {: .info}
+  > #### "Magic" Variable Names {: .info}
   >
   > In the above examples, `file` and `app` work as function parameters,
   > which are available to the "function body" in between `do` and `end`.
@@ -247,6 +296,12 @@ defmodule Eject.Plan do
   > if the `modify` function does not need it.**
 
   """
+  @spec modify(
+          pattern :: Path.t() | Regex.t(),
+          file :: String.t(),
+          app :: Eject.App.t(),
+          block :: term
+        ) :: term
   defmacro modify(path_or_regex, file, app, do: block) do
     line = __CALLER__.line
     fn_name = String.to_atom("modify_#{line}")
@@ -640,10 +695,58 @@ defmodule Eject.Plan do
           template "datadog/prerun.sh"
         end
       end
+
   """
   def template(path, opts \\ []), do: {:template, {path, opts}}
 
+  @doc """
+  `cp_r` works like `cp/2`, but for directory instead of a file.
+  The directory is copied as-is with `File.cp_r!/3`.
+
+  **None of the files are ran through Code Modifiers.**
+
+  This is useful for directories that do not require modification,
+  and contain many files.
+
+  For example, the `assets/node_modules` directory in a Phoenix application
+  would take ages to copy with `file Path.wildcard("assets/node_modules/**/*")`.
+  Instead, use `cp_r "assets/node_modules"`.
+
+  ### Examples
+
+      eject(app) do
+        cp_r "assets"
+      end
+
+      deps do
+        lib :some_lib do
+          cp_r "priv/files_for_some_lib"
+        end
+      end
+
+  """
   def cp_r(path, opts \\ []), do: {:cp_r, {path, opts}}
+
+  @doc """
+  `cp` works exactly like `file/2`, except that **no transformations
+  are applied to the file**.
+
+  The file is copied as-is with `File.cp!/3`.
+
+  ### Examples
+
+      eject(app) do
+        # every ejected app will have bin/some-binary, with the ACL mode changed to 555
+        cp "bin/some-binary", chmod: 0o555
+      end
+
+      deps do
+        lib :pdf do
+          # apps that include the pdf lib will also have bin/convert
+          cp "bin/convert"
+        end
+      end
+  """
   def cp(path, opts \\ []), do: {:cp, {path, opts}}
 
   @doc """

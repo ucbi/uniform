@@ -29,7 +29,7 @@ defmodule Eject.MixProject do
 
   defp deps do
     [
-      {:ex_doc, ">= 0.19.0", only: [:dev, :docs], runtime: false}
+      {:ex_doc, ">= 0.28.4", only: [:dev, :docs], runtime: false}
     ]
   end
 

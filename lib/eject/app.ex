@@ -1,10 +1,21 @@
 defmodule Eject.App do
   @moduledoc """
-  An App struct, representing a discrete, self-contained application to be
-  ejected. See the [type definition](`t:t/0`) for more details.
+  An App struct, representing an application to be ejected. See the [type
+  definition](`t:t/0`) for more details.
 
-  The `depends_on?/3` utility can be used to determine whether a given app
-  depends on a given mix or lib dependency.
+  The `depends_on?/3` utility can be used to determine whether a app depends on
+  a mix or lib dependency.
+
+  This struct is available in the Plan module in these locations:
+
+  - `c:Eject.Plan.extra/1` callback
+  - `c:Eject.Plan.target_path/2` callback
+  - `Eject.Plan.eject/2` macro
+  - `Eject.Plan.modify/4` macros
+
+  In all of these locations, you can make decisions about what to eject or how
+  files should be modified using the `app`.
+
   """
 
   alias __MODULE__
@@ -48,16 +59,6 @@ defmodule Eject.App do
   @typedoc """
   An App struct, representing a discrete, self-contained application to be
   ejected.
-
-  This struct is available in the Plan module in these locations:
-
-  - `c:Eject.Plan.extra/1` callback
-  - `c:Eject.Plan.target_path/2` callback
-  - `Eject.Plan.eject/2` macro
-  - `Eject.Plan.modify/4` macros
-
-  You can make decisions about what to eject or how files should be modified
-  using the `app`.
 
   ## Example
 
