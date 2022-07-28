@@ -1,8 +1,8 @@
 # Code Transformations
 
 Whenever `mix eject` is ran, a standard set of code transformations is applied
-to the file contents of each file copied, except for those specified with `cp`
-and `cp_r`.
+to the contents of each file copied, except for those specified with `cp` and
+`cp_r`.
 
 > #### Disabling Code Transformations for a file {: .tip}
 >
@@ -46,11 +46,11 @@ Given the above `mix.exs`, if you were to run `mix eject MyEjectableApp`:
 
 ## Code Fences
 
-In any file, you can wrap "code fence" comments in order to only include the
-code in an ejected app in certain scenarios.
+In any file, you can use "code fence" comments to remove code unless certain
+criteria are met.
 
-To only include code if an an app depends on a Lib Dependency called `my_lib`,
-wrap it in these comments:
+To remove code unless the ejected app depends on a Lib Dependency called
+`my_lib`, wrap it in these comments:
 
 ```elixir
 # <eject:lib:my_lib>
@@ -58,7 +58,7 @@ wrap it in these comments:
 # </eject:lib:my_lib>
 ```
 
-To only include code if an an app depends on a Mix Dependency called
+To remove code unless the ejected app depends on a Mix Dependency called
 `absinthe`, wrap it in these comments:
 
 ```elixir
@@ -67,7 +67,7 @@ To only include code if an an app depends on a Mix Dependency called
 # </eject:mix:absinthe>
 ```
 
-To only include code if the ejected app is called `MyApp`, wrap it in these
+To remove code unless the ejected app is called `MyApp`, wrap it in these
 comments:
 
 ```elixir
@@ -87,8 +87,8 @@ it in these comments:
 
 ## Modifiers from the Ejection Plan
 
-Users can also specify arbitrary modifications that should be applied to
-various files using the `modify` macro in the `Plan` module:
+Users can specify arbitrary modifications that should be applied to various
+files using the `modify` macro in the `Plan` module:
 
 ```elixir
 modify ~r/.+_worker.ex/, file, app do
