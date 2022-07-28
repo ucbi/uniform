@@ -21,17 +21,18 @@ their shared libraries.
 
 In an [umbrella
 project](https://elixir-lang.org/getting-started/mix-otp/dependencies-and-umbrella-projects.html#umbrella-projects),
-for example, your project has an `apps` directory containing distinct Elixir
-applications. In `Eject` projects, on the other hand,
-all of your separate applications are stored in a single Elixir project. **Each
-application is stored in a separate folder in the `lib/` directory.**
+there is an `apps` directory containing distinct Elixir
+applications. But in an `Eject` project, all of the separate applications are
+stored in a single Elixir project.
 
-To designate a lib directory as an ejectable application, create an `eject.exs`
+Each application is stored in a separate folder in the `lib/` directory. To
+designate a lib directory as an ejectable application, create an `eject.exs`
 file directly inside the lib directory. For example, `lib/my_app/eject.exs`.
 
 `eject.exs` files must contain a keyword list, in this structure:
 
 ```elixir
+# lib/my_app/eject.exs
 [
   mix_deps: [:gql, :timex],
   lib_deps: [:some_lib_directory],
@@ -41,7 +42,12 @@ file directly inside the lib directory. For example, `lib/my_app/eject.exs`.
 ]
 ```
 
-None of the keys are required; `[]` is a valid `eject.exs` file.
+> #### No Keys in eject.exs are required {: .info}
+>
+> Note that `eject.exs` does not need to include `mix_deps`, `lib_deps`, or
+> `extra`. They all default to an empty list.
+>
+> By implication, `[]` is a valid `eject.exs` file.
 
 The name of the directory is important. To eject an application in `lib/my_app`,
 run this command:
@@ -63,7 +69,7 @@ depends on them.
 
 ## What does `mix eject` do?
 
-When `mix eject MyApp` is run:
+When you run `mix eject MyApp`, the following happens:
 
 - A new directory is created (if it doesn't exist) at the destination.
 - If the destination already exists, all files and directories are deleted.
@@ -79,5 +85,6 @@ When `mix eject MyApp` is run:
   copied to the destination.
 - All of the files in Lib Dependencies of the app are copied to the
   destination.
-- As each of the files above are copied, a set of transformations are applied
-  to each file except for those specified with `cp` and `cp_r`.
+- As each of the files above are copied, [a set of
+  transformations](./code-transformations.html) are applied to each file except
+  for those specified with `cp` and `cp_r`.

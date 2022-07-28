@@ -4,6 +4,15 @@ Whenever `mix eject` is ran, a standard set of code transformations is applied
 to the file contents of each file copied, except for those specified with `cp`
 and `cp_r`.
 
+> #### Disabling Code Transformations for a file {: .tip}
+>
+> If you have a file that should not have code transformations applied upon
+> ejection, use `cp` instead of `file` to designate that it should be ejected
+> in the `Plan` module.
+>
+> If there is an entire directory of contents that should not be modified, use
+> `cp_r`, which will be much faster.
+
 ## mix.exs Dependency Removal
 
 Any Mix Dependency that is not directly or indirectly required by the app via
