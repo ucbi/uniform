@@ -88,7 +88,7 @@ eject(app) do
 end
 ```
 
-In the [eject](Eject.Plan.html#eject/2) block, we specify files that should _always_
+In the [eject](Eject.Plan.html#eject/2) section, we specify files that should _always_
 be ejected in every app. Phoenix apps will typically have CSS and JS assets in
 the `assets` directory. They'll also have static files to be served as-is in
 `priv/static`. Some of these files are binary (non-text) files, and we assume
@@ -107,7 +107,7 @@ Note that `cp_r` instructs `mix eject` to copy all the directory contents
 Phoenix apps typically have an `Web` module which is used to construct
 Controllers, Views, Routers, and LiveViews. Since this file is typically
 in `lib/` directly (and not in a sub-directory of `lib/`), we include it
-here in the `eject` block.
+here in the `eject` section.
 
 ```elixir
 file "lib/my_base_app_web.ex"

@@ -58,18 +58,16 @@ import Config
   config :my_base_app, some_api_token: System.get_env("SOME_API_TOKEN")
 <% end %>
 
-if config_env() not in [:dev, :test] do
-  config :my_base_app, MyBaseAppWeb.Endpoint,
-    url: [
-      host: System.get_env("HOST"),
-      port: String.to_integer(System.get_env("EXTERNAL_PORT"))
-    ],
-    secret_key_base: System.get_env("SECRET_KEY_BASE")
+config :my_base_app, MyBaseAppWeb.Endpoint,
+  url: [
+    host: System.get_env("HOST"),
+    port: String.to_integer(System.get_env("EXTERNAL_PORT"))
+  ],
+  secret_key_base: System.get_env("SECRET_KEY_BASE")
 
-  config :my_base_app, MyBaseApp.Repo,
-    priv: "priv/my_base_app_repo",
-    url: System.get_env("DATABASE_URL")
-end
+config :my_base_app, MyBaseApp.Repo,
+  priv: "priv/my_base_app_repo",
+  url: System.get_env("DATABASE_URL")
 
 # <eject:app:some_app>
 config :my_base_app, some_configuration: "just for some_app"

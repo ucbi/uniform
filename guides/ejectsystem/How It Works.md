@@ -1,4 +1,20 @@
-# How It Works
+# The Eject System: How It Works
+
+With the Eject System, multiple apps are maintained together in a single Elixir
+codebase. When you're ready to deploy an app, it's "ejected" out into separate
+codebases that only contains the code needed by the app.
+
+## What is a Base Project?
+
+A Base Project is the single Elixir application that developers directly modify
+when maintaining code with the Eject paradigm.
+
+The Base Project contains:
+
+1. Code for multiple [Ejectable Apps](#what-is-an-ejectable-app)
+2. [Libraries](dependencies.html#lib-dependencies) shared between the applications
+3. A [Plan](Eject.Plan.html) module configuring which files are copied to
+   ejected repositories.
 
 ## What is "Ejecting"?
 
@@ -21,22 +37,12 @@ automate the process of committing code to ejected repos and deploying to live
 environments. A single merged code change can result in dozens of apps being
 safely deployed without any human involvement.
 
-## What is a Base Project?
-
-A Base Project is the single Elixir application that developers directly modify
-when maintaining code with the Eject paradigm.
-
-The Base Project contains:
-
-1. Code for multiple [Ejectable Apps](#what-is-an-ejectable-app)
-2. [Libraries](dependencies.html#lib-dependencies) shared between the applications
-3. A [Plan](Eject.Plan.html) module configuring which files are copied to
-   ejected repositories.
-
 ## What is an Ejectable App?
 
-In the Eject System, multiple applications are stored in a single Elixir
-project. Each application is stored in a sub-directory of `lib`.
+An Ejectable App is simply an application that can be ejected from the Base
+Project.
+
+Each Ejectable App is stored in a sub-directory of `lib`.
 
 To identify a directory inside `lib` as an Ejectable App, **create an `eject.exs`
 file inside the directory.**
@@ -67,7 +73,7 @@ file inside the directory.**
 > `mix eject` does not by change its behavior based on the data in `extra`, but
 > it is placed in `app.extra` so that you can use it to make decisions in
 > [templates](building-files-from-eex-templates.html) or in the
-> [eject](Eject.Plan.html#eject/2) or [modify](Eject.Plan.html#modify/4) blocks
+> [eject](Eject.Plan.html#eject/2) or [modify](Eject.Plan.html#modify/4) sections
 > in your [Plan](Eject.Plan.html) module.
 >
 > For 'global' values available to _all_ ejectable apps, use the
@@ -85,13 +91,13 @@ file inside the directory.**
 Whenever you run `mix eject MyApp`, there are 4 simple rules that the library
 uses to decide which files to include or exclude from the ejected codebase.
 
-1. [A small handful of files](Eject.Plan.html#module-files-that-are-always-ejected)
-   common to most Elixir projects are always included.
+1. All files specified by the [eject section](Eject.Plan.html#eject/2) of the
+   Plan are included. These are "base files" to include with every app.
 2. All files in `lib/my_app` and `test/my_app` are included.
 3. For every [Lib Dependency](dependencies.html#lib-dependencies), all files in
    `lib/dep_name` and `test/dep_name` are included.
-4. All files specified by the [eject section](Eject.Plan.html#eject/2) of the
-   Plan are included.
+4. [A small handful of files](Eject.Plan.html#module-files-that-are-always-ejected)
+   common to most Elixir projects are always included.
 
 > The only caveat to these rules is that the files in rules 2 and 3 (the
 > `lib/foo` and `test/foo` files for your ejected app and Lib Dependencies) are
