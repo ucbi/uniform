@@ -1,7 +1,7 @@
 defmodule Eject.Config do
   @moduledoc false
 
-  defstruct [:mix_project_app, :mix_project, :plan, :templates, :destination]
+  defstruct [:mix_project_app, :mix_project, :plan, :destination]
 
   alias Eject.{LibDep, MixDep}
 
@@ -18,7 +18,6 @@ defmodule Eject.Config do
         mix_project_app: :my_app,
         mix_project: MyBaseApp.MixProject,
         plan: MyBaseApp.Eject.Project,
-        templates: "/Users/me/code/my_app/lib/my_app/eject/templates",
         destination: "/Users/me/code"
       }
 
@@ -27,16 +26,15 @@ defmodule Eject.Config do
           mix_project_app: atom,
           mix_project: module,
           plan: module,
-          templates: nil | Path.t(),
           destination: nil | Path.t()
         }
 
   @doc """
   Builds a `t:Eject.Config.t` struct from the current Mix project.
 
-  To derive the `plan`, `templates`, and `destination` fields, looks for the following in config:
+  To derive the `plan` and `destination` fields, looks for the following in config:
 
-        config :my_app, Eject, plan: SomeModule, templates: "...", destination: "..."
+        config :my_app, Eject, plan: SomeModule, destination: "..."
 
   where `:my_app` is the value of the `:app` key in your Mix project specification in `mix.exs`.
   """
@@ -49,7 +47,6 @@ defmodule Eject.Config do
       mix_project_app: mix_project_app,
       mix_project: Mix.Project.get(),
       plan: config[:plan],
-      templates: config[:templates],
       destination: config[:destination]
     }
   end

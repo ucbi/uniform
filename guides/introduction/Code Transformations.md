@@ -4,6 +4,13 @@ Whenever `mix eject` is ran, a standard set of code transformations is applied
 to the contents of each file copied, except for those specified with `cp` and
 `cp_r`.
 
+The following 4 code transformations occur **in this order**:
+
+1. [Unused mix.exs Dependencies are Removed](#mix-exs-dependency-removal)
+2. [Plan Modifiers](#modifiers-from-the-ejection-plan) are ran
+3. [The Base Project Name is replaced](#replacing-the-base-project-name) with the ejected app's name
+4. [Code Fences](#code-fences) are processed
+
 > #### Disabling Code Transformations for a file {: .tip}
 >
 > If you have a file that should not have code transformations applied upon
@@ -18,6 +25,30 @@ to the contents of each file copied, except for those specified with `cp` and
 Any Mix Dependency that is not directly or indirectly required by the app via
 `mix.exs` or the `Plan` module is removed from the ejected `mix.exs`.
 
+## Modifiers from the Ejection Plan
+
+Users can specify arbitrary modifications that should be applied to various
+files using the `modify` macro in the [Plan](`Eject.Plan`) module:
+
+```elixir
+modify ~r/.+_worker.ex/, file, app do
+  # This code will be ran for every file whose relative path in the base
+  # project matches the regex.
+  #
+  # `file` is a string containing the full file contents.
+  #
+  # `app` is the `Eject.App` struct of the given app being ejected.
+  #
+  # This is essentially a function body, must return a string with
+  # the modified file contents to eject.
+end
+
+modify "lib/my_app_web/router.ex", file do
+  # This modify block is like the one above, but the transformation will only
+  # be ran for `lib/my_app_web/router.ex`.
+end
+```
+
 ## Replacing the Base Project Name
 
 The base project name, appearing anywhere in a file, is replaced by the ejected
@@ -25,14 +56,13 @@ app name. This applies to the following formats: `base_app`, `base-app`, and
 `BaseApp`.
 
 The base project name is the `:app` key returned by `project` in the `mix.exs`
-file of the Base Project.
-
-For example, the base project name in this `mix.exs` would be `:my_base_app`:
+file of the Base Project. (For example, `:my_base_app` below.)
 
 ```elixir
+# mix.exs
 def project do
   [
-    app: :my_base_app,
+    app: :my_base_app, # <- base project name
     ...
   ]
 end
@@ -43,6 +73,42 @@ Given the above `mix.exs`, if you were to run `mix eject MyEjectableApp`:
 - `my_base_app` would be replaced with `my_ejectable_app`
 - `my-base-app` would be replaced with `my-ejectable-app`
 - `MyBaseApp` would be replaced with `MyEjectableApp`
+
+> #### Replacement in file paths {: .info}
+>
+> This same replacement of `base_project_name` to `ejected_app_name` also occurs
+> in file paths, but only with `this_format`. (Not `this-format` or `ThisFormat`.)
+>
+> This means a file at `lib/base_project_name/foo.ex` would be ejected to
+> `lib/ejected_app_name/foo.ex`.
+
+This means that a file like this
+
+```elixir
+defmodule MyBaseAppWeb.Endpoint do
+  use Phoenix.Endpoint, otp_app: :my_base_app
+
+  socket "/socket", MyBaseAppWeb.UserSocket,
+    websocket: true,
+    longpoll: false
+
+  plug MyBaseAppWeb.Router
+end
+```
+
+Would be transformed to this
+
+```elixir
+defmodule MyEjectableAppWeb.Endpoint do
+  use Phoenix.Endpoint, otp_app: :my_ejectable_app
+
+  socket "/socket", MyEjectableAppWeb.UserSocket,
+    websocket: true,
+    longpoll: false
+
+  plug MyEjectableAppWeb.Router
+end
+```
 
 ## Code Fences
 
@@ -85,26 +151,3 @@ it in these comments:
 # </eject:remove>
 ```
 
-## Modifiers from the Ejection Plan
-
-Users can specify arbitrary modifications that should be applied to various
-files using the `modify` macro in the `Plan` module:
-
-```elixir
-modify ~r/.+_worker.ex/, file, app do
-  # This code will be ran for every file whose relative path in the base
-  # project matches the regex.
-  #
-  # `file` is a string containing the full file contents.
-  #
-  # `app` is the `Eject.App` struct of the given app being ejected.
-  #
-  # This is essentially a function body, must return a string with
-  # the modified file contents to eject.
-end
-
-modify "lib/my_app_web/router.ex", file do
-  # This modify block is like the one above, but the transformation will only
-  # be ran for `lib/my_app_web/router.ex`.
-end
-```

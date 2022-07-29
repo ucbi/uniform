@@ -20,7 +20,7 @@ end
 
 ## The Plan module
 
-When using `Eject`, you must have a Plan module. It contains all of the details
+When using `Eject`, you must have a [Plan](Eject.Plan.html) module. It contains all of the details
 (the "plan") for how the ejector should behave whenever you tell it to eject a
 specific application.
 
@@ -34,16 +34,48 @@ You can name the module whatever you like, but we suggest putting it in `lib/my_
 and specifying the templates directory alongside it in `lib/my_app/eject/templates`.
 
 Then, in `config/config.exs` put the following line. (Changing the `plan` value
-to match the name of your `Plan` module above.)
+to match the name of your Plan module name above.)
 
 ```elixir
 config :ucbi_dev, Eject, plan: MyApp.Eject.Plan
 ```
 
+You can also optionally set a default `destination` for ejected apps.
+
+```elixir
+# With optional :destination
+config :ucbi_dev, Eject,
+  plan: MyApp.Eject.Plan,
+  destination: "/Users/me/ejected"
+```
+
+If `destination` is ommitted, the default is one level up from the
+Base Project's root folder. (`../`)
+
 ## Ejecting an Application
 
-To eject an application, run
+You must designate all `lib/` directories that represent an ejectable
+application by placing an `eject.exs` manifest file into the lib directory. You
+can start with a barebones manifest that contains an empty list.
 
+```elixir
+# lib/my_application_name/eject.exs
+[]
 ```
+
+> #### More on eject.exs {: .info}
+>
+> See [eject.exs Options](./how-it-works.html#eject-exs-options)
+> for an explanation of supported options.
+
+Then run
+
+```bash
 mix eject MyApplicationName
+```
+
+You can override the default destination with the `--destination` option:
+
+```bash
+mix eject MyApplicationName --destination ../path/to/ejected/apps/
 ```

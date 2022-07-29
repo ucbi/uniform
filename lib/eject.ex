@@ -14,18 +14,6 @@ defmodule Eject do
     - easily share custom library code (e.g. utilities, UI)
     - run / test all ejectable apps locally at the same time
 
-  ### Configuration
-
-  `Eject` offers the following configuration options:
-    - `project` - Required. Sets the base 'project module' that implements `Eject`.
-    - `templates` - Required. Sets the file path for `Eject` templates.
-    - `destination` - Optional. Sets the file path for the ejected apps. If omitted,
-        defaults to one level up from the `project` folder (i.e. `../`).
-
-    For example:
-
-      config :my_base_app, Eject, project: MyBaseApp.Eject.Project
-
   ### The Eject Manifest – `eject.exs`
 
   To designate a directory in `lib/` as an ejectable app, place a file
@@ -54,20 +42,6 @@ defmodule Eject do
           ]
         ]
       ]
-
-  ### Dependencies
-
-  Eject is aware of and automatically catalogs all Mix dependencies from `mix.exs`.
-
-  Any directory in side the `lib/` directory of your project root can be considered
-  a "Lib dependency".
-
-  There are three ways to tell Eject to include a dependency when a specific app is ejected:
-
-  1. Include the dependency by [saying so in `eject.exs`](#module-the-eject-manifest-eject-exs).
-  2. In your `Plan` module, configure another dependency to require it as a "sub-dependency".
-     (See `Eject.Plan.deps/1`.)
-  3. In your `Plan` module, place the dependency in the `always` block. (See `Eject.Plan.always/1`.)
 
   ### Usage
 

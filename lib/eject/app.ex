@@ -206,7 +206,7 @@ defmodule Eject.App do
     destination =
       case {config.destination, opts[:destination]} do
         {nil, nil} -> "../" <> app_name_underscore_case
-        {nil, opt} -> opt
+        {_, opt} when not is_nil(opt) -> opt
         {config, nil} -> Path.join(config, app_name_underscore_case)
       end
 

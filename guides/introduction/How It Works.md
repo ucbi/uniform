@@ -2,12 +2,14 @@
 
 ## What is "Ejecting"?
 
-When we refer to "ejecting" an app, we mean taking all of the code used by that
-application and copying it to a distinct code repository. This is done with
-`mix eject`.
+For the purposes of this documentation, ejecting an app means
 
-**`Eject` makes code repositories "out of thin air" by taking only the relevent
-bits from your Base Project.**
+> Copying the code used by the application to a separate, standalone code
+> repository, without including code that the application doesn't need.
+
+Ejecting is done with `mix eject`. This mix task essentially makes code
+repositories "out of thin air" by taking only the relevent bits from your Base
+Project.
 
 ## What is a Base Project?
 
@@ -25,9 +27,17 @@ there is an `apps` directory containing distinct Elixir
 applications. But in an `Eject` project, all of the separate applications are
 stored in a single Elixir project.
 
-Each application is stored in a separate folder in the `lib/` directory. To
+Each application is stored in a sub-directory of the `lib/` directory. To
 designate a lib directory as an ejectable application, create an `eject.exs`
 file directly inside the lib directory. For example, `lib/my_app/eject.exs`.
+
+To eject an Ejectable App in `lib/my_app`, run this command:
+
+```
+mix eject MyApp
+```
+
+### eject.exs Options
 
 `eject.exs` files must contain a keyword list, in this structure:
 
@@ -42,6 +52,21 @@ file directly inside the lib directory. For example, `lib/my_app/eject.exs`.
 ]
 ```
 
+- `mix_deps` - [Mix Dependencies](#mix-dependencies) of the app; each must exist in `mix.exs`.
+- `lib_deps` - [Lib Dependencies](#lib-dependencies) of the app; each must exist as a folder in `lib/`.
+- `extra` - additional user-defined data to configure the app.
+
+> #### The purpose of the :extra key {: .tip}
+>
+> `mix eject` does not by change its behavior based on the data in `extra`, but
+> it is placed in `app.extra` so that you can use it to make decisions in
+> [templates](building-files-from-eex-templates.html) or in the
+> [eject](Eject.Plan.html#eject/2) or [modify](Eject.Plan.html#modify/4) blocks
+> in your [Plan](Eject.Plan.html) module.
+>
+> For 'global' values available to _all_ ejectable apps, use the
+> `c:Eject.Plan.extra/1` callback implementation.
+
 > #### No Keys in eject.exs are required {: .info}
 >
 > Note that `eject.exs` does not need to include `mix_deps`, `lib_deps`, or
@@ -49,42 +74,75 @@ file directly inside the lib directory. For example, `lib/my_app/eject.exs`.
 >
 > By implication, `[]` is a valid `eject.exs` file.
 
-The name of the directory is important. To eject an application in `lib/my_app`,
-run this command:
+## Mix and Lib Dependencies
 
+### Lib Dependencies
+
+A Lib Dependency is a directory in the [Base
+Project](#what-is-a-base-project)'s `lib/` directory that contains a code
+library used by [Ejectable Apps](#what-is-an-ejectable-app).
+
+Lib Dependencies are `Eject`'s way to make sharing code easy between different
+apps without resorting to something more involved like private Hex packages.
+
+A Lib Dependency is referenced by an atom that matches the name of the
+directory in `lib/`.
+
+For example, a library in this directory
+
+```bash
+lib/utilities
 ```
-mix eject MyApp
+
+would be referenced in `eject.exs` like this
+
+```elixir
+[
+  lib_deps: [:utilities]
+]
 ```
 
-## What is a Lib Dependency?
+Or in the [Plan](Eject.Plan.html) module like this
 
-A Lib Dependency is a folder in `lib` that contains a code library that is used
-by Ejectable Apps.
+```elixir
+deps do
+  always do
+    lib :utilities
+  end
+end
+```
 
-While [Hex](https://hex.pm/) contains public libraries, many teams have private
-libraries that are useful to share between projects. It's possible to share
-these with private Hex packages. However, using the Eject paradigm, libraries
-can be shared simply by putting them in `lib/` and specifying that an app
-depends on them.
+### Mix Dependencies
 
-## What does `mix eject` do?
+`Eject` is aware of the deps in your `mix.exs`. Whenever an app is ejected, it
+removes all mix dependencies that aren't explicitly needed by the app.
 
-When you run `mix eject MyApp`, the following happens:
+### How to include a Dependency with an Ejectable App
 
-- A new directory is created (if it doesn't exist) at the destination.
-- If the destination already exists, all files and directories are deleted.
-  except for `.git`, `_build`, and `deps`.
-    - Keeping `.git` prevents `mix eject` from deleting your Git repository
-      history.
-    - Keeping `deps` ensures all of the dependencies won't need to be
-      downloaded every time ejection happens.
-    - Keeping `_build` ensures that the minimum amount of recompilation will be
-      required after ejection.
-- All of the files in `lib/my_app` are copied to the destination.
-- All of the files specified by the `eject` block of the `Plan` module are
-  copied to the destination.
-- All of the files in Lib Dependencies of the app are copied to the
-  destination.
-- As each of the files above are copied, [a set of
-  transformations](./code-transformations.html) are applied to each file except
-  for those specified with `cp` and `cp_r`.
+There are three ways:
+
+1. Include the dependency by saying so in [eject.exs](#eject-exs-options).
+2. Place the dependency in the `always` block of your [Plan](Eject.Plan.html)
+   module. (See `Eject.Plan.always/1`.)
+3. Configure another dependency to require it as a "sub-dependency" in your
+   [Plan](Eject.Plan.html) module. (See `Eject.Plan.deps/1`.) All transitive
+   (sub-) dependencies of any dependency in `always` or `eject.exs` will be
+   ejected.
+
+## What exactly does `mix eject` do?
+
+When you eject an app by running `mix eject MyApp`, the following happens:
+
+- The destination directory is created if it doesn't exist.
+- All files and directories in the destination are deleted, except for `.git`,
+  `_build`, and `deps`.
+    - `.git` is kept to preserve the Git repository and history.
+    - `deps` is kept to avoid having to download all dependencies after ejection.
+    - `_build` is kept to avoid having to recompile the entire project after
+      ejection.
+- All files in `lib/my_app` are copied to the destination.
+- All files specified in the `eject(app) do` block of the [Plan](`Eject.Plan`)
+  are copied to the destination.
+- All Lib Dependencies of the app are copied to the destination.
+- For each file copied, [a set of transformations](./code-transformations.html)
+  are applied to the file contents – except for those specified with `cp` and `cp_r`.
