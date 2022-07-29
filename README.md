@@ -1,63 +1,42 @@
 # Eject
 
-- [Eject](#eject)
-  - [Description](#description)
-  - [Terminology](#terminology)
-  - [Use Cases](#use-cases)
-  - [Benefits](#benefits)
-  - [Disadvantages](#disadvantages)
-  - [Compared with other approaches](#compared-with-other-approaches)
-  - [Installation](#installation)
-  - [Usage](#usage)
-  - [Documentation](#documentation)
-  - [License](#license)
-
-## Description
-
 Part architectural pattern, part template this is a way of working that enables developers to work on a primary, unified application, similar to a monolith, but unlike a monolith can be split into smaller completely uncoupled applications with no trace of the original monolith from whence they came.
 
-## Terminology
+The complete documentation for Eject is located [here](https://hexdocs.pm/eject/).
 
-- When we nail down the terms we'll using via [#1](https://github.com/ucbi/eject/issues/1) we need to define them each here and use them consistently throughout the documentation.
+## Recommended Guides
 
-## Use Cases
+In order to understand and use this library, we heavily recommend reading the
+following guides:
 
-You need to maintain a portfolio of applications that may be entirely independent of each other. You want things to be done consistently throughout them, though they may have some necessarily unique features. You want leverage as you maintain this portfolio.
+- [The Eject System: How It Works](https://hexdocs.pm/eject/how-it-works.html)
+- [Dependencies](https://hexdocs.pm/eject/dependencies.html)
+- [Code Transformations](https://hexdocs.pm/eject/code-transformations.html)
 
-In our specifc use case, we build and maintain applications across companies for a large enterprise. The companies have their own distinct branding, themes, deployment pipelines, and assurance processes. However, they share data access patterns, ui libraries, authentication mechanisms, and many other common features.
-
-This would also be true in an agency setting where the agency typically builds things a certain way but each company and domain brings unique requirements.
-
-## Compared with other approaches
-
-- VS Umbrellas
-- VS Ponchos
-- VS Monoliths
-- VS Micro-services
-- VS individual libraries for common features
-
-## Installation
-
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `eject` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:eject, "~> 0.1.0"}
-  ]
-end
-```
+The [Setting up a Phoenix
+project](https://hexdocs.pm/eject/setting-up-a-phoenix-project.html) guide is
+recommended if you're building Phoenix apps.
 
 ## Usage
 
-Add usage example/instructions
+```bash
+mix eject Tweeter
+```
 
-## Documentation
+Read about [the Eject System](https://hexdocs.pm/eject/how-it-works.html) for details about how it
+works.
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/eject>.
+## Installation
+
+Consult the [Getting Started](https://hexdocs.pm/eject/getting-started.html)
+guide to add `Eject` to an Elixir application.
+
+In summary, you'll need to:
+
+1. Add the dep in `mix.exs`: `{:eject, "~> 0.1.0"}`
+2. Add a [Plan](https://hexdocs.pm/eject/Eject.Plan.html) module to your project
+3. Configure your Elixir app to point to the Plan module
+4. Add `eject.exs` manifests to each Ejectable Application
 
 ## License
 

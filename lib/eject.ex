@@ -19,7 +19,6 @@ defmodule Eject do
   The [Setting up a Phoenix project](setting-up-a-phoenix-project.html) guide
   is recommended if you're building Phoenix apps.
 
-
   ## Usage
 
   ```bash
