@@ -37,7 +37,7 @@ by an App:
 ```
 
 2. Include the depencency in **all Ejectable Apps** by placing the dependency in
-   the [always](`Eject.Plan.always/1`) block of your [Plan](Eject.Plan.html)
+   the [always](`Eject.Plan.always/1`) section of your [Plan](Eject.Plan.html)
    module.
 
 ```elixir
@@ -50,7 +50,7 @@ end
 ```
 
 3. Make it a "sub-dependency" of a dependency from method 1 or 2 by using the
-   `lib_deps` or `mix_deps` macros in your [deps block](`Eject.Plan.deps/1`).
+   `lib_deps` or `mix_deps` macros in your [deps section](`Eject.Plan.deps/1`).
 
 ```elixir
 deps do

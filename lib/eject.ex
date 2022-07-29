@@ -3,9 +3,22 @@ defmodule Eject do
   A system for maintaining multiple homogenous Elixir apps from a single Elixir
   project in a way that minimizes duplicate work.
 
-  With `Eject`, the apps are maintained together in development. But when you're
-  ready to deploy them, they're "ejected" out into a separate codebase that
-  only contains the code needed by the app.
+  With [the Eject System](how-it-works.html), the apps are maintained together
+  in development. But when you're ready to deploy them, they're "ejected" out
+  into separate codebases that only contains the code needed by the app.
+
+  ## Recommended Guides
+
+  In order to understand and use this library, we heavily recommend reading the
+  following guides:
+
+  - [The Eject System: How It Works](how-it-works.html)
+  - [Dependencies](dependencies.html)
+  - [Code Transformations](code-transformations.html)
+
+  The [Setting up a Phoenix project](setting-up-a-phoenix-project.html) guide
+  is recommended if you're building Phoenix apps.
+
 
   ## Usage
 
@@ -13,19 +26,20 @@ defmodule Eject do
   mix eject Tweeter
   ```
 
-  See `mix eject` for details.
+  Read about [the Eject System](how-it-works.html) for details about how it
+  works.
 
   ## Installation
 
-  To set up a project for `Eject`, you need to:
+  Consult the [Getting Started](getting-started.html) guide to add `Eject` to
+  an Elixir application.
+
+  In summary, you'll need to:
 
   1. Add the dep in `mix.exs`: `{:eject, "~> 0.1.0"}`
   2. Add a [Plan](Eject.Plan) module to your project
   3. Configure your Elixir app to point to the Plan module
   4. Add `eject.exs` manifests to each Ejectable Application
-
-  For more details about each step, consult the [Getting
-  Started](getting-started.html) guide.
 
   ## The Eject System
 

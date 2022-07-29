@@ -43,7 +43,7 @@ modify ~r/.+_worker.ex/, file, app do
 end
 
 modify "lib/my_app_web/router.ex", file do
-  # This modify block is like the one above, but the transformation will only
+  # This modifier is like the one above, but the transformation will only
   # be ran for `lib/my_app_web/router.ex`.
 end
 ```
