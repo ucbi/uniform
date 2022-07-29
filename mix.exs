@@ -53,10 +53,10 @@ defmodule Eject.MixProject do
         "guides/ejectsystem/How It Works.md",
         "guides/ejectsystem/Dependencies.md",
         "guides/ejectsystem/Code Transformations.md",
-        "guides/ejectsystem/Benefits and Disadvantages.md",
         "guides/howtos/Setting up a Phoenix project.md",
         "guides/howtos/Handling Multiple Databases.md",
         "guides/howtos/Building files from EEx templates.md",
+        "guides/assessment/Benefits and Disadvantages.md",
         "guides/assessment/Use Cases.md",
         "guides/assessment/Alternative Models.md"
       ],
