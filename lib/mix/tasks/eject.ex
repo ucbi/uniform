@@ -23,21 +23,28 @@ defmodule Mix.Tasks.Eject do
 
   When you eject an app by running `mix eject MyApp`, the following happens:
 
-  - The destination directory is created if it doesn't exist.
-  - All files and directories in the destination are deleted, except for `.git`,
+  1. The destination directory is created if it doesn't exist.
+  2. All files and directories in the destination are deleted, except for `.git`,
     `_build`, and `deps`.
-      - `.git` is kept to preserve the Git repository and history.
-      - `deps` is kept to avoid having to download all dependencies after ejection.
-      - `_build` is kept to avoid having to recompile the entire project after
-        ejection.
-  - All files in `lib/my_app` are copied to the destination.
-  - All files specified in the `eject(app) do` block of the [Plan](`Eject.Plan`)
-    are copied to the destination.
-  - All [Lib Dependencies](dependencies.html#lib-dependencies) of the app are
-    copied to the destination.
-  - For each file copied, [a set of
+  3. All files in `lib/my_app` and `test/my_app` are copied to the destination.
+  4. All files specified in the [eject](Eject.Plan.html#eject/2) section of the
+     [Plan](`Eject.Plan`) are copied to the destination.
+  5. All [Lib Dependencies](dependencies.html#lib-dependencies) of the app are
+    copied to the destination. This includes all of `lib/dep_name` and
+    `test/dep_name` automatically.
+  6. For each file copied, [a set of
     transformations](./code-transformations.html) are applied to the file
-    contents – except for those specified with `cp` and `cp_r`.
+    contents – except for files specified with `cp` and `cp_r`.
+  7. `mix format` is ran on the ejected codebase.
+
+  In step 2, `.git` is kept to preserve the Git repository and history. `deps`
+  is kept to avoid having to download all dependencies after ejection. `_build`
+  is kept to avoid having to recompile the entire project after ejection.
+
+  In step 7, running `mix format` tidies up things like chains of newlines that
+  may appear from applying [Code Fences](code-transformations.html#code-fences).
+  It also prevents you from having to think about code formatting in
+  [modify](Eject.Plan.html#modify/4).
 
   """
 

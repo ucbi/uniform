@@ -1,7 +1,9 @@
 # Code Transformations
 
-During `mix eject`, there are 4 code transformations applied to the
-contents of each file copied. They occur **in this order**:
+During `mix eject`, there are 4 code transformations applied to file contents.
+These transformations happen to every file, except those ejected with `cp` and `cp_r`.
+
+They occur **in this order**.
 
 1. [Unused mix.exs Dependencies are Removed](#mix-exs-dependency-removal)
 2. [Plan Modifiers](#modifiers-from-the-ejection-plan) are ran
@@ -10,12 +12,12 @@ contents of each file copied. They occur **in this order**:
 
 > #### Disabling Code Transformations for a file {: .tip}
 >
-> If you have a file that should not have code transformations applied upon
-> ejection, use `cp` instead of `file` to designate that it should be ejected
-> in the `Plan` module.
+> If you have a file that should not have Code Transformations applied upon
+> ejection, use [`cp`](Eject.Plan.html#cp/2) instead of
+> [`file`](Eject.Plan.html#file/2).
 >
 > If there is an entire directory of contents that should not be modified, use
-> `cp_r`, which will be much faster.
+> [`cp_r`](Eject.Plan.html#cp_r/2), which will be much faster.
 
 ## mix.exs Dependency Removal
 

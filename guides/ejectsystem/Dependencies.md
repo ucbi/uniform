@@ -63,3 +63,16 @@ deps do
   end
 end
 ```
+
+> #### Chained Dependencies {: .info}
+>
+> `mix eject` will follow chains of sub-dependencies completely.
+>
+> If all of the following are true:
+>
+> - The app's `eject.exs` manifest includes `lib_deps: [:foo]`
+> - The `deps` section of your Plan says that `foo` has `lib_deps: [:bar]`
+> - The `deps` section of your Plan says that `bar` has `lib_deps: [:baz]`
+>
+> Then the ejected codebase will include `lib/foo`, `lib/bar`, and `lib/baz`.
+

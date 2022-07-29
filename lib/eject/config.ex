@@ -67,9 +67,9 @@ defmodule Eject.Config do
 
       {:error, error} ->
         raise """
-        Tried to load Plan module #{inspect config[:plan]} but received:
+        Tried to load Plan module #{inspect(config[:plan])} but received:
 
-            {:error, #{inspect error}}
+            {:error, #{inspect(error)}}
 
         Did you spell the module name correctly in `config.exs`?
 
@@ -78,16 +78,15 @@ defmodule Eject.Config do
 
     unless function_exported?(config[:plan], :__template_dir__, 0) do
       raise """
-      #{inspect config[:plan]} is not a Plan module.
+      #{inspect(config[:plan])} is not a Plan module.
 
-      Add the following to #{inspect config[:plan]}.
+      Add the following to #{inspect(config[:plan])}.
 
           use Eject.Plan, templates: "..."
 
       (Change `...` to your Eject templates directory.)
 
       """
-
     end
 
     %__MODULE__{
@@ -105,7 +104,10 @@ defmodule Eject.Config do
   @spec lib_deps(t) :: %{LibDep.name() => LibDep.t()}
   def lib_deps(config) do
     Code.ensure_loaded!(config.plan)
-    registered = if function_exported?(config.plan, :__deps__, 1), do: config.plan.__deps__(:lib), else: []
+
+    registered =
+      if function_exported?(config.plan, :__deps__, 1), do: config.plan.__deps__(:lib), else: []
+
     names = for lib_dep <- registered, do: to_string(lib_dep.name)
     rules = Eject.Rules.new([])
 
@@ -132,7 +134,9 @@ defmodule Eject.Config do
   @spec mix_deps(t) :: %{MixDep.name() => MixDep.t()}
   def mix_deps(config) do
     Code.ensure_loaded!(config.plan)
-    registered = if function_exported?(config.plan, :__deps__, 1), do: config.plan.__deps__(:mix), else: []
+
+    registered =
+      if function_exported?(config.plan, :__deps__, 1), do: config.plan.__deps__(:mix), else: []
 
     mix_exs_deps =
       config.mix_project.project()

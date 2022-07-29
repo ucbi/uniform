@@ -79,11 +79,20 @@ mix eject MyApplicationName
 
 ## Build the Plan
 
-At this point, you should be able to run `mix eject` on one of your applications without the Mix Task failing. However, the codebase that gets ejected will probably not run without errors.
+At this point, you should be able to eject your applications with `mix eject`. However, the ejected codebases will probably lack critical code that is needed to run properly.
 
-Since each Elixir application is different, it is up to you to determine which files need to be ejected in order to make `mix eject` emit a working application.
+> Read the documentation for [Eject.Plan](Eject.Plan.html) for the full range
+> of features to build out your Plan module.
 
-Here is what an example barebones Plan might look like.
+Since each Elixir application is different, **it is up to you to determine which files need to be ejected** to make `mix eject` emit a working application.
+
+> #### Using Phoenix? {: .tip}
+>
+> We recommend developers building Phoenix projects read about [the Eject
+> System](how-it-works.html), then consult the how-to guide for [Setting up a
+> Phoenix Project](./setting-up-a-phoenix-project.html).
+
+An example barebones Plan might look like this.
 
 ```elixir
 defmodule MyApp.Eject.Plan do
@@ -91,6 +100,22 @@ defmodule MyApp.Eject.Plan do
 
   eject(app) do
     file "lib/my_app/application.ex"
+    file "lib/my_app_web/endpoint.ex"
+    cp_r "assets"
+    template "config/runtime.exs"
+  end
+
+  deps do
+    always do
+      mix :phoenix
+      mix :phoenix_html
+
+      lib :utilities
+    end
+
+    lib :my_data_graph do
+      mix_deps [:absinthe]
+    end
   end
 end
 ```

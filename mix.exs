@@ -54,7 +54,9 @@ defmodule Eject.MixProject do
         "guides/ejectsystem/Dependencies.md",
         "guides/ejectsystem/Code Transformations.md",
         "guides/ejectsystem/Benefits and Disadvantages.md",
-        "guides/howtos/Building Files from EEx Templates.md"
+        "guides/howtos/Setting up a Phoenix project.md",
+        "guides/howtos/Handling Multiple Databases.md",
+        "guides/howtos/Building files from EEx templates.md"
       ],
       groups_for_extras: [
         Introduction: ~r/guides\/introduction\/.?/,
