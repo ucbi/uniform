@@ -1,4 +1,4 @@
-# Pros and Cons of the Eject Architecture
+# Benefits and Disadvantages
 
 `Eject` is not just a library. It's an entire paradigm and system for organizing
 and synchronizing a suite of applications.

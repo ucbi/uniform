@@ -49,16 +49,18 @@ defmodule Eject.MixProject do
       source_url: @source_url,
       extra_section: "GUIDES",
       extras: [
-        "guides/introduction/Pros and Cons of the Eject Architecture.md",
-        "guides/introduction/How It Works.md",
-        "guides/introduction/Code Transformations.md",
         "guides/introduction/Getting Started.md",
+        "guides/ejectsystem/How It Works.md",
+        "guides/ejectsystem/Dependencies.md",
+        "guides/ejectsystem/Code Transformations.md",
+        "guides/ejectsystem/Benefits and Disadvantages.md",
         "guides/howtos/Specifying Base Files.md",
         "guides/howtos/Bundling Related Dependencies.md",
         "guides/howtos/Building Files from EEx Templates.md"
       ],
       groups_for_extras: [
         Introduction: ~r/guides\/introduction\/.?/,
+        "The Eject System": ~r/guides\/ejectsystem\/.?/,
         "How-To's": ~r/guides\/howtos\/.?/
       ]
     ]

@@ -1,10 +1,7 @@
 # Code Transformations
 
-Whenever `mix eject` is ran, a standard set of code transformations is applied
-to the contents of each file copied, except for those specified with `cp` and
-`cp_r`.
-
-The following 4 code transformations occur **in this order**:
+During `mix eject`, there are 4 code transformations applied to the
+contents of each file copied. They occur **in this order**:
 
 1. [Unused mix.exs Dependencies are Removed](#mix-exs-dependency-removal)
 2. [Plan Modifiers](#modifiers-from-the-ejection-plan) are ran

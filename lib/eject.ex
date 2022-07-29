@@ -1,54 +1,36 @@
 defmodule Eject do
   @moduledoc """
-  A tool for "ejecting" applications from a "base" Elixir project into separate,
-  standalone code repositories and releases.
+  A system for maintaining multiple homogenous Elixir apps from a single Elixir
+  project in a way that minimizes duplicate work.
 
-  By belonging to a base application, each ejectable app is configured and managed
-  in a consistent, coordinated, and maintainable fashion.
+  With `Eject`, the apps are maintained together in development. But when you're
+  ready to deploy them, they're "ejected" out into a separate codebase that
+  only contains the code needed by the app.
 
-  ### Benefits
+  ## Usage
 
-  `Eject` allows you to:
-    - spin up new ejectable apps quickly and easily
-    - upgrade dependencies once in the base app to upgrade all ejectable apps
-    - easily share custom library code (e.g. utilities, UI)
-    - run / test all ejectable apps locally at the same time
+  ```bash
+  mix eject Tweeter
+  ```
 
-  ### The Eject Manifest – `eject.exs`
+  See `mix eject` for details.
 
-  To designate a directory in `lib/` as an ejectable app, place a file
-  called `eject.exs` directly inside that directory.
+  ## Installation
 
-  The `eject.exs` manifest specifies required dependencies and configuration values:
-    - `mix_deps` - mix dependencies; each must exist in `mix.exs`.
-    - `lib_deps` - lib dependencies; each must exist as a folder in `lib/`.
-    - `extra` - additional key value pairs specific to the ejectable app. For 'global' values available
-      to _all_ ejectable apps, use the `c:Eject.Plan.extra/1` callback implementation.
+  To set up a project for `Eject`, you need to:
 
-  Required for each ejectable app.
+  1. Add the dep in `mix.exs`: `{:eject, "~> 0.1.0"}`
+  2. Add a [Plan](Eject.Plan) module to your project
+  3. Configure your Elixir app to point to the Plan module
+  4. Add `eject.exs` manifests to each Ejectable Application
 
-      # Example `eject.exs`
-      [
-        mix_deps: [:ex_aws_s3],
-        lib_deps: [:my_utilities],
-        extra: [
-          sentry: [...],
-          deployment: [
-            target: :heroku,
-            options: [...],
-              buildpacks: [...],
-              addons: [...],
-              domains: [...]
-          ]
-        ]
-      ]
+  For more details about each step, consult the [Getting
+  Started](getting-started.html) guide.
 
-  ### Usage
+  ## The Eject System
 
-      $ mix eject Tweeter
-
-  See `Mix.Tasks.App.Eject` for details.
-
+  `Eject` is not just a library, but a whole system for structuring
+  applications.
   """
 
   require Logger
