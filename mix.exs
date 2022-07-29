@@ -56,12 +56,15 @@ defmodule Eject.MixProject do
         "guides/ejectsystem/Benefits and Disadvantages.md",
         "guides/howtos/Setting up a Phoenix project.md",
         "guides/howtos/Handling Multiple Databases.md",
-        "guides/howtos/Building files from EEx templates.md"
+        "guides/howtos/Building files from EEx templates.md",
+        "guides/assessment/Use Cases.md",
+        "guides/assessment/Alternative Models.md"
       ],
       groups_for_extras: [
         Introduction: ~r/guides\/introduction\/.?/,
         "The Eject System": ~r/guides\/ejectsystem\/.?/,
-        "How-To's": ~r/guides\/howtos\/.?/
+        "How-To's": ~r/guides\/howtos\/.?/,
+        "Assessing the Model": ~r/guides\/assessment\/.?/
       ]
     ]
   end
