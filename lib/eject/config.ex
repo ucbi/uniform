@@ -103,7 +103,7 @@ defmodule Eject.Config do
   """
   @spec lib_deps(t) :: %{LibDep.name() => LibDep.t()}
   def lib_deps(config) do
-    Code.ensure_loaded!(config.plan)
+    {:module, _} = Code.ensure_loaded(config.plan)
 
     registered =
       if function_exported?(config.plan, :__deps__, 1), do: config.plan.__deps__(:lib), else: []
@@ -133,7 +133,7 @@ defmodule Eject.Config do
   """
   @spec mix_deps(t) :: %{MixDep.name() => MixDep.t()}
   def mix_deps(config) do
-    Code.ensure_loaded!(config.plan)
+    {:module, _} = Code.ensure_loaded(config.plan)
 
     registered =
       if function_exported?(config.plan, :__deps__, 1), do: config.plan.__deps__(:mix), else: []

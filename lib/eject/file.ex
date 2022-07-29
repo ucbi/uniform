@@ -64,7 +64,7 @@ defmodule Eject.File do
 
   # Returns all files specified with file/template/cp/cp_r in the `eject` macro
   def base_files(app) do
-    Code.ensure_loaded!(app.internal.config.plan)
+    {:module, _} = Code.ensure_loaded(app.internal.config.plan)
 
     if function_exported?(app.internal.config.plan, :__eject__, 1) do
       app
@@ -106,7 +106,7 @@ defmodule Eject.File do
   @spec app_lib_files(App.t()) :: [t]
   defp app_lib_files(app) do
     manifest_path = Manifest.manifest_path(app.name.underscore)
-    Code.ensure_loaded!(app.internal.config.plan)
+    {:module, _} = Code.ensure_loaded(app.internal.config.plan)
 
     file_rules =
       if function_exported?(app.internal.config.plan, :__eject__, 1) do
