@@ -39,6 +39,19 @@ defmodule Eject.Plan do
 
   See `eject/2` for more information.
 
+  ## Files that are always ejected
+
+  There are a handful of files that are automatically ejected. You do not need
+  to specify these in the `eject` block.
+
+  ```bash
+  mix.exs
+  mix.lock
+  .gitignore
+  .formatter.exs
+  test/test_helper.exs
+  ```
+
   ## `deps` Block
 
   Besides the `eject` block, the plan can also contain a `deps` block to

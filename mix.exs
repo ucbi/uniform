@@ -54,8 +54,6 @@ defmodule Eject.MixProject do
         "guides/ejectsystem/Dependencies.md",
         "guides/ejectsystem/Code Transformations.md",
         "guides/ejectsystem/Benefits and Disadvantages.md",
-        "guides/howtos/Specifying Base Files.md",
-        "guides/howtos/Bundling Related Dependencies.md",
         "guides/howtos/Building Files from EEx Templates.md"
       ],
       groups_for_extras: [

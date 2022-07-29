@@ -1,8 +1,8 @@
 # Getting Started
 
-## Adding Eject to an Application
+## Add Eject to mix.exs
 
-Add `:eject` as a dependency in `mix.exs` and wrap your endir dependency list in
+Add `:eject` as a dependency in `mix.exs` and wrap your entire dependency list in
 `# <eject:deps>` and `# </eject:deps>` comments, like this.
 
 
@@ -11,18 +11,17 @@ defp deps do
   # <eject:deps>
   [
     {:eject, "~> 0.1.0"},
-    {:other_dep, ...},
     ...
   ]
   # </eject:deps>
 end
 ```
 
-## The Plan module
+## Create a Plan module
 
-Create a [Plan](Eject.Plan.html) module. It contains all of the details (the
-"plan") for how the ejector should behave whenever you tell it to eject a
-specific application.
+Next, create a [Plan](Eject.Plan.html) module. It will contain all of the
+details (the "plan") for how `mix eject` should behave whenever you tell it to
+eject a specific application.
 
 ```elixir
 defmodule MyApp.Eject.Plan do
@@ -30,8 +29,9 @@ defmodule MyApp.Eject.Plan do
 end
 ```
 
-You can name the module whatever you like, but we suggest putting it in `lib/my_app/eject/plan.ex`
-and specifying the templates directory alongside it in `lib/my_app/eject/templates`.
+You can name the module whatever you like, but we suggest putting it in
+`lib/my_app/eject/plan.ex` and specifying the templates directory alongside it
+in `lib/my_app/eject/templates`.
 
 ## Configuration
 
@@ -75,4 +75,22 @@ Then run
 
 ```bash
 mix eject MyApplicationName
+```
+
+## Build the Plan
+
+At this point, you should be able to run `mix eject` on one of your applications without the Mix Task failing. However, the codebase that gets ejected will probably not run without errors.
+
+Since each Elixir application is different, it is up to you to determine which files need to be ejected in order to make `mix eject` emit a working application.
+
+Here is what an example barebones Plan might look like.
+
+```elixir
+defmodule MyApp.Eject.Plan do
+  use Eject.Plan
+
+  eject(app) do
+    file "lib/my_app/application.ex"
+  end
+end
 ```

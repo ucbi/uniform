@@ -82,6 +82,7 @@ defmodule Eject.File do
   # Returns hardcoded base files that don't need to be specified
   @spec hardcoded_base_files(App.t()) :: [t]
   defp hardcoded_base_files(app) do
+    # If this list changes, update the moduledoc in `Eject.Plan`
     files =
       [
         "mix.exs",
