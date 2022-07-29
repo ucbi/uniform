@@ -85,7 +85,20 @@ defmodule Eject do
     if not is_atom(name) do
       raise ArgumentError,
         message:
-          "🤖 Please pass in a module name corresponding to a directory in `lib` containing an `eject.exs` file. E.g. Tweeter (received #{inspect(name)})"
+          "🤖 Please pass in a module name corresponding to a directory in lib/ containing an `eject.exs` file. E.g. Tweeter (received #{inspect(name)})"
+    end
+
+    # ensure the name was passed in CamelCase format; otherwise subtle bugs happen
+    unless inspect(name) =~ ~r/^[A-Z][a-zA-Z0-9]*$/ do
+      raise ArgumentError,
+        message: """
+        The name must correspond to a directory in lib/, in CamelCase format.
+
+        For example, to eject `lib/my_app`, do:
+
+            mix eject MyApp
+
+        """
     end
 
     Mix.Task.run("compile", [])
