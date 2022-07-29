@@ -158,7 +158,7 @@ defmodule Eject.App do
       destination: destination(app_name_underscore_case, config, opts)
     }
 
-    Code.ensure_loaded!(config.plan)
+    {:module, _} = Code.ensure_loaded(config.plan)
 
     # `extra/1` requires an app struct
     extra =
