@@ -158,8 +158,17 @@ defmodule Eject.App do
       destination: destination(app_name_underscore_case, config, opts)
     }
 
+    Code.ensure_loaded!(config.plan)
+
     # `extra/1` requires an app struct
-    %{app | extra: Keyword.merge(config.plan.extra(app), manifest.extra)}
+    extra =
+      if function_exported?(config.plan, :extra, 1) do
+        Keyword.merge(config.plan.extra(app), manifest.extra)
+      else
+        manifest.extra
+      end
+
+    %{app | extra: extra}
   end
 
   @doc """

@@ -88,6 +88,10 @@ defmodule Mix.Tasks.Eject do
       IO.puts("   " <> Enum.join(mix_deps, " "))
     end)
 
+    if Enum.empty?(app.internal.deps.included.mix) do
+      IO.puts("   " <> "[NONE]")
+    end
+
     IO.puts("")
     IO.puts("🤓 Lib Dependencies")
 
@@ -96,6 +100,10 @@ defmodule Mix.Tasks.Eject do
     |> Enum.each(fn lib_deps ->
       IO.puts("   " <> Enum.join(lib_deps, " "))
     end)
+
+    if Enum.empty?(app.internal.deps.included.lib) do
+      IO.puts("   " <> "[NONE]")
+    end
 
     IO.puts("")
 

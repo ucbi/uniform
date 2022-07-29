@@ -117,9 +117,13 @@ defmodule Eject do
   @doc "Clear the destination folder where the app will be ejected." && false
   def clear_destination(app) do
     if File.exists?(app.destination) do
+      Code.ensure_loaded!(app.internal.config.plan)
+
       preserve =
-        for {:preserve, filename} <- app.internal.config.plan.__eject__(app) do
-          filename
+        if function_exported?(app.internal.config.plan, :__eject__, 1) do
+          for {:preserve, filename} <- app.internal.config.plan.__eject__(app), do: filename
+        else
+          []
         end
 
       preserve = [".git", "deps", "_build" | preserve]

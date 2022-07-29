@@ -261,6 +261,8 @@ defmodule Eject.Plan do
   """
   @callback target_path(path :: Path.t(), app :: Eject.App.t()) :: Path.t()
 
+  @optional_callbacks extra: 1, target_path: 2
+
   @doc """
        A macro for defining an ejection plan.
 
