@@ -1,80 +1,49 @@
 defmodule Eject do
   @moduledoc """
-  A tool for "ejecting" applications from a "base" Elixir project into separate,
-  standalone code repositories and releases.
+  A system for maintaining multiple homogenous Elixir apps from a single Elixir
+  project in a way that minimizes duplicate work.
 
-  By belonging to a base application, each ejectable app is configured and managed
-  in a consistent, coordinated, and maintainable fashion.
+  With [the Eject System](how-it-works.html), the apps are maintained together
+  in development. But when you're ready to deploy them, they're "ejected" out
+  into separate codebases that only contains the code needed by the app.
 
-  ### Benefits
+  ## Recommended Guides
 
-  `Eject` allows you to:
-    - spin up new ejectable apps quickly and easily
-    - upgrade dependencies once in the base app to upgrade all ejectable apps
-    - easily share custom library code (e.g. utilities, UI)
-    - run / test all ejectable apps locally at the same time
+  In order to understand and use this library, we heavily recommend reading the
+  following guides:
 
-  ### Configuration
+  - [The Eject System: How It Works](how-it-works.html)
+  - [Dependencies](dependencies.html)
+  - [Code Transformations](code-transformations.html)
 
-  `Eject` offers the following configuration options:
-    - `project` - Required. Sets the base 'project module' that implements `Eject`.
-    - `templates` - Required. Sets the file path for `Eject` templates.
-    - `destination` - Optional. Sets the file path for the ejected apps. If omitted,
-        defaults to one level up from the `project` folder (i.e. `../`).
+  The [Setting up a Phoenix project](setting-up-a-phoenix-project.html) guide
+  is recommended if you're building Phoenix apps.
 
-    For example:
+  ## Usage
 
-      config :my_base_app, Eject, project: MyBaseApp.Eject.Project
+  ```bash
+  mix eject Tweeter
+  ```
 
-  ### The Eject Manifest – `eject.exs`
+  Read about [the Eject System](how-it-works.html) for details about how it
+  works.
 
-  To designate a directory in `lib/` as an ejectable app, place a file
-  called `eject.exs` directly inside that directory.
+  ## Installation
 
-  The `eject.exs` manifest specifies required dependencies and configuration values:
-    - `mix_deps` - mix dependencies; each must exist in `mix.exs`.
-    - `lib_deps` - lib dependencies; each must exist as a folder in `lib/`.
-    - `extra` - additional key value pairs specific to the ejectable app. For 'global' values available
-      to _all_ ejectable apps, use the `c:Eject.Plan.extra/1` callback implementation.
+  Consult the [Getting Started](getting-started.html) guide to add `Eject` to
+  an Elixir application.
 
-  Required for each ejectable app.
+  In summary, you'll need to:
 
-      # Example `eject.exs`
-      [
-        mix_deps: [:ex_aws_s3],
-        lib_deps: [:my_utilities],
-        extra: [
-          sentry: [...],
-          deployment: [
-            target: :heroku,
-            options: [...],
-              buildpacks: [...],
-              addons: [...],
-              domains: [...]
-          ]
-        ]
-      ]
+  1. Add the dep in `mix.exs`: `{:eject, "~> 0.1.0"}`
+  2. Add a [Plan](Eject.Plan) module to your project
+  3. Configure your Elixir app to point to the Plan module
+  4. Add `eject.exs` manifests to each Ejectable Application
 
-  ### Dependencies
+  ## The Eject System
 
-  Eject is aware of and automatically catalogs all Mix dependencies from `mix.exs`.
-
-  Any directory in side the `lib/` directory of your project root can be considered
-  a "Lib dependency".
-
-  There are three ways to tell Eject to include a dependency when a specific app is ejected:
-
-  1. Include the dependency by [saying so in `eject.exs`](#module-the-eject-manifest-eject-exs).
-  2. In your `Plan` module, configure another dependency to require it as a "sub-dependency".
-     (See `Eject.Plan.deps/1`.)
-  3. In your `Plan` module, place the dependency in the `always` block. (See `Eject.Plan.always/1`.)
-
-  ### Usage
-
-      $ mix eject Tweeter
-
-  See `Mix.Tasks.App.Eject` for details.
-
+  `Eject` is not just a library, but a whole system for structuring
+  applications.
   """
 
   require Logger
@@ -129,7 +98,20 @@ defmodule Eject do
     if not is_atom(name) do
       raise ArgumentError,
         message:
-          "🤖 Please pass in a module name corresponding to a directory in `lib` containing an `eject.exs` file. E.g. Tweeter (received #{inspect(name)})"
+          "🤖 Please pass in a module name corresponding to a directory in lib/ containing an `eject.exs` file. E.g. Tweeter (received #{inspect(name)})"
+    end
+
+    # ensure the name was passed in CamelCase format; otherwise subtle bugs happen
+    unless inspect(name) =~ ~r/^[A-Z][a-zA-Z0-9]*$/ do
+      raise ArgumentError,
+        message: """
+        The name must correspond to a directory in lib/, in CamelCase format.
+
+        For example, to eject `lib/my_app`, do:
+
+            mix eject MyApp
+
+        """
     end
 
     Mix.Task.run("compile", [])
@@ -161,9 +143,13 @@ defmodule Eject do
   @doc "Clear the destination folder where the app will be ejected." && false
   def clear_destination(app) do
     if File.exists?(app.destination) do
+      {:module, _} = Code.ensure_loaded(app.internal.config.plan)
+
       preserve =
-        for {:preserve, filename} <- app.internal.config.plan.__eject__(app) do
-          filename
+        if function_exported?(app.internal.config.plan, :__eject__, 1) do
+          for {:preserve, filename} <- app.internal.config.plan.__eject__(app), do: filename
+        else
+          []
         end
 
       preserve = [".git", "deps", "_build" | preserve]

@@ -158,8 +158,17 @@ defmodule Eject.App do
       destination: destination(app_name_underscore_case, config, opts)
     }
 
+    {:module, _} = Code.ensure_loaded(config.plan)
+
     # `extra/1` requires an app struct
-    %{app | extra: Keyword.merge(config.plan.extra(app), manifest.extra)}
+    extra =
+      if function_exported?(config.plan, :extra, 1) do
+        Keyword.merge(config.plan.extra(app), manifest.extra)
+      else
+        manifest.extra
+      end
+
+    %{app | extra: extra}
   end
 
   @doc """
@@ -206,7 +215,7 @@ defmodule Eject.App do
     destination =
       case {config.destination, opts[:destination]} do
         {nil, nil} -> "../" <> app_name_underscore_case
-        {nil, opt} -> opt
+        {_, opt} when not is_nil(opt) -> opt
         {config, nil} -> Path.join(config, app_name_underscore_case)
       end
 

@@ -1,6 +1,7 @@
 defmodule Mix.Tasks.Eject do
   @moduledoc """
-  Ejects a logical Elixir application as a standalone application.
+  Ejects an [Ejectable App](how-it-works.html#what-is-an-ejectable-app) to a
+  standalone code repository.
 
   ## Examples
 
@@ -12,22 +13,44 @@ defmodule Mix.Tasks.Eject do
 
   ## Command line options
 
-    * `--destination` – output directory for the ejected code. Falls back to a
-      directory named after the app, inside `config :my_app, Eject, destination: "..."`
-      if provided, and otherwise inside the parent directory of the Elixir project.
+    * `--destination` – output directory for the ejected code. Read the
+      [Configuration section of the Getting Started
+      guide](getting-started.html#configuration) to understand how the
+      destination is chosen if this option is omitted.
     * `--confirm` – affirm "yes" to the prompt asking you whether you want to eject.
 
-  ## Configuration
+  ## Ejection Step By Step
 
-  The destination folder for ejected apps can be set in app configuration:
+  When you eject an app by running `mix eject MyApp`, the following happens:
 
-  ```
-  config :my_app, Eject, destination: "/Users/me/ejected"
-  ```
+  1. The destination directory is created if it doesn't exist.
+  2. All files and directories in the destination are deleted, except for `.git`,
+    `_build`, and `deps`.
+  3. All files in `lib/my_app` and `test/my_app` are copied to the destination.
+  4. All files specified in the [eject](Eject.Plan.html#eject/2) section of the
+     [Plan](`Eject.Plan`) are copied to the destination.
+  5. All [Lib Dependencies](dependencies.html#lib-dependencies) of the app are
+    copied to the destination. This includes all of `lib/dep_name` and
+    `test/dep_name` automatically.
+  6. For each file copied, [a set of
+    transformations](./code-transformations.html) are applied to the file
+    contents – except for files specified with `cp` and `cp_r`.
+  7. `mix format` is ran on the ejected codebase.
+
+  In step 2, `.git` is kept to preserve the Git repository and history. `deps`
+  is kept to avoid having to download all dependencies after ejection. `_build`
+  is kept to avoid having to recompile the entire project after ejection.
+
+  In step 7, running `mix format` tidies up things like chains of newlines that
+  may appear from applying [Code Fences](code-transformations.html#code-fences).
+  It also prevents you from having to think about code formatting in
+  [modify](Eject.Plan.html#modify/4).
+
   """
 
   use Mix.Task
 
+  @doc false
   def run(args) do
     sample_syntax = "   Syntax is:   mix eject AppName [--destination path] [--confirm]"
 
@@ -72,6 +95,10 @@ defmodule Mix.Tasks.Eject do
       IO.puts("   " <> Enum.join(mix_deps, " "))
     end)
 
+    if Enum.empty?(app.internal.deps.included.mix) do
+      IO.puts("   " <> "[NONE]")
+    end
+
     IO.puts("")
     IO.puts("🤓 Lib Dependencies")
 
@@ -80,6 +107,10 @@ defmodule Mix.Tasks.Eject do
     |> Enum.each(fn lib_deps ->
       IO.puts("   " <> Enum.join(lib_deps, " "))
     end)
+
+    if Enum.empty?(app.internal.deps.included.lib) do
+      IO.puts("   " <> "[NONE]")
+    end
 
     IO.puts("")
 

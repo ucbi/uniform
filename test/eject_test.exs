@@ -15,7 +15,8 @@ defmodule EjectTest do
   end
 
   test "full ejection" do
-    # this is gitignored; we can eject to it without adding to the git index
+    # the destination is gitignored; we can eject to it without adding to the git index
+
     # prepare app
     config = %Config{
       mix_project_app: :test_project,
@@ -93,5 +94,20 @@ defmodule EjectTest do
     # (note: TestProject.Eject.Plan specifies to preserve .gitignore)
     Eject.clear_destination(app)
     assert file_exists?(".gitignore")
+  end
+
+  test "ejecting with an empty Plan" do
+    # the destination is gitignored; we can eject to it without adding to the git index
+    config = %Config{
+      mix_project_app: :test_project,
+      mix_project: TestProject.MixProject,
+      plan: TestProject.Eject.EmptyPlan,
+      destination: "../../ejected"
+    }
+
+    manifest = %Manifest{}
+    app = App.new!(config, manifest, Tweeter)
+
+    Eject.eject(app)
   end
 end

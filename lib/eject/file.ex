@@ -64,24 +64,31 @@ defmodule Eject.File do
 
   # Returns all files specified with file/template/cp/cp_r in the `eject` macro
   def base_files(app) do
-    app
-    |> app.internal.config.plan.__eject__()
-    |> Enum.flat_map(fn item ->
-      case item do
-        {type, {path_or_paths, opts}} when type in [:text, :template, :cp, :cp_r] ->
-          rules = Rules.new(opts)
-          for path <- List.wrap(path_or_paths), do: new(type, app, path, rules)
+    {:module, _} = Code.ensure_loaded(app.internal.config.plan)
 
-        _ ->
-          []
-      end
-    end)
-    |> Enum.reject(&is_nil/1)
+    if function_exported?(app.internal.config.plan, :__eject__, 1) do
+      app
+      |> app.internal.config.plan.__eject__()
+      |> Enum.flat_map(fn item ->
+        case item do
+          {type, {path_or_paths, opts}} when type in [:text, :template, :cp, :cp_r] ->
+            rules = Rules.new(opts)
+            for path <- List.wrap(path_or_paths), do: new(type, app, path, rules)
+
+          _ ->
+            []
+        end
+      end)
+      |> Enum.reject(&is_nil/1)
+    else
+      []
+    end
   end
 
   # Returns hardcoded base files that don't need to be specified
   @spec hardcoded_base_files(App.t()) :: [t]
   defp hardcoded_base_files(app) do
+    # If this list changes, update the moduledoc in `Eject.Plan`
     files =
       [
         "mix.exs",
@@ -99,14 +106,19 @@ defmodule Eject.File do
   @spec app_lib_files(App.t()) :: [t]
   defp app_lib_files(app) do
     manifest_path = Manifest.manifest_path(app.name.underscore)
+    {:module, _} = Code.ensure_loaded(app.internal.config.plan)
 
     file_rules =
-      app
-      |> app.internal.config.plan.__eject__()
-      # never eject the Eject manifest
-      |> Keyword.update(:except, [manifest_path], fn except -> [manifest_path | except] end)
-      |> Keyword.take([:except])
-      |> Rules.new()
+      if function_exported?(app.internal.config.plan, :__eject__, 1) do
+        app
+        |> app.internal.config.plan.__eject__()
+        # never eject the Eject manifest
+        |> Keyword.update(:except, [manifest_path], fn except -> [manifest_path | except] end)
+        |> Keyword.take([:except])
+        |> Rules.new()
+      else
+        Rules.new(except: [manifest_path])
+      end
 
     lib_dir_files(app, app.name.underscore, file_rules)
   end

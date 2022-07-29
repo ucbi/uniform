@@ -20,9 +20,10 @@ defmodule Eject.Plan do
   Would search for templates in the `priv/eject-templates` directory. See
   `template/2` for more information.
 
-  ## `eject` Block
+  ## The `eject` Section
 
-  At minimum, the plan requires an `eject` block:
+  The `eject` section specifies files that should be ejected which aren't in
+  `lib`.
 
       defmodule Plan do
         use Eject.Plan, templates: "..."
@@ -34,14 +35,24 @@ defmodule Eject.Plan do
         end
       end
 
-  The `eject` block specifies files that should be ejected which aren't in the
-  `lib/` directory of the app being ejected.
-
   See `eject/2` for more information.
 
-  ## `deps` Block
+  ## Files that are always ejected
 
-  Besides the `eject` block, the plan can also contain a `deps` block to
+  There are a handful of files that are automatically ejected. You do not need
+  to specify these in the `eject` section.
+
+  ```bash
+  mix.exs
+  mix.lock
+  .gitignore
+  .formatter.exs
+  test/test_helper.exs
+  ```
+
+  ## The `deps` Section
+
+  Besides the `eject` section, the plan can also contain a `deps` section to
   configure dependencies.
 
       defmodule Plan do
@@ -61,9 +72,9 @@ defmodule Eject.Plan do
 
   See `deps/1` for more information.
 
-  ## `modify` Blocks
+  ## Modifying files programmatically with `modify`
 
-  Lastly, `modify` blocks can be used whenever you want to transform
+  Lastly, `modify` can be used whenever you want to transform
   file contents during ejection. You can specify a specific filepath
   or use a regex to match multiple files.
 
@@ -148,7 +159,7 @@ defmodule Eject.Plan do
 
         # configure dependencies from mix.exs and `lib/`
         deps do
-          # always eject the dependencies in the `always do` block;
+          # always eject the dependencies in the `always` section;
           # don't require adding them to eject.exs
           always do
             lib :my_app do
@@ -248,6 +259,8 @@ defmodule Eject.Plan do
   """
   @callback target_path(path :: Path.t(), app :: Eject.App.t()) :: Path.t()
 
+  @optional_callbacks extra: 1, target_path: 2
+
   @doc """
        A macro for defining an ejection plan.
 
@@ -346,17 +359,76 @@ defmodule Eject.Plan do
   # Configuring which files to eject outside of the files in the app's `lib` directory.
   #
 
-  @doc """
-  The `eject` block "receives" an `app` (see `Eject.App.t`) like a function.
+  @doc ~S"""
+  The `eject` section is where you **specify base files** that should always
+  be ejected.
 
-  It is where you specify files which aren't in an included `lib/` directory
-  that should be ejected.
+  The eject section "receives" an [`app`](`t:Eject.App.t/0`) like a function,
+  and it can be used to build the instructions or in `if`
+  conditionals.
 
-  ## Files Tied to Lib Dependencies
+      eject(app) do
+        # interpolating the app name into a path dynamically
+        cp "priv/static/images/#{app.name.underscore}_logo.png"
+
+        # conditional instructions
+        if deploys_to_fly_io?(app) do
+          template "fly.toml"
+        end
+      end
+
+  Note that the `if` conditionals cannot be nested.
+
+  ## API Reference
+
+  The following instructions can be given in the `eject` section:
+
+  - `file/2` ejects a single file or list of files
+  - `template/2` creates a new file on ejection from an EEx template
+  - `cp/1` copies a file (like `file/2`) without running it through [Code
+    Transformations](code-transformations.html). This is useful for binary
+    files such as images or executable.
+  - `cp_r/1` copies an entire **directory** of files without [Code
+    Transformations](code-transformations.html).
+  - `except/1` prevents ejecting certain files from the app's `lib` directory.
+  - `preserve/1` instructs `mix eject` not to delete files or directories in
+    the project's root folder at the beginning of ejection.
+
+  ## Example
+
+      eject(app) do
+        file ".credo.exs"
+        file Path.wildcard("config/**/*.exs")
+        template "config/runtime.exs"
+        cp "bin/some-executable"
+        cp_r "assets"
+        except ["lib/#{app.name.underscore}/hidden_file.ex"]
+        preserve ".env"
+      end
+
+  ## Files in `lib`
+
+  Typically, the `eject` section only contains files that aren't in `lib`,
+  since files in `lib/app_being_ejected` and `lib/required_lib_dependency` are
+  ejected automatically.
+
+      # ❌ Don't do this
+      eject(app) do
+        file "lib/my_lib/some_file.ex"
+      end
+
+      # ✅ Instead, do this
+
+      # lib/my_app/eject.exs
+      [
+        lib_deps: [:my_lib]
+      ]
+
+  ## Files outside `lib` but tied to Lib Dependencies
 
   If a file or template should only be ejected in the case that a certain Lib
   Dependency is included, we recommend placing that in `lib/2` inside the
-  `deps/1` block instead of in the `eject` block.
+  `deps/1` section instead of in the `eject` section.
 
       # ❌ Don't do this
       eject(app) do
@@ -675,11 +747,18 @@ defmodule Eject.Plan do
   in a `lib/` directory** which should be ejected in the app or along with the
   lib.
 
+  > #### Use `Path.wildcard/1` for shorter code {: .tip}
+  >
+  > Note that `file` can take a path or a list of paths. You can use
+  > `Path.wildcard` as in the example below to target multiple files instead
+  > of listing them on separate lines.
+
   ### Examples
 
       eject(app) do
         # every ejected app will include app.js
         file "assets/js/app.js"
+        file Path.wildcard("config/**/*.exs")
       end
 
       deps do
@@ -696,7 +775,7 @@ defmodule Eject.Plan do
   In `eject` and `lib` blocks, `template` is used to specify EEx templates that
   should be rendered and then ejected.
 
-  ### Template Directory and Destination Path
+  ## Template Directory and Destination Path
 
   Eject templates use a "convention over configuration" model
   that works like this:
@@ -710,9 +789,13 @@ defmodule Eject.Plan do
   that they should be placed in, in the ejected directory.
   3. Templates must have the destination filename, appended with `.eex`.
 
-  See the code snippet below for an example.
+  > #### Companion guide {: .tip}
+  >
+  > Consult [Building files from EEx
+  > templates](building-files-from-eex-templates.html) for a more detailed look
+  > at constructing and effectively using templates for ejection.
 
-  ### Examples
+  ## Examples
 
       use Eject, templates: "priv/eject-templates"
 
@@ -798,9 +881,52 @@ defmodule Eject.Plan do
   """
   def preserve(path), do: {:preserve, path}
 
-  # Specifying allow/deny-lists that drive which files to include in a lib directory
-  @doc false
+  @doc ~S"""
+  In the `deps` section of your Plan, you can specify that a Lib Dependency
+  excludes certain files.
+
+  This works much like the `except` option that can be given when importing
+  functions with `import/2`.
+
+  In the example below, for any app that depends on `:aws`, every file in
+  `lib/aws` and `test/aws` will be ejected except for `lib/aws/hidden_file.ex`.
+
+      deps do
+        lib :aws do
+          except ["lib/aws/hidden_file.ex"]
+        end
+      end
+
+  The `except` instruction can also be placed in the `eject` section of the
+  Plan. It only filters out files from the app library (`lib/my_app` and
+  `test/my_app`).
+
+  ```elixir
+  eject(app) do
+    except ["lib/#{app.name.underscore}/hidden_file.ex"]
+  end
+  ```
+  """
   def except(paths), do: {:except, List.wrap(paths)}
-  @doc false
+
+  @doc """
+  In the `deps` section of your Plan, you can specify that a Lib Dependency
+  only includes certain files.
+
+  These work much like the `only` option that can be given when importing
+  functions with `import/2`.
+
+  In the example below, for any app that depends on `:gcp`, only
+  `lib/gcp/necessary_file.ex` will be ejected. Nothing else from `lib/gcp` or
+  `test/gcp` will be ejected.
+
+      deps do
+        lib :gcp do
+          # NOTHING in lib/gcp or test/gcp will be included except these:
+          only ["lib/gcp/necessary_file.ex"]
+        end
+      end
+
+  """
   def only(paths), do: {:only, List.wrap(paths)}
 end
