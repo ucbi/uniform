@@ -690,11 +690,18 @@ defmodule Eject.Plan do
   in a `lib/` directory** which should be ejected in the app or along with the
   lib.
 
+  > #### Use `Path.wildcard/1` for shorter code {: .tip}
+  >
+  > Note that `file` can take a path or a list of paths. You can use
+  > `Path.wildcard` as in the example below to target multiple files instead
+  > of listing them on separate lines.
+
   ### Examples
 
       eject(app) do
         # every ejected app will include app.js
         file "assets/js/app.js"
+        file Path.wildcard("config/**/*.exs")
       end
 
       deps do
@@ -813,9 +820,52 @@ defmodule Eject.Plan do
   """
   def preserve(path), do: {:preserve, path}
 
-  # Specifying allow/deny-lists that drive which files to include in a lib directory
-  @doc false
+  @doc ~S"""
+  In the `deps` section of your Plan, you can specify that a Lib Dependency
+  excludes certain files.
+
+  This works much like the `except` option that can be given when importing
+  functions with `import/2`.
+
+  In the example below, for any app that depends on `:aws`, every file in
+  `lib/aws` and `test/aws` will be ejected except for `lib/aws/hidden_file.ex`.
+
+      deps do
+        lib :aws do
+          except ["lib/aws/hidden_file.ex"]
+        end
+      end
+
+  The `except` instruction can also be placed in the `eject` section of the
+  Plan. It only filters out files from the app library (`lib/my_app` and
+  `test/my_app`).
+
+  ```elixir
+  eject(app) do
+    except ["lib/#{app.name.underscore}/hidden_file.ex"]
+  end
+  ```
+  """
   def except(paths), do: {:except, List.wrap(paths)}
-  @doc false
+
+  @doc """
+  In the `deps` section of your Plan, you can specify that a Lib Dependency
+  only includes certain files.
+
+  These work much like the `only` option that can be given when importing
+  functions with `import/2`.
+
+  In the example below, for any app that depends on `:gcp`, only
+  `lib/gcp/necessary_file.ex` will be ejected. Nothing else from `lib/gcp` or
+  `test/gcp` will be ejected.
+
+      deps do
+        lib :gcp do
+          # NOTHING in lib/gcp or test/gcp will be included except these:
+          only ["lib/gcp/necessary_file.ex"]
+        end
+      end
+
+  """
   def only(paths), do: {:only, List.wrap(paths)}
 end

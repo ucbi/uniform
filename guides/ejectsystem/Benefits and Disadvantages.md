@@ -39,6 +39,11 @@ functionality.
   together, we're free to refactor any interal API and know that we've gotten
   all invocations across the enterprise. This eliminates the burden of
   maintaining backwards compatibility.
+- **Self-Healing Properties** - Since `mix eject` starts by deleting the
+  contents of the destination codebase, it's possible to modify an ejected
+  codebase temporarily, and then "bring it back in sync" with your Base Project
+  by running `mix eject` again. Ejecting an app with `mix eject` is meant to be
+  something that can be done over and over without preparation or ceremony.
 
 ## Disadvantages
 
