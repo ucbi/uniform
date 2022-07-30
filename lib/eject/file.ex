@@ -253,15 +253,21 @@ defmodule Eject.File do
     end
   end
 
-  @default_modifier {"mix.exs", {Eject.Modifiers, :remove_unused_mix_deps}}
+  @default_modifier {"mix.exs", &Eject.Modifiers.remove_unused_mix_deps/2}
 
   defp apply_modifiers(contents, relative_path, app) do
     modifiers = app.internal.config.plan.__modifiers__()
     modifiers = [@default_modifier | modifiers]
 
-    Enum.reduce(modifiers, contents, fn {path_or_regex, {module, function}}, contents ->
+    Enum.reduce(modifiers, contents, fn {path_or_regex, function}, contents ->
       if apply_modifier?(path_or_regex, relative_path) do
-        apply(module, function, [contents, app])
+        args =
+          case function do
+            f when is_function(f, 1) -> [contents]
+            f when is_function(f, 2) -> [contents, app]
+          end
+
+        apply(function, args)
       else
         contents
       end

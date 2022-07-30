@@ -10,7 +10,7 @@ defmodule Eject.App do
   - `c:Eject.Plan.extra/1` callback
   - `c:Eject.Plan.target_path/2` callback
   - `Eject.Plan.eject/2` macro
-  - `Eject.Plan.modify/4` macros
+  - `Eject.Plan.modify/2` macros
 
   In these callbacks and macros, you can make decisions about what to eject or
   how files should be modified using the `app`.
