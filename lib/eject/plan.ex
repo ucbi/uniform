@@ -394,7 +394,7 @@ defmodule Eject.Plan do
     end
   end
 
-  defmacro modify(_path_or_regex, fun) do
+  defmacro modify(path_or_regex, fun) do
     quote do
       raise ArgumentError,
         message: """
@@ -406,18 +406,18 @@ defmodule Eject.Plan do
 
         Instead, either pass an anonymous function:
 
-            modify "path", fn file_contents ->
+            modify #{inspect(unquote(path_or_regex))}, fn file ->
               # ...
             end
 
-            modify "path", fn file_contents, app ->
+            modify #{inspect(unquote(path_or_regex))}, fn file, app ->
               # ...
             end
 
         Or pass a function capture:
 
-            modify ~r/_test.exs$/, &modify_tests/1
-            modify "path", &Modifiers.modify_other_file/2
+            modify #{inspect(unquote(path_or_regex))}, &modify_tests/1
+            modify #{inspect(unquote(path_or_regex))}, &Modifiers.modify_other_file/2
 
         """
     end
