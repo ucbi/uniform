@@ -70,6 +70,8 @@ defmodule EjectTest do
     modified_file = read!(".dotfile")
     assert modified_file =~ "[REPLACED LINE WHILE EJECTING Tweeter]"
     refute modified_file =~ "[REPLACE THIS LINE VIA modify/0]"
+    assert modified_file =~ "hello world"
+    assert modified_file =~ "app name is tweeter"
 
     # associated_files are included
     assert file_exists?("priv/associated.txt")

@@ -81,16 +81,13 @@ defmodule Eject.Plan do
       defmodule Plan do
         use Eject.Plan, templates: "..."
 
-        modify "assets/js/app.js", file, app do
+        modify "assets/js/app.js", fn file, app ->
           String.replace(file, "SOME_VALUE_PER_APP", app.extra[:some_value])
         end
 
-        modify ~r/_worker.ex/, file, app do
-          # ...
-        end
-      end
+        modify ~r/_worker.ex/, &MyApp.Modify.modify_workers/1
 
-  See `modify/4` for more information.
+  See `modify/2` for more information.
 
   ## Full Example
 
@@ -278,7 +275,7 @@ defmodule Eject.Plan do
     quote do
       @behaviour Eject.Plan
       @before_compile Eject.Plan.BeforeCompile
-      import Eject.Plan, only: [modify: 4, modify: 3, deps: 1, eject: 2]
+      import Eject.Plan, only: [modify: 2, deps: 1, eject: 2]
       import Eject.App, only: [depends_on?: 3]
 
       def __template_dir__, do: unquote(templates)
@@ -297,62 +294,133 @@ defmodule Eject.Plan do
   #
 
   @doc """
-  Specify a file or regex pattern and a transformation function to apply to all
-  files matching that pattern.
+  Specify a file path or regex pattern and a transformation function, which
+  must return the new file contents as a string.
+
+  The first argument of `modify` must be either the relative path of a file in
+  your Base Project, or a regex which matches against those relative paths.
+
+      # exact (relative) path
+      modify "tests/path/to/specific_test.exs", fn file -> ... end
+
+      # regex
+      modify ~r/.+_test.exs/, fn file -> ... end
+
+  The second argument of `modify` must either be a function capture
+
+      modify ~r/.+_test.exs/, &MyApp.Modify.modify_tests/1
+      modify ~r/.+_test.exs/, &MyApp.Modify.modify_tests/2
+
+  Or an anonymous function
+
+      modify ~r/.+_test.exs/, fn file ->
+        # ...
+      end
+
+      modify ~r/.+_test.exs/, fn file, app ->
+        # ...
+      end
+
+  If the function is 1-arity, it will receive the file contents. If it's
+  2-arity, it will receive the file contents and the `Eject.App` struct.
 
   ### Examples
 
-      modify ~r/.+_worker.ex/, file, app do
-        # Return modified `file` string
-        # Only ran on files matching the regex
+      modify "config/config.exs", file do
+        file <>
+          ~S'''
+          if config_env() in [:dev, :test] do
+            import_config "#\{config_env()}.exs"
+          end
+          '''
       end
 
-      modify "lib/my_app_web/router.ex", file do
-        # Return modified `file` string
-        # Only ran on files with the exact path "lib/my_app_web/router.ex"
+      modify ~r/.+_worker.ex/, fn file, app ->
+        String.replace(file, "SOME_VALUE_PER_APP", app.extra[:some_value])
       end
-
-  > #### "Magic" Variable Names {: .info}
-  >
-  > In the above examples, `file` and `app` work as function parameters,
-  > which are available to the "function body" in between `do` and `end`.
-  > The macro turns them into variables under the hood. As such, they can
-  > be given different names.
-  >
-  > **Note that the final parameter (`app`) is optional, and can be excluded
-  > if the `modify` function does not need it.**
 
   """
   @spec modify(
           pattern :: Path.t() | Regex.t(),
-          file :: String.t(),
-          app :: Eject.App.t(),
-          block :: term
+          fun ::
+            (file :: String.t(), Eject.App.t() -> String.t()) | (file :: String.t() -> String.t())
         ) :: term
-  defmacro modify(path_or_regex, file, app, do: block) do
-    line = __CALLER__.line
-    fn_name = String.to_atom("modify_#{line}")
+  defmacro modify(path_or_regex, {:fn, _, _} = fun) do
+    # anonymous functions cannot be saved into module attributes, so create a
+    # named function
+    fn_name = String.to_atom("__modify_line_#{__CALLER__.line}__")
 
     quote do
-      Eject.Plan.__register_modifier__(__MODULE__, unquote(path_or_regex), unquote(fn_name))
-      def unquote(fn_name)(unquote(file), unquote(app)), do: unquote(block)
+      Eject.Plan.validate_path_or_regex!(unquote(path_or_regex))
+
+      Module.put_attribute(
+        __MODULE__,
+        :modifiers,
+        {unquote(path_or_regex), Function.capture(__MODULE__, unquote(fn_name), 2)}
+      )
+
+      def unquote(fn_name)(file, app) do
+        f = unquote(fun)
+
+        case f do
+          f when is_function(f, 1) -> f.(file)
+          f when is_function(f, 2) -> f.(file, app)
+        end
+      end
+    end
+  end
+
+  defmacro modify(path_or_regex, {:&, _, _} = fun) do
+    quote do
+      Eject.Plan.validate_path_or_regex!(unquote(path_or_regex))
+      Module.put_attribute(__MODULE__, :modifiers, {unquote(path_or_regex), unquote(fun)})
     end
   end
 
   @doc false
-  defmacro modify(path_or_regex, file, do: block) do
-    app = quote generated: true, do: var!(app)
-    line = __CALLER__.line
-    fn_name = String.to_atom("modify_#{line}")
+  def validate_path_or_regex!(path_or_regex) do
+    case path_or_regex do
+      path when is_binary(path) ->
+        :ok
 
-    quote do
-      Eject.Plan.__register_modifier__(__MODULE__, unquote(path_or_regex), unquote(fn_name))
-      def unquote(fn_name)(unquote(file), unquote(app)), do: unquote(block)
+      %Regex{} ->
+        :ok
+
+      _ ->
+        raise ArgumentError,
+          message: """
+          modify/2 expects a (string) path or a regex (~r/.../) as the first argument. Received #{inspect(path_or_regex)}
+          """
     end
   end
 
-  def __register_modifier__(mod, path_or_regex, fn_name) do
-    Module.put_attribute(mod, :modifiers, {path_or_regex, {mod, fn_name}})
+  defmacro modify(_path_or_regex, fun) do
+    quote do
+      raise ArgumentError,
+        message: """
+        modify/2 expects an anonymous function of a function capture as the 2nd argument.
+
+        Received:
+
+            #{inspect(unquote(fun))}
+
+        Instead, either pass an anonymous function:
+
+            modify "path", fn file_contents ->
+              # ...
+            end
+
+            modify "path", fn file_contents, app ->
+              # ...
+            end
+
+        Or pass a function capture:
+
+            modify ~r/_test.exs$/, &modify_tests/1
+            modify "path", &Modifiers.modify_other_file/2
+
+        """
+    end
   end
 
   #
