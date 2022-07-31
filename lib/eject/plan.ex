@@ -723,13 +723,28 @@ defmodule Eject.Plan do
 
   @doc false
   def __lib__(mod, name, opts, always) when is_atom(name) and is_list(opts) do
+    associated_files =
+      Enum.flat_map(opts, fn opt ->
+        case opt do
+          {type, path_or_paths} when type in [:text, :template, :cp, :cp_r] ->
+            path_or_paths
+            |> List.wrap()
+            |> Enum.map(&{type, &1})
+
+          _ ->
+            []
+        end
+      end)
+
     lib_dep =
       Eject.LibDep.new!(%{
         name: name,
         lib_deps: opts |> Keyword.get(:lib_deps, []) |> List.wrap(),
         mix_deps: opts |> Keyword.get(:mix_deps, []) |> List.wrap(),
         always: always,
-        file_rules: opts |> rule_opts() |> Eject.Rules.new()
+        only: opts[:only],
+        except: opts[:except],
+        associated_files: associated_files
       })
 
     Module.put_attribute(mod, :lib_deps, lib_dep)
@@ -810,23 +825,6 @@ defmodule Eject.Plan do
 
   @doc false
   defmacro lib_deps(deps), do: {:lib_deps, List.wrap(deps)}
-
-  defp rule_opts(opts) do
-    associated_files =
-      Enum.flat_map(opts, fn opt ->
-        case opt do
-          {type, path_or_paths} when type in [:text, :template, :cp, :cp_r] ->
-            path_or_paths
-            |> List.wrap()
-            |> Enum.map(&{type, &1})
-
-          _ ->
-            []
-        end
-      end)
-
-    Keyword.put(opts, :associated_files, associated_files)
-  end
 
   @doc """
   In `eject` and `lib` blocks, `file` is used to specify **files that are not
