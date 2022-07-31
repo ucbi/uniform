@@ -11,7 +11,7 @@ defmodule Eject.File do
 
              """ && false
 
-  alias Eject.{App, CodeFence, Manifest, Rules}
+  alias Eject.{App, Manifest, Rules}
 
   defstruct [:type, :source, :destination, :chmod]
 
@@ -241,21 +241,10 @@ defmodule Eject.File do
               File.read!(Path.expand(source))
           end
 
-        underscore = to_string(app.internal.config.mix_project_app)
-
-        transformed =
-          contents
-          # apply specified transformations in `Project.modify`
-          |> apply_modifiers(source, app)
-          # replace `base_project_name` with `ejected_app_name`
-          |> String.replace(underscore, app.name.underscore)
-          # replace `base-project-name` with `ejected-app-name`
-          |> String.replace(String.replace(underscore, "_", "-"), app.name.hyphen)
-          # replace `BaseProjectName` with `EjectedAppName`
-          |> String.replace(Macro.camelize(underscore), app.name.camel)
-          |> CodeFence.apply_fences(app)
-
-        File.write!(destination, transformed)
+        File.write!(
+          destination,
+          apply_modifiers(contents, source, app)
+        )
     end
 
     # apply chmod if relevant
@@ -264,11 +253,15 @@ defmodule Eject.File do
     end
   end
 
-  @default_modifier {"mix.exs", &Eject.Modifiers.remove_unused_mix_deps/2}
+  @default_modifiers [
+    {"mix.exs", &Eject.Modifiers.remove_unused_mix_deps/2},
+    {:all, &Eject.Modifiers.code_fences/2},
+    {:all, &Eject.Modifiers.replace_base_project_name/2}
+  ]
 
   defp apply_modifiers(contents, relative_path, app) do
-    modifiers = app.internal.config.plan.__modifiers__()
-    modifiers = [@default_modifier | modifiers]
+    # add `Plan.modify` transformations to hard-coded default transformations
+    modifiers = app.internal.config.plan.__modifiers__() ++ @default_modifiers
 
     Enum.reduce(modifiers, contents, fn {path_or_regex, function}, contents ->
       if apply_modifier?(path_or_regex, relative_path) do
@@ -285,6 +278,7 @@ defmodule Eject.File do
     end)
   end
 
+  defp apply_modifier?(:all, _path), do: true
   defp apply_modifier?(%Regex{} = regex, path), do: String.match?(path, regex)
   defp apply_modifier?(path, matching_path), do: path == matching_path
 end
