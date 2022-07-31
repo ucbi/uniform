@@ -193,7 +193,7 @@ defmodule Eject.App do
         end
       end
 
-      modify ~r/^test\/.+_(test).exs/, file, app do
+      modify ~r/^test\/.+_(test).exs/, fn file, app ->
         if depends_on?(app, :lib, :my_data_lib) do
           file
         else
