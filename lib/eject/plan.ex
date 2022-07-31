@@ -842,7 +842,8 @@ defmodule Eject.Plan do
   ## Options
 
   `file` takes a `chmod` option, which sets the `mode` for the given `file`
-  after it's ejected.
+  after it's ejected. See the possible [permission
+  options](https://hexdocs.pm/elixir/File.html#chmod/2-permissions).
 
   ## Examples
 
@@ -890,7 +891,8 @@ defmodule Eject.Plan do
   ## Options
 
   `template` takes a `chmod` option, which sets the `mode` for the rendered
-  file after it's ejected.
+  file after it's ejected. See the possible [permission
+  options](https://hexdocs.pm/elixir/File.html#chmod/2-permissions).
 
   ## Examples
 
@@ -951,7 +953,8 @@ defmodule Eject.Plan do
   ## Options
 
   `cp` takes a `chmod` option, which sets the `mode` for the file after it's
-  copied.
+  copied. See the possible [permission
+  options](https://hexdocs.pm/elixir/File.html#chmod/2-permissions).
 
   ## Examples
 
