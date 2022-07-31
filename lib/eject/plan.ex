@@ -818,12 +818,18 @@ defmodule Eject.Plan do
   > `Path.wildcard` as in the example below to target multiple files instead
   > of listing them on separate lines.
 
-  ### Examples
+  ## Options
+
+  `file` takes a `chmod` option, which sets the `mode` for the given `file`
+  after it's ejected.
+
+  ## Examples
 
       eject(app) do
-        # every ejected app will include app.js
+        # every ejected app will include these
         file "assets/js/app.js"
         file Path.wildcard("config/**/*.exs")
+        file "some/file", chmod: 0o777
       end
 
       deps do
@@ -860,6 +866,11 @@ defmodule Eject.Plan do
   > templates](building-files-from-eex-templates.html) for a more detailed look
   > at constructing and effectively using templates for ejection.
 
+  ## Options
+
+  `template` takes a `chmod` option, which sets the `mode` for the rendered
+  file after it's ejected.
+
   ## Examples
 
       use Eject, templates: "priv/eject-templates"
@@ -875,7 +886,7 @@ defmodule Eject.Plan do
           # for every app that includes `lib/datadog`,
           # priv/eject-templates/datadog/prerun.sh.eex will be rendered, and
           # the result will be placed in `datadog/prerun.sh`
-          template "datadog/prerun.sh"
+          template "datadog/prerun.sh", chmod: 0o555
         end
       end
 
@@ -895,7 +906,7 @@ defmodule Eject.Plan do
   would take ages to copy with `file Path.wildcard("assets/node_modules/**/*")`.
   Instead, use `cp_r "assets/node_modules"`.
 
-  ### Examples
+  ## Examples
 
       eject(app) do
         cp_r "assets"
@@ -916,7 +927,12 @@ defmodule Eject.Plan do
 
   The file is copied as-is with `File.cp!/3`.
 
-  ### Examples
+  ## Options
+
+  `cp` takes a `chmod` option, which sets the `mode` for the file after it's
+  copied.
+
+  ## Examples
 
       eject(app) do
         # every ejected app will have bin/some-binary, with the ACL mode changed to 555
