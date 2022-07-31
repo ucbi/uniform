@@ -118,26 +118,29 @@ defmodule Eject.File do
     manifest_path = Manifest.manifest_path(app.name.underscore)
     {:module, _} = Code.ensure_loaded(app.internal.config.plan)
 
-    file_rules =
+    opts =
       if function_exported?(app.internal.config.plan, :__eject__, 1) do
         app
         |> app.internal.config.plan.__eject__()
         # never eject the Eject manifest
         |> Keyword.update(:except, [manifest_path], fn except -> [manifest_path | except] end)
         |> Keyword.take([:except])
-        |> Rules.new()
       else
-        Rules.new(except: [manifest_path])
+        [except: [manifest_path]]
       end
 
-    lib_dir_files(app, app.name.underscore, file_rules)
+    lib_dir_files(app, app.name.underscore, opts)
   end
 
   # Returns all files required by all the lib deps of this app
   @spec lib_dep_files(App.t()) :: [t]
   defp lib_dep_files(app) do
     Enum.flat_map(app.internal.deps.lib, fn {_, lib_dep} ->
-      lib_dir_files(app, to_string(lib_dep.name), lib_dep.file_rules)
+      lib_dir_files(
+        app,
+        to_string(lib_dep.name),
+        Map.take(lib_dep, ~w(only except associated_files)a)
+      )
     end)
   end
 
@@ -145,23 +148,22 @@ defmodule Eject.File do
   # associated with that directory. Includes files in `lib/<lib_dir>`
   # as well as `test/<lib_dir>`
   @spec lib_dir_files(App.t(), String.t(), Rules.t()) :: [Eject.File.t()]
-  defp lib_dir_files(
-         app,
-         lib_dir,
-         %Rules{only: only, except: except} = rules
-       ) do
+  defp lib_dir_files(app, lib_dir, opts) do
     # location of lib and test cp_r is configurable for testing
+    only = opts[:only]
+    except = opts[:except]
+
     paths = Path.wildcard("lib/#{lib_dir}/**")
     paths = paths ++ Path.wildcard("test/#{lib_dir}/**")
     paths = if only, do: Enum.filter(paths, &filter_path(&1, only)), else: paths
     paths = if except, do: Enum.reject(paths, &filter_path(&1, except)), else: paths
     paths = Enum.reject(paths, &File.dir?/1)
 
-    lib_files = for path <- paths, do: new(:text, app, path, chmod: rules.chmod)
+    lib_files = for path <- paths, do: new(:text, app, path)
 
     associated_files =
       Enum.flat_map(
-        rules.associated_files || [],
+        opts[:associated_files] || [],
         fn {type, {path_or_paths, opts}} ->
           for path <- List.wrap(path_or_paths), do: new(type, app, path, opts)
         end
