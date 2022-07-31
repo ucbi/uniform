@@ -207,7 +207,7 @@ defmodule Eject.Plan do
   A hook to add more data to `app.extra`, beyond what's in the [Eject Manifest
   file](./Eject.html#module-the-eject-manifest-eject-exs).
 
-  ### Example
+  ## Example
 
   You may want to set the theme based on the name of the ejectable app.  In
   this case, add an 'extra' entry called 'theme', which will then be available
@@ -238,7 +238,7 @@ defmodule Eject.Plan do
 
       def target_path(path, _app), do: path
 
-  ### Example
+  ## Example
 
   You may want to place certain files in `lib/ejected_app_web` instead of `lib/ejected_app`.
   Let's say you have an `is_web_file?` function that identifies whether the file belongs in
@@ -321,7 +321,7 @@ defmodule Eject.Plan do
   If the function is 1-arity, it will receive the file contents. If it's
   2-arity, it will receive the file contents and the `Eject.App` struct.
 
-  ### Examples
+  ## Examples
 
       modify "config/config.exs", file do
         file <>
@@ -547,7 +547,7 @@ defmodule Eject.Plan do
 
   See `mix/2`, `lib/2`, and `always/1` for more details.
 
-  ### Example
+  ## Example
 
       deps do
         always do
@@ -647,7 +647,7 @@ defmodule Eject.Plan do
   > [Eject Manifest file](./Eject.html#module-the-eject-manifest-eject-exs),
   > or make it a `lib_dependency` of another dependency in the Manifest.
 
-  ### Examples
+  ## Examples
 
       deps do
         always do
@@ -674,6 +674,27 @@ defmodule Eject.Plan do
           mix_deps [:oban_pro, :oban_web]
         end
       end
+
+  ## Associated Files
+
+  Sometimes, when a Lib Dependency is ejected with an app, there are other
+  files outside of `lib/that_library` which should also be ejected.
+
+  In this scenario, you can use these instructions used in `eject/2` to denote
+  them.
+
+  - `file/2`
+  - `template/2`
+  - `cp/1`
+  - `cp_r/1`
+
+  ```
+  lib :my_data_source do
+    file Path.wildcard("priv/my_data_source_repo/**", match_dot: true)
+    file Path.wildcard("test/support/fixtures/my_data_source/**/*.ex")
+    template "some/template/for/my_data_source"
+  end
+  ```
 
   """
   defmacro lib(name, do: block) do
