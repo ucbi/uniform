@@ -31,11 +31,22 @@ defmodule Eject.File do
 
   def new(type, %App{} = app, source, rules \\ nil)
       when type in [:text, :template, :cp, :cp_r] and is_binary(source) do
+    {:module, _} = Code.ensure_loaded(app.internal.config.plan)
+
+    destination =
+      if function_exported?(app.internal.config.plan, :target_path, 2) do
+        # call target_path callback, giving the developer a chance to modify the final path
+        app.internal.config.plan.target_path(source, app)
+      else
+        source
+      end
+
     path =
-      source
-      # call target_path callback, giving the developer a chance to modify the final path
-      |> app.internal.config.plan.target_path(app)
-      |> String.replace(to_string(app.internal.config.mix_project_app), app.name.underscore)
+      String.replace(
+        destination,
+        to_string(app.internal.config.mix_project_app),
+        app.name.underscore
+      )
 
     struct!(
       __MODULE__,

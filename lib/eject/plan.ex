@@ -280,9 +280,6 @@ defmodule Eject.Plan do
 
       def __template_dir__, do: unquote(templates)
 
-      def target_path(path, _app), do: path
-      defoverridable target_path: 2
-
       Module.register_attribute(__MODULE__, :lib_deps, accumulate: true)
       Module.register_attribute(__MODULE__, :mix_deps, accumulate: true)
       Module.register_attribute(__MODULE__, :modifiers, accumulate: true)
