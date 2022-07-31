@@ -29,7 +29,7 @@ defmodule Eject.File do
   # Functions for creating a File struct
   #
 
-  def new(type, %App{} = app, source, rules \\ nil)
+  def new(type, %App{} = app, source, opts \\ [])
       when type in [:text, :template, :cp, :cp_r] and is_binary(source) do
     {:module, _} = Code.ensure_loaded(app.internal.config.plan)
 
@@ -53,7 +53,7 @@ defmodule Eject.File do
       type: type,
       source: source,
       destination: Path.join(app.destination, path),
-      chmod: rules && rules.chmod
+      chmod: opts[:chmod]
     )
   end
 
@@ -83,8 +83,7 @@ defmodule Eject.File do
       |> Enum.flat_map(fn item ->
         case item do
           {type, {path_or_paths, opts}} when type in [:text, :template, :cp, :cp_r] ->
-            rules = Rules.new(opts)
-            for path <- List.wrap(path_or_paths), do: new(type, app, path, rules)
+            for path <- List.wrap(path_or_paths), do: new(type, app, path, opts)
 
           _ ->
             []
@@ -158,14 +157,13 @@ defmodule Eject.File do
     paths = if except, do: Enum.reject(paths, &filter_path(&1, except)), else: paths
     paths = Enum.reject(paths, &File.dir?/1)
 
-    lib_files = for path <- paths, do: new(:text, app, path, rules)
+    lib_files = for path <- paths, do: new(:text, app, path, chmod: rules.chmod)
 
     associated_files =
       Enum.flat_map(
         rules.associated_files || [],
         fn {type, {path_or_paths, opts}} ->
-          rules = Rules.new(opts)
-          for path <- List.wrap(path_or_paths), do: new(type, app, path, rules)
+          for path <- List.wrap(path_or_paths), do: new(type, app, path, opts)
         end
       )
 
