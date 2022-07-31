@@ -1,7 +1,7 @@
-defmodule Eject.CodeFenceTest do
+defmodule Eject.ModifiersTest do
   use Eject.TestProjectCase
 
-  alias Eject.{App, CodeFence, Manifest, Config}
+  alias Eject.{App, Modifiers, Manifest, Config}
 
   setup do
     config = %Config{
@@ -23,7 +23,7 @@ defmodule Eject.CodeFenceTest do
 
   test "eject:lib", %{app: app} do
     output =
-      CodeFence.apply_fences(
+      Modifiers.code_fences(
         """
         defmodule Testing do
           # <eject:lib:included_lib>
@@ -45,7 +45,7 @@ defmodule Eject.CodeFenceTest do
 
   test "eject:mix", %{app: app} do
     output =
-      CodeFence.apply_fences(
+      Modifiers.code_fences(
         """
         defmodule Testing do
           # <eject:mix:included_mix>
@@ -71,7 +71,7 @@ defmodule Eject.CodeFenceTest do
     :another_app
 
     output =
-      CodeFence.apply_fences(
+      Modifiers.code_fences(
         """
         defmodule Testing do
           # <eject:app:code_fence_app>
@@ -93,7 +93,7 @@ defmodule Eject.CodeFenceTest do
 
   test "eject:remove", %{app: app} do
     output =
-      CodeFence.apply_fences(
+      Modifiers.code_fences(
         """
         defmodule Testing do
           # Keep
