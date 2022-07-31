@@ -4,6 +4,25 @@ With the Eject System, multiple apps are maintained together in a single Elixir
 codebase. When you're ready to deploy an app, it's "ejected" out into separate
 codebases that only contains the code needed by the app.
 
+## Project Structure
+
+Since Eject projects are just an Elixir application, the `lib` directory is
+central. It contains directories for:
+
+1. [Ejectable Apps](how-it-works.html#what-is-an-ejectable-app)
+2. [Lib Dependencies](dependencies.html#lib-dependencies) (shared libraries)
+
+A basic directory structure might look like this.
+
+```bash
++ my_base_app
+  + lib
+    + my_first_app
+    + my_second_app
+    + utilities
+    + ui_components
+```
+
 ## What is a Base Project?
 
 A Base Project is the single Elixir application that developers directly modify

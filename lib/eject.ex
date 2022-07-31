@@ -39,11 +39,9 @@ defmodule Eject do
   2. Add a [Plan](Eject.Plan) module to your project
   3. Configure your Elixir app to point to the Plan module
   4. Add `eject.exs` manifests to each Ejectable Application
+  5. Add to the Plan module all the files necessary to eject a working
+     application
 
-  ## The Eject System
-
-  `Eject` is not just a library, but a whole system for structuring
-  applications.
   """
 
   require Logger
