@@ -28,7 +28,7 @@ common to Phoenix applications.
 defmodule MyBaseApp.Eject.Plan do
   use Eject.Plan, templates: "lib/my_base_app/eject/templates"
 
-  eject(app) do
+  base_files do
     cp_r "assets"
     cp_r "priv/static"
 
@@ -78,7 +78,7 @@ Let's walk through it step by step.
 ## The `eject` section
 
 ```elixir
-eject(app) do
+base_files do
   cp_r "assets"
   cp_r "priv/static"
 

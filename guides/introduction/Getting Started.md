@@ -115,7 +115,7 @@ An example barebones Plan might look like this.
 defmodule MyApp.Eject.Plan do
   use Eject.Plan
 
-  eject(app) do
+  base_files do
     file "lib/my_app/application.ex"
     file "lib/my_app_web/endpoint.ex"
     cp_r "assets"
