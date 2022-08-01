@@ -186,9 +186,9 @@ defmodule Eject.File do
 
   @doc """
   Given a relative path of a file in your base project, read in the file, send the
-  (string) contents along with the `app` to `transform`, and then write
-  it to the same directory in the ejected project. (Replacing `my_app` in
-  the path with the ejected app's name.)
+  (string) contents along with the `app` to `transform`, and then write it to
+  the same directory in the ejected app. (Replacing `my_app` in the path with
+  the ejected app's name.)
   """
   def eject!(%Eject.File{source: source, type: type, destination: destination, chmod: chmod}, app) do
     # ensure the base directory exists before trying to write the file

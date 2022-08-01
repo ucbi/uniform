@@ -27,7 +27,7 @@ defmodule Mix.Tasks.Eject do
   2. All files and directories in the destination are deleted, except for `.git`,
     `_build`, and `deps`.
   3. All files in `lib/my_app` and `test/my_app` are copied to the destination.
-  4. All files specified in the [eject](Eject.Plan.html#eject/2) section of the
+  4. All files specified in the [base_files](Eject.Plan.html#base_files/1) section of the
      [Plan](`Eject.Plan`) are copied to the destination.
   5. All [Lib Dependencies](dependencies.html#lib-dependencies) of the app are
     copied to the destination. This includes all of `lib/dep_name` and
