@@ -92,7 +92,7 @@ file inside the directory.**
 > `mix eject` does not by change its behavior based on the data in `extra`, but
 > it is placed in `app.extra` so that you can use it to make decisions in
 > [templates](building-files-from-eex-templates.html) or in the
-> [eject](Eject.Plan.html#eject/2) or [modify](Eject.Plan.html#modify/4) sections
+> [base_files](Eject.Plan.html#base_files/1) or [modify](Eject.Plan.html#modify/4) sections
 > in your [Plan](Eject.Plan.html) module.
 >
 > For 'global' values available to _all_ ejectable apps, use the

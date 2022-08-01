@@ -1,18 +1,10 @@
 # Setting up a Phoenix project
 
-> This guide assumes that you're familiar with [The Eject
-> System](how-it-works.html) and have gone through the [Getting
-> Started](#getting-started.html) guide.
+> This guide walks through a typical process for setting up a Phoenix project.
+> It assumes that you're familiar with [The Eject System](how-it-works.html)
+> and have gone through the [Getting Started](#getting-started.html) guide.
 
-With the Eject System, teams can save dozens of hours of time setting up a
-Phoenix codebase's structure to match existing ones.
-
-This guide walks through a typical process for setting up an Elixir Phoenix
-project with `Eject`.
-
-## The Value Proposition
-
-Imagine creating an entire new application simply by adding a Router and a
+Imagine creating an entire new application simply by adding a Route and a
 single LiveView to an existing Elixir project.
 
 This is in fact the vision that drove the creation of `Eject`. The overhead of
@@ -75,7 +67,7 @@ end
 
 Let's walk through it step by step.
 
-## The `eject` section
+## The `base_files` section
 
 ```elixir
 base_files do
@@ -88,7 +80,7 @@ base_files do
 end
 ```
 
-In the [eject](Eject.Plan.html#eject/2) section, we specify files that should _always_
+In the [base_files](Eject.Plan.html#base_files/1) section, we specify files that should _always_
 be ejected in every app. Phoenix apps will typically have CSS and JS assets in
 the `assets` directory. They'll also have static files to be served as-is in
 `priv/static`. Some of these files are binary (non-text) files, and we assume
@@ -119,12 +111,6 @@ Base Project's configuration files.
 ```elixir
 file Path.wildcard("config/**/*.exs")
 ```
-
-> #### Use Code Fences for config files {: .tip}
->
-> If there are areas of the configuration files that you want to modify, such
-> as excluding configuration for a dependency that isn't included, use [Code
-> Fences](code-transformations.html#code-fences).
 
 ## The `deps` section
 
@@ -190,9 +176,219 @@ lib :my_base_app_web do
 end
 ```
 
-> #### Base Web as an internal space {: .tip}
->
-> We suggest utilizing the base web app (`my_base_app_web` in this case) as a
-> place to create web pages that serve your team internally. (Using `only` to
-> ensure they aren't ejected.) For example, creating pages that catalog and
-> document all of your [Ejectable Apps](how-it-works.html#what-is-an-ejectable-app).
+## The Phoenix Router
+
+A simple way to set up your `Phoenix.Router` is to use [Code
+Fences](code-transformations.html#code-fences) and `Eject.Plan.modify/2`.
+
+Routes for all of your apps are all placed in the router, with two caveats:
+
+1. Routes are wrapped in [Code Fences](code-transformations.html#code-fences)
+   so that they're removed when other apps are ejected.
+2. Paths are prefixed with `/app-name` so that each app exists at a nice URL
+   for development. The prefixes are removed with `modify`.
+
+```elixir
+defmodule MyBaseAppWeb.Router do
+  use MyBaseAppWeb, :router
+
+  pipeline :browser do
+    # ...
+  end
+
+  # <eject:remove>
+
+  # Place "internal pages" that should never be ejected here.
+  # See "Internal Pages" below this code example.
+  scope "/", SomeAppWeb do
+    pipe_through :browser
+
+    get "/internal-team-page", InternalTeamController, :index
+  end
+
+  # </eject:remove>
+
+  # <eject:app:some_app>
+  scope "/some-app", SomeAppWeb do
+    pipe_through :browser
+
+    get "/widgets", WidgetController, :index
+    get "/widgets/new", WidgetController, :new
+    post "/widgets/new", WidgetController, :create
+    get "/widgets/:widget_id", WidgetController, :show
+  end
+  # </eject:app:some_app>
+
+  # <eject:app:another_app>
+  scope "/another-app", SomeAppWeb do
+    pipe_through :browser
+
+    get "/widgets", WidgetController, :index
+    get "/widgets/new", WidgetController, :new
+    post "/widgets/new", WidgetController, :create
+    get "/widgets/:widget_id", WidgetController, :show
+  end
+  # </eject:app:another_app>
+end
+```
+
+```elixir
+defmodule MyBaseApp.Eject.Plan do
+  use Eject.Plan, templates: "..."
+
+  modify "lib/my_base_app_web/router.ex", fn file, app ->
+    String.replace(
+      file,
+      "scope \"/#{app.name.hyphen}\"",
+      "scope \"/\""
+    )
+  end
+end
+```
+
+The Code Fences (comments like this: `# <eject:app:some_app>`) will cause the
+code to be removed when ejecting a different app. The simple code transformer
+defined with `modify` changes
+
+```elixir
+scope "/some-app", SomeAppWeb do
+```
+
+To
+
+```elixir
+scope "/", SomeAppWeb do
+```
+
+In the ejected codebase.
+
+This method is a great starting point. Once you reach dozens of apps, you may
+want to consider other methods that allow you to branch out to more separation
+in your Router.
+
+### Internal Pages
+
+Since you're adopting a model that serves all of your applications from a
+single server in the development environment, it can be useful to add other
+pages that aren't intended to be ejected with any app. For example, a page that
+catalogs and links to your various apps.
+
+We recommend adding these as often as you like, and wrapping them all in
+`# <eject:remove>` Code Fences as in the example above.
+
+## Code Fences Everywhere!
+
+There are other files crucial for Elixir apps, such as `application.ex`,
+`mix.exs`, and `config/*.exs` files.
+
+Similarly to the Phoenix Router, we recommend adding all of the code needed for
+every application and [Lib Dependency](dependencies.html#lib-dependencies) to
+each of these places and using [Code
+Fences](code-transformations.html#code-fences) to remove code that isn't needed
+for any given application.
+
+### Application
+
+Your `Application` file at `lib/my_base_app/application.ex` is a critical piece
+of Elixir applications since it's used to start processes and supervisors at
+the start of the application.
+
+Here's what an example `Application` file would look like with Code Fences applied.
+
+```elixir
+defmodule MyBaseApp.Application do
+  use Application
+
+  def start(_type, _args) do
+    children = [
+      MyBaseAppWeb.Endpoint,
+      {Phoenix.PubSub, name: MyBaseApp.PubSub},
+      MyBaseAppWeb.Presence,
+      MyBaseAppWeb.Telemetry,
+
+      # <eject:lib:my_first_data_lib>
+      MyFirstDataLib.Repo,
+      # </eject:lib:my_first_data_lib>
+
+      # <eject:lib:my_second_data_lib>
+      MySecondDataLib.Repo,
+      MySecondDataLib.Vault,
+      # </eject:lib:my_second_data_lib>
+
+      # <eject:remove>
+      SomeDevelopmentOnlyDB.Repo,
+      # </eject:remove>
+
+      # <eject:mix:oban>
+      {Oban, ...},
+      # </eject:mix:oban>
+    ]
+
+    # ...
+  end
+end
+```
+
+Notice that code which should always be ejected does not get surrounded by Code
+Fences.
+
+### mix.exs
+
+Some dependencies require modifying `mix.exs`. For example, the
+[exq](https://hexdocs.pm/exq) Hex package says to add `:exq` to `application`
+in `mix.exs`.
+
+```elixir
+def application do
+  [
+    applications: [:logger, :exq],
+    # ...
+  ]
+end
+```
+
+But what if only some of your apps require exq? Wrap the exq-specific code in
+Code Fences, and it will only be included when exq is required.
+
+```elixir
+def application do
+  [
+    applications: [
+      :logger,
+      # <eject:mix:exq>
+      :exq
+      # </eject:mix:exq>
+    ],
+    # ...
+  ]
+end
+```
+
+#### You don't need to use Code Fences in `deps` {: .tip}
+
+Note that removing deps from the `deps` section of `mix.exs` is automatic if
+you follow the [Getting Started](getting-started.html) instructions properly.
+
+So this would not be required.
+
+    # ❌ Do NOT wrap deps in code fences
+    defp deps do
+      [
+        # <eject:mix:jason>
+        {:jason, "~> 1.0"}
+        # </eject:mix:jason>
+      ]
+    end
+
+### Config Files
+
+Many dependencies also require configuration. Apply code fences in your
+configuration files for the same result.
+
+```elixir
+# <eject:mix:guardian>
+config :my_base_app, MyBaseApp.Guardian,
+       issuer: "my_base_app",
+       secret_key: ...
+# </eject:mix:guardian>
+```
