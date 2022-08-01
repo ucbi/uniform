@@ -143,13 +143,7 @@ defmodule Eject do
     if File.exists?(app.destination) do
       {:module, _} = Code.ensure_loaded(app.internal.config.plan)
 
-      preserve =
-        if function_exported?(app.internal.config.plan, :__eject__, 1) do
-          for {:preserve, filename} <- app.internal.config.plan.__eject__(app), do: filename
-        else
-          []
-        end
-
+      preserve = app.internal.config.plan.__preserve__()
       preserve = [".git", "deps", "_build" | preserve]
 
       app.destination

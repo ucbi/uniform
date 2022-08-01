@@ -118,18 +118,15 @@ defmodule Eject.File do
     manifest_path = Manifest.manifest_path(app.name.underscore)
     {:module, _} = Code.ensure_loaded(app.internal.config.plan)
 
-    opts =
-      if function_exported?(app.internal.config.plan, :__eject__, 1) do
-        app
-        |> app.internal.config.plan.__eject__()
-        # never eject the Eject manifest
-        |> Keyword.update(:except, [manifest_path], fn except -> [manifest_path | except] end)
-        |> Keyword.take([:except])
+    # never eject the Eject manifest
+    except =
+      if function_exported?(app.internal.config.plan, :app_lib_except, 1) do
+        [manifest_path | app.internal.config.plan.app_lib_except(app)]
       else
-        [except: [manifest_path]]
+        [manifest_path]
       end
 
-    lib_dir_files(app, app.name.underscore, opts)
+    lib_dir_files(app, app.name.underscore, except: except)
   end
 
   # Returns all files required by all the lib deps of this app

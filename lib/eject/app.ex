@@ -9,7 +9,7 @@ defmodule Eject.App do
 
   - `c:Eject.Plan.extra/1` callback
   - `c:Eject.Plan.target_path/2` callback
-  - `Eject.Plan.eject/2` macro
+  - `Eject.Plan.base_files/1` macro
   - `Eject.Plan.modify/2` macros
 
   In these callbacks and macros, you can make decisions about what to eject or
@@ -187,7 +187,7 @@ defmodule Eject.App do
 
   ## Examples in Context
 
-      eject(app) do
+      base_files do
         if depends_on?(app, :mix, :some_hex_dependency) do
           file "file_needed_by_some_hex_dependency"
         end
