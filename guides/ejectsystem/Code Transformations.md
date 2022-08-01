@@ -150,3 +150,12 @@ it in these comments:
 # </eject:remove>
 ```
 
+> #### Code Fence comments are removed on ejection {: .info}
+>
+> Note that regardless of whether `mix eject` keeps or deletes the code in a
+> code fence, the code fence comments themselves (like `# <eject:app:my_app>`)
+> are always removed.
+>
+> Furthermore, `mix eject` runs `mix format` on the ejected codebase at the
+> end. So you always end up with "clean" looking code.
+
