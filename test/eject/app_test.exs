@@ -8,7 +8,7 @@ defmodule Eject.AppTest do
     config = %Config{
       mix_project_app: :test_project,
       mix_project: TestProject.MixProject,
-      plan: TestProject.Eject.Plan,
+      blueprint: TestProject.Eject.Blueprint,
       destination: "/Users/me/code"
     }
 
@@ -29,7 +29,7 @@ defmodule Eject.AppTest do
     assert app.internal.config == %Config{
              mix_project_app: :test_project,
              mix_project: TestProject.MixProject,
-             plan: TestProject.Eject.Plan,
+             blueprint: TestProject.Eject.Blueprint,
              destination: "/Users/me/code"
            }
 

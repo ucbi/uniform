@@ -1,5 +1,5 @@
-defmodule TestProject.Eject.Plan do
-  use Eject.Plan, templates: "templates"
+defmodule TestProject.Eject.Blueprint do
+  use Eject.Blueprint, templates: "templates"
 
   @preserve [".gitignore"]
 

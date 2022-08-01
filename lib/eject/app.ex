@@ -5,12 +5,12 @@ defmodule Eject.App do
 
   ## App Struct Availability
 
-  This struct is available in the Plan module in these locations:
+  This struct is available in the Blueprint module in these locations:
 
-  - `c:Eject.Plan.extra/1` callback
-  - `c:Eject.Plan.target_path/2` callback
-  - `Eject.Plan.base_files/1` macro
-  - `Eject.Plan.modify/2` macros
+  - `c:Eject.Blueprint.extra/1` callback
+  - `c:Eject.Blueprint.target_path/2` callback
+  - `Eject.Blueprint.base_files/1` macro
+  - `Eject.Blueprint.modify/2` macros
 
   In these callbacks and macros, you can make decisions about what to eject or
   how files should be modified using the `app`.
@@ -72,7 +72,7 @@ defmodule Eject.App do
 
   Note that the `extra` key contains everything you put in `extra` in
   `eject.exs` for the given app. It also contains anything returned by
-  `c:Eject.Plan.extra/1`.
+  `c:Eject.Blueprint.extra/1`.
 
       #Eject.App<
         destination: "/Users/me/code/tweeter",
@@ -158,12 +158,12 @@ defmodule Eject.App do
       destination: destination(app_name_underscore_case, config, opts)
     }
 
-    {:module, _} = Code.ensure_loaded(config.plan)
+    {:module, _} = Code.ensure_loaded(config.blueprint)
 
     # `extra/1` requires an app struct
     extra =
-      if function_exported?(config.plan, :extra, 1) do
-        Keyword.merge(config.plan.extra(app), manifest.extra)
+      if function_exported?(config.blueprint, :extra, 1) do
+        Keyword.merge(config.blueprint.extra(app), manifest.extra)
       else
         manifest.extra
       end
