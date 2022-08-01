@@ -18,7 +18,7 @@ defmodule Eject.FileTest do
     config = %Config{
       mix_project_app: :test_project,
       mix_project: TestProject.MixProject,
-      plan: TestProject.Eject.Plan
+      blueprint: TestProject.Eject.Blueprint
     }
 
     manifest = %Manifest{lib_deps: [:included_lib], mix_deps: [:included_mix]}

@@ -27,8 +27,8 @@ defmodule Mix.Tasks.Eject do
   2. All files and directories in the destination are deleted, except for `.git`,
     `_build`, and `deps`.
   3. All files in `lib/my_app` and `test/my_app` are copied to the destination.
-  4. All files specified in the [base_files](Eject.Plan.html#base_files/1) section of the
-     [Plan](`Eject.Plan`) are copied to the destination.
+  4. All files specified in the [base_files](Eject.Blueprint.html#base_files/1) section of the
+     [Blueprint](`Eject.Blueprint`) are copied to the destination.
   5. All [Lib Dependencies](dependencies.html#lib-dependencies) of the app are
     copied to the destination. This includes all of `lib/dep_name` and
     `test/dep_name` automatically.
@@ -44,7 +44,7 @@ defmodule Mix.Tasks.Eject do
   In step 7, running `mix format` tidies up things like chains of newlines that
   may appear from applying [Code Fences](code-transformations.html#code-fences).
   It also prevents you from having to think about code formatting in
-  [modify](Eject.Plan.html#modify/4).
+  [modify](Eject.Blueprint.html#modify/4).
 
   """
 

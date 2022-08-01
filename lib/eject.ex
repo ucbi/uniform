@@ -36,10 +36,10 @@ defmodule Eject do
   In summary, you'll need to:
 
   1. Add the dep in `mix.exs`: `{:eject, "~> 0.1.0"}`
-  2. Add a [Plan](Eject.Plan) module to your project
-  3. Configure your Elixir app to point to the Plan module
+  2. Add a [Blueprint](Eject.Blueprint) module to your project
+  3. Configure your Elixir app to point to the Blueprint module
   4. Add `eject.exs` manifests to each Ejectable Application
-  5. Add to the Plan module all the files necessary to eject a working
+  5. Add to the Blueprint module all the files necessary to eject a working
      application
 
   """
@@ -141,9 +141,9 @@ defmodule Eject do
   @doc "Clear the destination folder where the app will be ejected." && false
   def clear_destination(app) do
     if File.exists?(app.destination) do
-      {:module, _} = Code.ensure_loaded(app.internal.config.plan)
+      {:module, _} = Code.ensure_loaded(app.internal.config.blueprint)
 
-      preserve = app.internal.config.plan.__preserve__()
+      preserve = app.internal.config.blueprint.__preserve__()
       preserve = [".git", "deps", "_build" | preserve]
 
       app.destination

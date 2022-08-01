@@ -11,14 +11,14 @@ This is in fact the vision that drove the creation of `Eject`. The overhead of
 experimenting with new apps becomes extremely low, incentivizing the team to
 try out ideas without being inhibited by initial setup time.
 
-## Setting up your Plan module
+## Setting up your Blueprint module
 
-Below is an example [Plan](Eject.Plan.html) module for ejecting the files
+Below is an example [Blueprint](Eject.Blueprint.html) module for ejecting the files
 common to Phoenix applications.
 
 ```elixir
-defmodule MyBaseApp.Eject.Plan do
-  use Eject.Plan, templates: "lib/my_base_app/eject/templates"
+defmodule MyBaseApp.Eject.Blueprint do
+  use Eject.Blueprint, templates: "lib/my_base_app/eject/templates"
 
   base_files do
     cp_r "assets"
@@ -80,7 +80,7 @@ base_files do
 end
 ```
 
-In the [base_files](Eject.Plan.html#base_files/1) section, we specify files that should _always_
+In the [base_files](Eject.Blueprint.html#base_files/1) section, we specify files that should _always_
 be ejected in every app. Phoenix apps will typically have CSS and JS assets in
 the `assets` directory. They'll also have static files to be served as-is in
 `priv/static`. Some of these files are binary (non-text) files, and we assume
@@ -179,7 +179,7 @@ end
 ## The Phoenix Router
 
 A simple way to set up your `Phoenix.Router` is to use [Code
-Fences](code-transformations.html#code-fences) and `Eject.Plan.modify/2`.
+Fences](code-transformations.html#code-fences) and `Eject.Blueprint.modify/2`.
 
 Routes for all of your apps are all placed in the router, with two caveats:
 
@@ -233,8 +233,8 @@ end
 ```
 
 ```elixir
-defmodule MyBaseApp.Eject.Plan do
-  use Eject.Plan, templates: "..."
+defmodule MyBaseApp.Eject.Blueprint do
+  use Eject.Blueprint, templates: "..."
 
   modify "lib/my_base_app_web/router.ex", fn file, app ->
     String.replace(

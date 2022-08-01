@@ -13,7 +13,7 @@ A Lib Dependency is referenced by an atom that matches the name of the
 directory in `lib/`.
 
 For example, a library in `lib/utilities` would be referenced in `eject.exs` or
-in the [Plan](Eject.Plan.html) module as `:utilities`.
+in the [Blueprint](Eject.Blueprint.html) module as `:utilities`.
 
 ## Mix Dependencies
 
@@ -37,7 +37,7 @@ by an App:
 ```
 
 2. Include the depencency in **all Ejectable Apps** by placing the dependency in
-   the [always](`Eject.Plan.always/1`) section of your [Plan](Eject.Plan.html)
+   the [always](`Eject.Blueprint.always/1`) section of your [Blueprint](Eject.Blueprint.html)
    module.
 
 ```elixir
@@ -50,7 +50,7 @@ end
 ```
 
 3. Make it a "sub-dependency" of a dependency from method 1 or 2 by using the
-   `lib_deps` or `mix_deps` macros in your [deps section](`Eject.Plan.deps/1`).
+   `lib_deps` or `mix_deps` macros in your [deps section](`Eject.Blueprint.deps/1`).
    (See "Chained Dependencies" below.)
 
 ```elixir
@@ -72,8 +72,8 @@ end
 > If these are true:
 >
 > - The app's `eject.exs` manifest includes `lib_deps: [:foo]`
-> - The `deps` section of your Plan says that `foo` has `lib_deps: [:bar]`
-> - The `deps` section of your Plan says that `bar` has `lib_deps: [:baz]`
+> - The `deps` section of your Blueprint says that `foo` has `lib_deps: [:bar]`
+> - The `deps` section of your Blueprint says that `bar` has `lib_deps: [:baz]`
 >
 > Then the ejected codebase will include `lib/foo`, `lib/bar`, and `lib/baz`.
 

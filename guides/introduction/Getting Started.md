@@ -17,29 +17,29 @@ defp deps do
 end
 ```
 
-## Create a Plan module
+## Create a Blueprint module
 
-Next, create a [Plan](Eject.Plan.html) module. It will contain all of the
-details (the "plan") for how `mix eject` should behave whenever you tell it to
-eject a specific application.
+Next, create a [Blueprint](Eject.Blueprint.html) module. It will contain all of
+the details for how `mix eject` should behave whenever you tell it to eject a
+specific application.
 
 ```elixir
-defmodule MyApp.Eject.Plan do
-  use Eject.Plan, templates: "lib/my_app/eject/templates"
+defmodule MyApp.Eject.Blueprint do
+  use Eject.Blueprint, templates: "lib/my_app/eject/templates"
 end
 ```
 
 You can name the module whatever you like, but we suggest putting it in
-`lib/my_app/eject/plan.ex` and specifying the templates directory alongside it
+`lib/my_app/eject/blueprint.ex` and specifying the templates directory alongside it
 in `lib/my_app/eject/templates`.
 
 ## Configuration
 
-In `config/config.exs` put the following line. (Changing the `plan` value to
-match the name of your Plan module name above.)
+In `config/config.exs` put the following line. (Changing the `blueprint` value to
+match the name of your Blueprint module name above.)
 
 ```elixir
-config :my_app, Eject, plan: MyApp.Eject.Plan
+config :my_app, Eject, blueprint: MyApp.Eject.Blueprint
 ```
 
 You can also optionally set a default `destination` for ejected apps.
@@ -47,7 +47,7 @@ You can also optionally set a default `destination` for ejected apps.
 ```elixir
 # With optional :destination
 config :my_app, Eject,
-  plan: MyApp.Eject.Plan,
+  blueprint: MyApp.Eject.Blueprint,
   destination: "/Users/me/ejected"
 ```
 
@@ -81,7 +81,7 @@ Once you start structuring your project for the Eject System, you'll add
 > #### More on eject.exs {: .info}
 >
 > See [eject.exs Options](./how-it-works.html#eject-exs-options)
-> for an explanation of supported options.
+> for an exblueprintation of supported options.
 
 ## Ejecting an Application
 
@@ -94,12 +94,12 @@ mix eject MyApplicationName
 And be able to successfully create an ejected codebase. However, it will
 probably lack critical code that is needed to run properly.
 
-This leads us to the final step of **Building a Plan**.
+This leads us to the final step of **Building a Blueprint**.
 
-## Build the Plan
+## Build the Blueprint
 
-> Read the documentation for [Eject.Plan](Eject.Plan.html) for the full range
-> of features to build out your Plan module.
+> Read the documentation for [Eject.Blueprint](Eject.Blueprint.html) for the full range
+> of features to build out your Blueprint module.
 
 Since each Elixir application is different, **it is up to you to determine which files need to be ejected** to make `mix eject` emit a working application.
 
@@ -109,11 +109,11 @@ Since each Elixir application is different, **it is up to you to determine which
 > System](how-it-works.html), then consult the how-to guide for [Setting up a
 > Phoenix Project](./setting-up-a-phoenix-project.html).
 
-An example barebones Plan might look like this.
+An example barebones Blueprint might look like this.
 
 ```elixir
-defmodule MyApp.Eject.Plan do
-  use Eject.Plan
+defmodule MyApp.Eject.Blueprint do
+  use Eject.Blueprint
 
   base_files do
     file "lib/my_app/application.ex"

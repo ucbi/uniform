@@ -32,7 +32,7 @@ The Base Project contains:
 
 1. Code for multiple [Ejectable Apps](#what-is-an-ejectable-app)
 2. [Libraries](dependencies.html#lib-dependencies) shared between the applications
-3. A [Plan](Eject.Plan.html) module configuring which files are copied to
+3. A [Blueprint](Eject.Blueprint.html) module configuring which files are copied to
    ejected repositories.
 
 ## What is "Ejecting"?
@@ -92,11 +92,11 @@ file inside the directory.**
 > `mix eject` does not by change its behavior based on the data in `extra`, but
 > it is placed in `app.extra` so that you can use it to make decisions in
 > [templates](building-files-from-eex-templates.html) or in the
-> [base_files](Eject.Plan.html#base_files/1) or [modify](Eject.Plan.html#modify/4) sections
-> in your [Plan](Eject.Plan.html) module.
+> [base_files](Eject.Blueprint.html#base_files/1) or [modify](Eject.Blueprint.html#modify/4) sections
+> in your [Blueprint](Eject.Blueprint.html) module.
 >
 > For 'global' values available to _all_ ejectable apps, use the
-> `c:Eject.Plan.extra/1` callback implementation.
+> `c:Eject.Blueprint.extra/1` callback implementation.
 
 > #### No Keys in eject.exs are required {: .info}
 >
@@ -110,15 +110,15 @@ file inside the directory.**
 Whenever you run `mix eject MyApp`, there are 4 simple rules that the library
 uses to decide which files to include or exclude from the ejected codebase.
 
-1. All files specified by the [eject section](Eject.Plan.html#eject/2) of the
-   Plan are included. These are "base files" to include with every app.
+1. All files specified by the [eject section](Eject.Blueprint.html#eject/2) of the
+   Blueprint are included. These are "base files" to include with every app.
 2. All files in `lib/my_app` and `test/my_app` are included.
 3. For every [Lib Dependency](dependencies.html#lib-dependencies), all files in
    `lib/dep_name` and `test/dep_name` are included.
-4. [A small handful of files](Eject.Plan.html#module-files-that-are-always-ejected)
+4. [A small handful of files](Eject.Blueprint.html#module-files-that-are-always-ejected)
    common to most Elixir projects are always included.
 
 > The only caveat to these rules is that the files in rules 2 and 3 (the
 > `lib/foo` and `test/foo` files for your ejected app and Lib Dependencies) are
-> subject to [only](Eject.Plan.html#only/1) and
-> [except](Eject.Plan.html#except/1) instructions.
+> subject to [only](Eject.Blueprint.html#only/1) and
+> [except](Eject.Blueprint.html#except/1) instructions.
