@@ -23,15 +23,15 @@ defmodule Eject.ModifiersTest do
 
   test "eject:lib", %{app: app} do
     output =
-      Modifiers.code_fences(
+      Modifiers.elixir_code_fences(
         """
         defmodule Testing do
-          # <eject:lib:included_lib>
+          # eject:lib:included_lib
           # Keep
-          # </eject:lib:included_lib>
-          # <eject:lib:excluded_lib>
+          # /eject:lib:included_lib
+          # eject:lib:excluded_lib
           # Remove
-          # </eject:lib:excluded_lib>
+          # /eject:lib:excluded_lib
         end
         """,
         app
@@ -45,15 +45,15 @@ defmodule Eject.ModifiersTest do
 
   test "eject:mix", %{app: app} do
     output =
-      Modifiers.code_fences(
+      Modifiers.elixir_code_fences(
         """
         defmodule Testing do
-          # <eject:mix:included_mix>
+          # eject:mix:included_mix
           # Keep
-          # </eject:mix:included_mix>
-          # <eject:mix:excluded_mix>
+          # /eject:mix:included_mix
+          # eject:mix:excluded_mix
           # Remove
-          # </eject:mix:excluded_mix>
+          # /eject:mix:excluded_mix
         end
         """,
         app
@@ -71,15 +71,15 @@ defmodule Eject.ModifiersTest do
     :another_app
 
     output =
-      Modifiers.code_fences(
+      Modifiers.elixir_code_fences(
         """
         defmodule Testing do
-          # <eject:app:code_fence_app>
+          # eject:app:code_fence_app
           # Keep
-          # </eject:app:code_fence_app>
-          # <eject:app:another_app>
+          # /eject:app:code_fence_app
+          # eject:app:another_app
           # Remove
-          # </eject:app:another_app>
+          # /eject:app:another_app
         end
         """,
         app
@@ -93,13 +93,13 @@ defmodule Eject.ModifiersTest do
 
   test "eject:remove", %{app: app} do
     output =
-      Modifiers.code_fences(
+      Modifiers.elixir_code_fences(
         """
         defmodule Testing do
           # Keep
-          # <eject:remove>
+          # eject:remove
           # Remove
-          # </eject:remove>
+          # /eject:remove
         end
         """,
         app
