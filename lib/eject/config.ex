@@ -109,7 +109,6 @@ defmodule Eject.Config do
       if function_exported?(config.plan, :__deps__, 1), do: config.plan.__deps__(:lib), else: []
 
     names = for lib_dep <- registered, do: to_string(lib_dep.name)
-    rules = Eject.Rules.new([])
 
     unregistered =
       for dir <- File.ls!("lib"), File.dir?(Path.join("lib", dir)), dir not in names do
@@ -117,8 +116,7 @@ defmodule Eject.Config do
           name: String.to_atom(dir),
           lib_deps: [],
           mix_deps: [],
-          always: false,
-          file_rules: rules
+          always: false
         })
       end
 

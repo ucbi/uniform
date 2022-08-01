@@ -28,13 +28,26 @@ defmodule TestProject.Eject.Plan do
     end
   end
 
-  modify ~r/\.dotfile/, file, app do
+  modify ~r/\.dotfile/, fn file, app ->
     String.replace(
       file,
       "[REPLACE THIS LINE VIA modify/0]",
       "[REPLACED LINE WHILE EJECTING #{app.name.camel}]"
     )
   end
+
+  defmodule Modify do
+    def append_hello_world(file) do
+      file <> "hello world"
+    end
+
+    def append_app_name(file, app) do
+      file <> "app name is #{app.name.hyphen}"
+    end
+  end
+
+  modify ~r/\.dotfile/, &Modify.append_hello_world/1
+  modify ~r/\.dotfile/, &Modify.append_app_name/2
 
   deps do
     always do

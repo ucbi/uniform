@@ -11,7 +11,7 @@ defmodule Eject.File do
 
              """ && false
 
-  alias Eject.{App, CodeFence, Manifest, Rules}
+  alias Eject.{App, Manifest, Rules}
 
   defstruct [:type, :source, :destination, :chmod]
 
@@ -29,20 +29,31 @@ defmodule Eject.File do
   # Functions for creating a File struct
   #
 
-  def new(type, %App{} = app, source, rules \\ nil)
+  def new(type, %App{} = app, source, opts \\ [])
       when type in [:text, :template, :cp, :cp_r] and is_binary(source) do
+    {:module, _} = Code.ensure_loaded(app.internal.config.plan)
+
+    destination =
+      if function_exported?(app.internal.config.plan, :target_path, 2) do
+        # call target_path callback, giving the developer a chance to modify the final path
+        app.internal.config.plan.target_path(source, app)
+      else
+        source
+      end
+
     path =
-      source
-      # call target_path callback, giving the developer a chance to modify the final path
-      |> app.internal.config.plan.target_path(app)
-      |> String.replace(to_string(app.internal.config.mix_project_app), app.name.underscore)
+      String.replace(
+        destination,
+        to_string(app.internal.config.mix_project_app),
+        app.name.underscore
+      )
 
     struct!(
       __MODULE__,
       type: type,
       source: source,
       destination: Path.join(app.destination, path),
-      chmod: rules && rules.chmod
+      chmod: opts[:chmod]
     )
   end
 
@@ -72,8 +83,7 @@ defmodule Eject.File do
       |> Enum.flat_map(fn item ->
         case item do
           {type, {path_or_paths, opts}} when type in [:text, :template, :cp, :cp_r] ->
-            rules = Rules.new(opts)
-            for path <- List.wrap(path_or_paths), do: new(type, app, path, rules)
+            for path <- List.wrap(path_or_paths), do: new(type, app, path, opts)
 
           _ ->
             []
@@ -108,26 +118,29 @@ defmodule Eject.File do
     manifest_path = Manifest.manifest_path(app.name.underscore)
     {:module, _} = Code.ensure_loaded(app.internal.config.plan)
 
-    file_rules =
+    opts =
       if function_exported?(app.internal.config.plan, :__eject__, 1) do
         app
         |> app.internal.config.plan.__eject__()
         # never eject the Eject manifest
         |> Keyword.update(:except, [manifest_path], fn except -> [manifest_path | except] end)
         |> Keyword.take([:except])
-        |> Rules.new()
       else
-        Rules.new(except: [manifest_path])
+        [except: [manifest_path]]
       end
 
-    lib_dir_files(app, app.name.underscore, file_rules)
+    lib_dir_files(app, app.name.underscore, opts)
   end
 
   # Returns all files required by all the lib deps of this app
   @spec lib_dep_files(App.t()) :: [t]
   defp lib_dep_files(app) do
     Enum.flat_map(app.internal.deps.lib, fn {_, lib_dep} ->
-      lib_dir_files(app, to_string(lib_dep.name), lib_dep.file_rules)
+      lib_dir_files(
+        app,
+        to_string(lib_dep.name),
+        Map.take(lib_dep, ~w(only except associated_files)a)
+      )
     end)
   end
 
@@ -135,26 +148,24 @@ defmodule Eject.File do
   # associated with that directory. Includes files in `lib/<lib_dir>`
   # as well as `test/<lib_dir>`
   @spec lib_dir_files(App.t(), String.t(), Rules.t()) :: [Eject.File.t()]
-  defp lib_dir_files(
-         app,
-         lib_dir,
-         %Rules{only: only, except: except} = rules
-       ) do
+  defp lib_dir_files(app, lib_dir, opts) do
     # location of lib and test cp_r is configurable for testing
+    only = opts[:only]
+    except = opts[:except]
+
     paths = Path.wildcard("lib/#{lib_dir}/**")
     paths = paths ++ Path.wildcard("test/#{lib_dir}/**")
     paths = if only, do: Enum.filter(paths, &filter_path(&1, only)), else: paths
     paths = if except, do: Enum.reject(paths, &filter_path(&1, except)), else: paths
     paths = Enum.reject(paths, &File.dir?/1)
 
-    lib_files = for path <- paths, do: new(:text, app, path, rules)
+    lib_files = for path <- paths, do: new(:text, app, path)
 
     associated_files =
       Enum.flat_map(
-        rules.associated_files || [],
+        opts[:associated_files] || [],
         fn {type, {path_or_paths, opts}} ->
-          rules = Rules.new(opts)
-          for path <- List.wrap(path_or_paths), do: new(type, app, path, rules)
+          for path <- List.wrap(path_or_paths), do: new(type, app, path, opts)
         end
       )
 
@@ -230,21 +241,10 @@ defmodule Eject.File do
               File.read!(Path.expand(source))
           end
 
-        underscore = to_string(app.internal.config.mix_project_app)
-
-        transformed =
-          contents
-          # apply specified transformations in `Project.modify`
-          |> apply_modifiers(source, app)
-          # replace `base_project_name` with `ejected_app_name`
-          |> String.replace(underscore, app.name.underscore)
-          # replace `base-project-name` with `ejected-app-name`
-          |> String.replace(String.replace(underscore, "_", "-"), app.name.hyphen)
-          # replace `BaseProjectName` with `EjectedAppName`
-          |> String.replace(Macro.camelize(underscore), app.name.camel)
-          |> CodeFence.apply_fences(app)
-
-        File.write!(destination, transformed)
+        File.write!(
+          destination,
+          apply_modifiers(contents, source, app)
+        )
     end
 
     # apply chmod if relevant
@@ -253,21 +253,32 @@ defmodule Eject.File do
     end
   end
 
-  @default_modifier {"mix.exs", {Eject.Modifiers, :remove_unused_mix_deps}}
+  @default_modifiers [
+    {"mix.exs", &Eject.Modifiers.remove_unused_mix_deps/2},
+    {:all, &Eject.Modifiers.code_fences/2},
+    {:all, &Eject.Modifiers.replace_base_project_name/2}
+  ]
 
   defp apply_modifiers(contents, relative_path, app) do
-    modifiers = app.internal.config.plan.__modifiers__()
-    modifiers = [@default_modifier | modifiers]
+    # add `Plan.modify` transformations to hard-coded default transformations
+    modifiers = app.internal.config.plan.__modifiers__() ++ @default_modifiers
 
-    Enum.reduce(modifiers, contents, fn {path_or_regex, {module, function}}, contents ->
+    Enum.reduce(modifiers, contents, fn {path_or_regex, function}, contents ->
       if apply_modifier?(path_or_regex, relative_path) do
-        apply(module, function, [contents, app])
+        args =
+          case function do
+            f when is_function(f, 1) -> [contents]
+            f when is_function(f, 2) -> [contents, app]
+          end
+
+        apply(function, args)
       else
         contents
       end
     end)
   end
 
+  defp apply_modifier?(:all, _path), do: true
   defp apply_modifier?(%Regex{} = regex, path), do: String.match?(path, regex)
   defp apply_modifier?(path, matching_path), do: path == matching_path
 end

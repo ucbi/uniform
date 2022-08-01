@@ -30,7 +30,7 @@ Users can specify arbitrary modifications that should be applied to various
 files using the `modify` macro in the [Plan](`Eject.Plan`) module:
 
 ```elixir
-modify ~r/.+_worker.ex/, file, app do
+modify ~r/.+_worker.ex/, fn file, app ->
   # This code will be ran for every file whose relative path in the base
   # project matches the regex.
   #
@@ -42,7 +42,7 @@ modify ~r/.+_worker.ex/, file, app do
   # the modified file contents to eject.
 end
 
-modify "lib/my_app_web/router.ex", file do
+modify "lib/my_app_web/router.ex", fn file ->
   # This modifier is like the one above, but the transformation will only
   # be ran for `lib/my_app_web/router.ex`.
 end

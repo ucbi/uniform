@@ -81,16 +81,13 @@ defmodule Eject.Plan do
       defmodule Plan do
         use Eject.Plan, templates: "..."
 
-        modify "assets/js/app.js", file, app do
+        modify "assets/js/app.js", fn file, app ->
           String.replace(file, "SOME_VALUE_PER_APP", app.extra[:some_value])
         end
 
-        modify ~r/_worker.ex/, file, app do
-          # ...
-        end
-      end
+        modify ~r/_worker.ex/, &MyApp.Modify.modify_workers/1
 
-  See `modify/4` for more information.
+  See `modify/2` for more information.
 
   ## Full Example
 
@@ -210,7 +207,7 @@ defmodule Eject.Plan do
   A hook to add more data to `app.extra`, beyond what's in the [Eject Manifest
   file](./Eject.html#module-the-eject-manifest-eject-exs).
 
-  ### Example
+  ## Example
 
   You may want to set the theme based on the name of the ejectable app.  In
   this case, add an 'extra' entry called 'theme', which will then be available
@@ -241,7 +238,7 @@ defmodule Eject.Plan do
 
       def target_path(path, _app), do: path
 
-  ### Example
+  ## Example
 
   You may want to place certain files in `lib/ejected_app_web` instead of `lib/ejected_app`.
   Let's say you have an `is_web_file?` function that identifies whether the file belongs in
@@ -278,13 +275,10 @@ defmodule Eject.Plan do
     quote do
       @behaviour Eject.Plan
       @before_compile Eject.Plan.BeforeCompile
-      import Eject.Plan, only: [modify: 4, modify: 3, deps: 1, eject: 2]
+      import Eject.Plan, only: [modify: 2, deps: 1, eject: 2]
       import Eject.App, only: [depends_on?: 3]
 
       def __template_dir__, do: unquote(templates)
-
-      def target_path(path, _app), do: path
-      defoverridable target_path: 2
 
       Module.register_attribute(__MODULE__, :lib_deps, accumulate: true)
       Module.register_attribute(__MODULE__, :mix_deps, accumulate: true)
@@ -297,62 +291,133 @@ defmodule Eject.Plan do
   #
 
   @doc """
-  Specify a file or regex pattern and a transformation function to apply to all
-  files matching that pattern.
+  Specify a file path or regex pattern and a transformation function, which
+  must return the new file contents as a string.
 
-  ### Examples
+  The first argument of `modify` must be either the relative path of a file in
+  your Base Project, or a regex which matches against those relative paths.
 
-      modify ~r/.+_worker.ex/, file, app do
-        # Return modified `file` string
-        # Only ran on files matching the regex
+      # exact (relative) path
+      modify "tests/path/to/specific_test.exs", fn file -> ... end
+
+      # regex
+      modify ~r/.+_test.exs/, fn file -> ... end
+
+  The second argument of `modify` must either be a function capture
+
+      modify ~r/.+_test.exs/, &MyApp.Modify.modify_tests/1
+      modify ~r/.+_test.exs/, &MyApp.Modify.modify_tests/2
+
+  Or an anonymous function
+
+      modify ~r/.+_test.exs/, fn file ->
+        # ...
       end
 
-      modify "lib/my_app_web/router.ex", file do
-        # Return modified `file` string
-        # Only ran on files with the exact path "lib/my_app_web/router.ex"
+      modify ~r/.+_test.exs/, fn file, app ->
+        # ...
       end
 
-  > #### "Magic" Variable Names {: .info}
-  >
-  > In the above examples, `file` and `app` work as function parameters,
-  > which are available to the "function body" in between `do` and `end`.
-  > The macro turns them into variables under the hood. As such, they can
-  > be given different names.
-  >
-  > **Note that the final parameter (`app`) is optional, and can be excluded
-  > if the `modify` function does not need it.**
+  If the function is 1-arity, it will receive the file contents. If it's
+  2-arity, it will receive the file contents and the `Eject.App` struct.
+
+  ## Examples
+
+      modify "config/config.exs", file do
+        file <>
+          ~S'''
+          if config_env() in [:dev, :test] do
+            import_config "#\{config_env()}.exs"
+          end
+          '''
+      end
+
+      modify ~r/.+_worker.ex/, fn file, app ->
+        String.replace(file, "SOME_VALUE_PER_APP", app.extra[:some_value])
+      end
 
   """
   @spec modify(
           pattern :: Path.t() | Regex.t(),
-          file :: String.t(),
-          app :: Eject.App.t(),
-          block :: term
+          fun ::
+            (file :: String.t(), Eject.App.t() -> String.t()) | (file :: String.t() -> String.t())
         ) :: term
-  defmacro modify(path_or_regex, file, app, do: block) do
-    line = __CALLER__.line
-    fn_name = String.to_atom("modify_#{line}")
+  defmacro modify(path_or_regex, {:fn, _, _} = fun) do
+    # anonymous functions cannot be saved into module attributes, so create a
+    # named function
+    fn_name = String.to_atom("__modify_line_#{__CALLER__.line}__")
 
     quote do
-      Eject.Plan.__register_modifier__(__MODULE__, unquote(path_or_regex), unquote(fn_name))
-      def unquote(fn_name)(unquote(file), unquote(app)), do: unquote(block)
+      Eject.Plan.validate_path_or_regex!(unquote(path_or_regex))
+
+      Module.put_attribute(
+        __MODULE__,
+        :modifiers,
+        {unquote(path_or_regex), Function.capture(__MODULE__, unquote(fn_name), 2)}
+      )
+
+      def unquote(fn_name)(file, app) do
+        f = unquote(fun)
+
+        case f do
+          f when is_function(f, 1) -> f.(file)
+          f when is_function(f, 2) -> f.(file, app)
+        end
+      end
+    end
+  end
+
+  defmacro modify(path_or_regex, {:&, _, _} = fun) do
+    quote do
+      Eject.Plan.validate_path_or_regex!(unquote(path_or_regex))
+      Module.put_attribute(__MODULE__, :modifiers, {unquote(path_or_regex), unquote(fun)})
     end
   end
 
   @doc false
-  defmacro modify(path_or_regex, file, do: block) do
-    app = quote generated: true, do: var!(app)
-    line = __CALLER__.line
-    fn_name = String.to_atom("modify_#{line}")
+  def validate_path_or_regex!(path_or_regex) do
+    case path_or_regex do
+      path when is_binary(path) ->
+        :ok
 
-    quote do
-      Eject.Plan.__register_modifier__(__MODULE__, unquote(path_or_regex), unquote(fn_name))
-      def unquote(fn_name)(unquote(file), unquote(app)), do: unquote(block)
+      %Regex{} ->
+        :ok
+
+      _ ->
+        raise ArgumentError,
+          message: """
+          modify/2 expects a (string) path or a regex (~r/.../) as the first argument. Received #{inspect(path_or_regex)}
+          """
     end
   end
 
-  def __register_modifier__(mod, path_or_regex, fn_name) do
-    Module.put_attribute(mod, :modifiers, {path_or_regex, {mod, fn_name}})
+  defmacro modify(path_or_regex, fun) do
+    quote do
+      raise ArgumentError,
+        message: """
+        modify/2 expects an anonymous function of a function capture as the 2nd argument.
+
+        Received:
+
+            #{inspect(unquote(fun))}
+
+        Instead, either pass an anonymous function:
+
+            modify #{inspect(unquote(path_or_regex))}, fn file ->
+              # ...
+            end
+
+            modify #{inspect(unquote(path_or_regex))}, fn file, app ->
+              # ...
+            end
+
+        Or pass a function capture:
+
+            modify #{inspect(unquote(path_or_regex))}, &modify_tests/1
+            modify #{inspect(unquote(path_or_regex))}, &Modifiers.modify_other_file/2
+
+        """
+    end
   end
 
   #
@@ -482,7 +547,7 @@ defmodule Eject.Plan do
 
   See `mix/2`, `lib/2`, and `always/1` for more details.
 
-  ### Example
+  ## Example
 
       deps do
         always do
@@ -582,7 +647,7 @@ defmodule Eject.Plan do
   > [Eject Manifest file](./Eject.html#module-the-eject-manifest-eject-exs),
   > or make it a `lib_dependency` of another dependency in the Manifest.
 
-  ### Examples
+  ## Examples
 
       deps do
         always do
@@ -609,6 +674,27 @@ defmodule Eject.Plan do
           mix_deps [:oban_pro, :oban_web]
         end
       end
+
+  ## Associated Files
+
+  Sometimes, when a Lib Dependency is ejected with an app, there are other
+  files outside of `lib/that_library` which should also be ejected.
+
+  In this scenario, you can use these instructions used in `eject/2` to denote
+  them.
+
+  - `file/2`
+  - `template/2`
+  - `cp/1`
+  - `cp_r/1`
+
+  ```
+  lib :my_data_source do
+    file Path.wildcard("priv/my_data_source_repo/**", match_dot: true)
+    file Path.wildcard("test/support/fixtures/my_data_source/**/*.ex")
+    template "some/template/for/my_data_source"
+  end
+  ```
 
   """
   defmacro lib(name, do: block) do
@@ -637,13 +723,28 @@ defmodule Eject.Plan do
 
   @doc false
   def __lib__(mod, name, opts, always) when is_atom(name) and is_list(opts) do
+    associated_files =
+      Enum.flat_map(opts, fn opt ->
+        case opt do
+          {type, path_or_paths} when type in [:text, :template, :cp, :cp_r] ->
+            path_or_paths
+            |> List.wrap()
+            |> Enum.map(&{type, &1})
+
+          _ ->
+            []
+        end
+      end)
+
     lib_dep =
       Eject.LibDep.new!(%{
         name: name,
         lib_deps: opts |> Keyword.get(:lib_deps, []) |> List.wrap(),
         mix_deps: opts |> Keyword.get(:mix_deps, []) |> List.wrap(),
         always: always,
-        file_rules: opts |> rule_opts() |> Eject.Rules.new()
+        only: opts[:only],
+        except: opts[:except],
+        associated_files: associated_files
       })
 
     Module.put_attribute(mod, :lib_deps, lib_dep)
@@ -725,23 +826,6 @@ defmodule Eject.Plan do
   @doc false
   defmacro lib_deps(deps), do: {:lib_deps, List.wrap(deps)}
 
-  defp rule_opts(opts) do
-    associated_files =
-      Enum.flat_map(opts, fn opt ->
-        case opt do
-          {type, path_or_paths} when type in [:text, :template, :cp, :cp_r] ->
-            path_or_paths
-            |> List.wrap()
-            |> Enum.map(&{type, &1})
-
-          _ ->
-            []
-        end
-      end)
-
-    Keyword.put(opts, :associated_files, associated_files)
-  end
-
   @doc """
   In `eject` and `lib` blocks, `file` is used to specify **files that are not
   in a `lib/` directory** which should be ejected in the app or along with the
@@ -753,12 +837,19 @@ defmodule Eject.Plan do
   > `Path.wildcard` as in the example below to target multiple files instead
   > of listing them on separate lines.
 
-  ### Examples
+  ## Options
+
+  `file` takes a `chmod` option, which sets the `mode` for the given `file`
+  after it's ejected. See the possible [permission
+  options](https://hexdocs.pm/elixir/File.html#chmod/2-permissions).
+
+  ## Examples
 
       eject(app) do
-        # every ejected app will include app.js
+        # every ejected app will include these
         file "assets/js/app.js"
         file Path.wildcard("config/**/*.exs")
+        file "some/file", chmod: 0o777
       end
 
       deps do
@@ -795,6 +886,12 @@ defmodule Eject.Plan do
   > templates](building-files-from-eex-templates.html) for a more detailed look
   > at constructing and effectively using templates for ejection.
 
+  ## Options
+
+  `template` takes a `chmod` option, which sets the `mode` for the rendered
+  file after it's ejected. See the possible [permission
+  options](https://hexdocs.pm/elixir/File.html#chmod/2-permissions).
+
   ## Examples
 
       use Eject, templates: "priv/eject-templates"
@@ -810,7 +907,7 @@ defmodule Eject.Plan do
           # for every app that includes `lib/datadog`,
           # priv/eject-templates/datadog/prerun.sh.eex will be rendered, and
           # the result will be placed in `datadog/prerun.sh`
-          template "datadog/prerun.sh"
+          template "datadog/prerun.sh", chmod: 0o555
         end
       end
 
@@ -830,7 +927,7 @@ defmodule Eject.Plan do
   would take ages to copy with `file Path.wildcard("assets/node_modules/**/*")`.
   Instead, use `cp_r "assets/node_modules"`.
 
-  ### Examples
+  ## Examples
 
       eject(app) do
         cp_r "assets"
@@ -851,7 +948,13 @@ defmodule Eject.Plan do
 
   The file is copied as-is with `File.cp!/3`.
 
-  ### Examples
+  ## Options
+
+  `cp` takes a `chmod` option, which sets the `mode` for the file after it's
+  copied. See the possible [permission
+  options](https://hexdocs.pm/elixir/File.html#chmod/2-permissions).
+
+  ## Examples
 
       eject(app) do
         # every ejected app will have bin/some-binary, with the ACL mode changed to 555

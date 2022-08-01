@@ -55,15 +55,27 @@ If `destination` is ommitted, the default is one level up from the Base
 Project's root folder. The `--destination` option of `mix eject` takes
 precedence and overrides both of these behaviors.
 
-## Ejecting an Application
+## Add Eject Manifests
 
-Designate all `lib/` directories that represent an ejectable application by
-placing an `eject.exs` manifest file into each directory. You can start with a
-barebones manifest that contains an empty list.
+Designate all `lib` directories that represent an [Ejectable
+App](how-it-works.html#what-is-an-ejectable-app) by placing an `eject.exs`
+manifest file into each directory. You can start with a barebones manifest that
+contains an empty list.
 
 ```elixir
 # lib/my_application_name/eject.exs
 []
+```
+
+Once you start structuring your project for the Eject System, you'll add
+[Lib](dependencies.html#lib-dependencies) and
+[Mix](dependencies.html#mix-dependencies) Dependencies in this file.
+
+```elixir
+[
+  lib_deps: [:my_data_source, :utilities],
+  mix_deps: [:csv, :chromic_pdf]
+]
 ```
 
 > #### More on eject.exs {: .info}
@@ -71,15 +83,20 @@ barebones manifest that contains an empty list.
 > See [eject.exs Options](./how-it-works.html#eject-exs-options)
 > for an explanation of supported options.
 
-Then run
+## Ejecting an Application
+
+At this point, you should be able to run
 
 ```bash
 mix eject MyApplicationName
 ```
 
-## Build the Plan
+And be able to successfully create an ejected codebase. However, it will
+probably lack critical code that is needed to run properly.
 
-At this point, you should be able to eject your applications with `mix eject`. However, the ejected codebases will probably lack critical code that is needed to run properly.
+This leads us to the final step of **Building a Plan**.
+
+## Build the Plan
 
 > Read the documentation for [Eject.Plan](Eject.Plan.html) for the full range
 > of features to build out your Plan module.

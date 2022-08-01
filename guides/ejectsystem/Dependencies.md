@@ -20,7 +20,7 @@ in the [Plan](Eject.Plan.html) module as `:utilities`.
 `Eject` is aware of the deps in your `mix.exs`. Whenever an app is ejected, it
 removes all mix dependencies that aren't explicitly needed by the app.
 
-## Configuring the Deps of an App
+## Adding Dependencies to an App
 
 There are three methods to specify which Lib and Mix dependencies are required
 by an App:
@@ -51,6 +51,7 @@ end
 
 3. Make it a "sub-dependency" of a dependency from method 1 or 2 by using the
    `lib_deps` or `mix_deps` macros in your [deps section](`Eject.Plan.deps/1`).
+   (See "Chained Dependencies" below.)
 
 ```elixir
 deps do
@@ -68,7 +69,7 @@ end
 >
 > `mix eject` will follow chains of sub-dependencies completely.
 >
-> If all of the following are true:
+> If these are true:
 >
 > - The app's `eject.exs` manifest includes `lib_deps: [:foo]`
 > - The `deps` section of your Plan says that `foo` has `lib_deps: [:bar]`
