@@ -56,7 +56,7 @@ defmodule EjectTest do
     assert lib_file =~ "Tweeter"
     refute lib_file =~ "TestProject"
 
-    # files are created from templates for `eject(app) do` and `lib :name do`
+    # files are created from templates for `base_files` and `lib`
     template_file = read!("config/runtime.exs")
     assert template_file =~ "1 + 1 = 2"
     assert template_file =~ "App name is tweeter"

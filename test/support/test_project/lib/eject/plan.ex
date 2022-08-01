@@ -1,6 +1,12 @@
 defmodule TestProject.Eject.Plan do
   use Eject.Plan, templates: "templates"
 
+  @preserve [".gitignore"]
+
+  def app_lib_except(_app) do
+    [~r/excluded/]
+  end
+
   def extra(_app) do
     [company: :fake_co, logo_file: "pixel"]
   end
@@ -15,12 +21,9 @@ defmodule TestProject.Eject.Plan do
 
   def target_path(source, _app), do: source
 
-  eject(app) do
-    preserve ".gitignore"
+  base_files do
     cp "assets/static/images/#{app.extra[:logo_file]}.png"
     template "config/runtime.exs"
-
-    except ~r/excluded/
 
     if app.extra[:company] == :fake_co do
       file [".dotfile", ".another-dotfile"]

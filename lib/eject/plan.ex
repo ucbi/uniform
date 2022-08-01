@@ -3,6 +3,7 @@ defmodule Eject.Plan.BeforeCompile do
   defmacro __before_compile__(_env) do
     quote do
       def __modifiers__, do: @modifiers
+      def __preserve__, do: @preserve
     end
   end
 end
@@ -20,15 +21,15 @@ defmodule Eject.Plan do
   Would search for templates in the `priv/eject-templates` directory. See
   `template/2` for more information.
 
-  ## The `eject` Section
+  ## The `base_files` Section
 
-  The `eject` section specifies files that should be ejected which aren't in
-  `lib`.
+  The `base_files` section specifies files that should be ejected which aren't
+  in `lib/my_app`. (When running `mix eject MyApp`.)
 
       defmodule Plan do
         use Eject.Plan, templates: "..."
 
-        eject(app) do
+        base_files do
           file "my_main_app/application.ex"
           cp_r "assets"
           # ...
@@ -89,12 +90,29 @@ defmodule Eject.Plan do
 
   See `modify/2` for more information.
 
+  ## Preserving files
+
+  Whenever running `mix eject`, the contents in the destination directory will
+  be deleted except for the `.git`, `deps`, and `_build` directories.
+
+  If there are any other files or directories *in the project's root folder*
+  that you would like to preserve (by not deleting them), specify them with
+  `@preserve`.
+
+      # .env will not be deleted immediately before ejection
+      @preserve [
+        ".env"
+      ]
+
   ## Full Example
 
   Below is an example `Plan` module that shows off a majority of the features that can be used.
 
       defmodule MyApp.Eject.Plan do
         use Eject.Plan, templates: "lib/eject/templates"
+
+        # do not delete this root file when clearing the destination
+        @preserve [".env"]
 
         @impl Eject.Plan
         def extra(app) do
@@ -119,10 +137,7 @@ defmodule Eject.Plan do
         end
 
         # files to eject in every app, which are outside `lib/that_app`
-        eject(app) do
-          # do not delete this root file when clearing the destination
-          preserve ".env"
-
+        base_files do
           # copy these directories wholesale; do NOT run them through code modifiers
           cp_r "assets"
 
@@ -256,7 +271,22 @@ defmodule Eject.Plan do
   """
   @callback target_path(path :: Path.t(), app :: Eject.App.t()) :: Path.t()
 
-  @optional_callbacks extra: 1, target_path: 2
+  @doc ~S"""
+  This callback works like the `except/1` instruction for Lib Dependencies,
+  except that it applies to the `lib` folder of the ejected app itself.
+
+  When running `mix eject MyApp`, any files in `lib/my_app` or `test/my_app`
+  which match the paths or regexes returned by `app_lib_except` will **not** be
+  ejected.
+
+      def app_lib_except(app) do
+        ["lib/#{app.name.underscore}/hidden_file.ex"]
+      end
+
+  """
+  @callback app_lib_except(app :: Eject.App.t()) :: [Path.t() | Regex.t()]
+
+  @optional_callbacks extra: 1, target_path: 2, app_lib_except: 1
 
   @doc """
        A macro for defining an ejection plan.
@@ -275,7 +305,11 @@ defmodule Eject.Plan do
     quote do
       @behaviour Eject.Plan
       @before_compile Eject.Plan.BeforeCompile
-      import Eject.Plan, only: [modify: 2, deps: 1, eject: 2]
+
+      # default value of @preserve
+      @preserve []
+
+      import Eject.Plan, only: [modify: 2, deps: 1, base_files: 1]
       import Eject.App, only: [depends_on?: 3]
 
       def __template_dir__, do: unquote(templates)
@@ -425,14 +459,15 @@ defmodule Eject.Plan do
   #
 
   @doc ~S"""
-  The `eject` section is where you **specify base files** that should always
-  be ejected.
+  The `base_files` section is where you specify files outside of an ejected
+  app's `lib/my_app` and `test/my_app` directories which should always be
+  ejected.
 
-  The eject section "receives" an [`app`](`t:Eject.App.t/0`) like a function,
-  and it can be used to build the instructions or in `if`
-  conditionals.
+  This section has access to an [`app`](`t:Eject.App.t/0`) variable which can
+  be used to build the instructions or conditionally include certain files with
+  `if`.
 
-      eject(app) do
+      base_files do
         # interpolating the app name into a path dynamically
         cp "priv/static/images/#{app.name.underscore}_logo.png"
 
@@ -442,11 +477,11 @@ defmodule Eject.Plan do
         end
       end
 
-  Note that the `if` conditionals cannot be nested.
+  **Note that `if` conditionals cannot be nested here.**
 
   ## API Reference
 
-  The following instructions can be given in the `eject` section:
+  The following instructions can be given in the `base_files` section:
 
   - `file/2` ejects a single file or list of files
   - `template/2` creates a new file on ejection from an EEx template
@@ -455,36 +490,30 @@ defmodule Eject.Plan do
     files such as images or executable.
   - `cp_r/1` copies an entire **directory** of files without [Code
     Transformations](code-transformations.html).
-  - `except/1` prevents ejecting certain files from the app's `lib` directory.
-  - `preserve/1` instructs `mix eject` not to delete files or directories in
-    the project's root folder at the beginning of ejection.
 
   ## Example
 
-      eject(app) do
+      base_files do
         file ".credo.exs"
         file Path.wildcard("config/**/*.exs")
         template "config/runtime.exs"
         cp "bin/some-executable"
         cp_r "assets"
         except ["lib/#{app.name.underscore}/hidden_file.ex"]
-        preserve ".env"
       end
 
   ## Files in `lib`
 
-  Typically, the `eject` section only contains files that aren't in `lib`,
+  Typically, the `base_files` section only contains files that aren't in `lib`,
   since files in `lib/app_being_ejected` and `lib/required_lib_dependency` are
   ejected automatically.
 
       # ❌ Don't do this
-      eject(app) do
+      base_files do
         file "lib/my_lib/some_file.ex"
       end
 
-      # ✅ Instead, do this
-
-      # lib/my_app/eject.exs
+      # ✅ Instead, do this (lib/my_app/eject.exs)
       [
         lib_deps: [:my_lib]
       ]
@@ -493,10 +522,10 @@ defmodule Eject.Plan do
 
   If a file or template should only be ejected in the case that a certain Lib
   Dependency is included, we recommend placing that in `lib/2` inside the
-  `deps/1` section instead of in the `eject` section.
+  `deps/1` section instead of in `base_files`.
 
       # ❌ Don't do this
-      eject(app) do
+      base_files do
         if depends_on?(app, :lib, :my_lib) do
           file "some_file"
         end
@@ -510,7 +539,7 @@ defmodule Eject.Plan do
       end
 
   """
-  defmacro eject(app, do: block) do
+  defmacro base_files(do: block) do
     {:__block__, [], items} = block
 
     items =
@@ -521,6 +550,9 @@ defmodule Eject.Plan do
         item ->
           item
       end)
+
+    # inject magic `app` variable
+    app = quote generated: true, do: var!(app)
 
     quote do
       try do
@@ -845,7 +877,7 @@ defmodule Eject.Plan do
 
   ## Examples
 
-      eject(app) do
+      base_files do
         # every ejected app will include these
         file "assets/js/app.js"
         file Path.wildcard("config/**/*.exs")
@@ -859,6 +891,7 @@ defmodule Eject.Plan do
           file "test/support/fixtures/some_aws_fixture.xml"
         end
       end
+
   """
   def file(path, opts \\ []), do: {:text, {path, opts}}
 
@@ -896,7 +929,7 @@ defmodule Eject.Plan do
 
       use Eject, templates: "priv/eject-templates"
 
-      eject(app) do
+      base_files do
         # priv/eject-templates/config/runtime.exs.eex will be rendered, and the
         # result will be placed in `config/runtime.exs` in every ejected app
         template "config/runtime.exs"
@@ -929,7 +962,7 @@ defmodule Eject.Plan do
 
   ## Examples
 
-      eject(app) do
+      base_files do
         cp_r "assets"
       end
 
@@ -956,7 +989,7 @@ defmodule Eject.Plan do
 
   ## Examples
 
-      eject(app) do
+      base_files do
         # every ejected app will have bin/some-binary, with the ACL mode changed to 555
         cp "bin/some-binary", chmod: 0o555
       end
@@ -967,24 +1000,11 @@ defmodule Eject.Plan do
           cp "bin/convert"
         end
       end
+
   """
   def cp(path, opts \\ []), do: {:cp, {path, opts}}
 
   @doc """
-  Whenever running `mix eject`, the contents in the destination directory will
-  be deleted except for the `.git`, `deps`, and `_build` directories.
-
-  If there are any other files or directories that you would like to
-  **preserve** (by not deleting them), specify them with `preserve`:
-
-      eject(app) do
-        # .env will not be deleted immediately before ejection
-        preserve ".env"
-      end
-  """
-  def preserve(path), do: {:preserve, path}
-
-  @doc ~S"""
   In the `deps` section of your Plan, you can specify that a Lib Dependency
   excludes certain files.
 
@@ -1000,15 +1020,6 @@ defmodule Eject.Plan do
         end
       end
 
-  The `except` instruction can also be placed in the `eject` section of the
-  Plan. It only filters out files from the app library (`lib/my_app` and
-  `test/my_app`).
-
-  ```elixir
-  eject(app) do
-    except ["lib/#{app.name.underscore}/hidden_file.ex"]
-  end
-  ```
   """
   def except(paths), do: {:except, List.wrap(paths)}
 
