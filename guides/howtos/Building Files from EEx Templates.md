@@ -15,11 +15,11 @@ between apps based on the Lib and Mix Dependencies of the app.
 This is an ideal scenario for using an [EEx](https://hexdocs.pm/eex/EEx.html)
 template. Below are the steps to create `runtime.exs` with an EEx template.
 
-## Step 1: Set the template directory in your Plan module
+## Step 1: Set the template directory in your Blueprint module
 
 ```
-defmodule MyApp.Eject.Plan do
-  use Eject.Plan, templates: "lib/eject/templates"
+defmodule MyApp.Eject.Blueprint do
+  use Eject.Blueprint, templates: "lib/eject/templates"
 ```
 
 ## Step 2: Add the EEx file in the correct relative path
@@ -37,7 +37,7 @@ templates directory     destination    .eex suffix
 ```
 
 The path "prefix", `lib/eject/templates`, must match the `templates` directory
-specified with `use Eject.Plan` above.
+specified with `use Eject.Blueprint` above.
 
 > #### Don't forget the .eex suffix {: .tip}
 >
@@ -54,7 +54,7 @@ of the file.
 ```elixir
 import Config
 
-<%= if MyApp.Eject.Plan.deploys_to_fly_io?(app) do %>
+<%= if MyApp.Eject.Blueprint.deploys_to_fly_io?(app) do %>
   config :my_base_app, some_api_token: System.get_env("SOME_API_TOKEN")
 <% end %>
 

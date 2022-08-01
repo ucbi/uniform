@@ -1,7 +1,7 @@
 defmodule Eject.Config do
   @moduledoc false
 
-  defstruct [:mix_project_app, :mix_project, :plan, :destination]
+  defstruct [:mix_project_app, :mix_project, :blueprint, :destination]
 
   alias Eject.{LibDep, MixDep}
 
@@ -17,7 +17,7 @@ defmodule Eject.Config do
       %Config{
         mix_project_app: :my_app,
         mix_project: MyBaseApp.MixProject,
-        plan: MyBaseApp.Eject.Project,
+        blueprint: MyBaseApp.Eject.Project,
         destination: "/Users/me/code"
       }
 
@@ -25,16 +25,16 @@ defmodule Eject.Config do
   @type t :: %__MODULE__{
           mix_project_app: atom,
           mix_project: module,
-          plan: module,
+          blueprint: module,
           destination: nil | Path.t()
         }
 
   @doc """
   Builds a `t:Eject.Config.t` struct from the current Mix project.
 
-  To derive the `plan` and `destination` fields, looks for the following in config:
+  To derive the `blueprint` and `destination` fields, looks for the following in config:
 
-        config :my_app, Eject, plan: SomeModule, destination: "..."
+        config :my_app, Eject, blueprint: SomeModule, destination: "..."
 
   where `:my_app` is the value of the `:app` key in your Mix project specification in `mix.exs`.
   """
@@ -43,7 +43,7 @@ defmodule Eject.Config do
     mix_project_app = Keyword.fetch!(Mix.Project.config(), :app)
     config = Application.get_env(mix_project_app, Eject)
 
-    if is_nil(config[:plan]) do
+    if is_nil(config[:blueprint]) do
       camelized =
         mix_project_app
         |> to_string()
@@ -54,20 +54,20 @@ defmodule Eject.Config do
 
       Add the following to config/config.exs.
 
-          config :#{mix_project_app}, Eject, plan: #{camelized}.Eject.Plan
+          config :#{mix_project_app}, Eject, blueprint: #{camelized}.Eject.Blueprint
 
-      (Change `#{camelized}.Eject.Plan` to the name of your Plan module.)
+      (Change `#{camelized}.Eject.Blueprint` to the name of your Blueprint module.)
 
       """
     end
 
-    case Code.ensure_loaded(config[:plan]) do
+    case Code.ensure_loaded(config[:blueprint]) do
       {:module, _} ->
         :ok
 
       {:error, error} ->
         raise """
-        Tried to load Plan module #{inspect(config[:plan])} but received:
+        Tried to load Blueprint module #{inspect(config[:blueprint])} but received:
 
             {:error, #{inspect(error)}}
 
@@ -76,13 +76,13 @@ defmodule Eject.Config do
         """
     end
 
-    unless function_exported?(config[:plan], :__template_dir__, 0) do
+    unless function_exported?(config[:blueprint], :__template_dir__, 0) do
       raise """
-      #{inspect(config[:plan])} is not a Plan module.
+      #{inspect(config[:blueprint])} is not a Blueprint module.
 
-      Add the following to #{inspect(config[:plan])}.
+      Add the following to #{inspect(config[:blueprint])}.
 
-          use Eject.Plan, templates: "..."
+          use Eject.Blueprint, templates: "..."
 
       (Change `...` to your Eject templates directory.)
 
@@ -92,7 +92,7 @@ defmodule Eject.Config do
     %__MODULE__{
       mix_project_app: mix_project_app,
       mix_project: Mix.Project.get(),
-      plan: config[:plan],
+      blueprint: config[:blueprint],
       destination: config[:destination]
     }
   end
@@ -103,10 +103,12 @@ defmodule Eject.Config do
   """
   @spec lib_deps(t) :: %{LibDep.name() => LibDep.t()}
   def lib_deps(config) do
-    {:module, _} = Code.ensure_loaded(config.plan)
+    {:module, _} = Code.ensure_loaded(config.blueprint)
 
     registered =
-      if function_exported?(config.plan, :__deps__, 1), do: config.plan.__deps__(:lib), else: []
+      if function_exported?(config.blueprint, :__deps__, 1),
+        do: config.blueprint.__deps__(:lib),
+        else: []
 
     names = for lib_dep <- registered, do: to_string(lib_dep.name)
 
@@ -131,10 +133,12 @@ defmodule Eject.Config do
   """
   @spec mix_deps(t) :: %{MixDep.name() => MixDep.t()}
   def mix_deps(config) do
-    {:module, _} = Code.ensure_loaded(config.plan)
+    {:module, _} = Code.ensure_loaded(config.blueprint)
 
     registered =
-      if function_exported?(config.plan, :__deps__, 1), do: config.plan.__deps__(:mix), else: []
+      if function_exported?(config.blueprint, :__deps__, 1),
+        do: config.blueprint.__deps__(:mix),
+        else: []
 
     mix_exs_deps =
       config.mix_project.project()

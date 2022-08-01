@@ -50,7 +50,7 @@ For example, given apps with these `eject.exs` manifests
 
 ## Configuring Lib Dependencies
 
-If you take this approach, make sure to configure your [Plan](`Eject.Plan`) module
+If you take this approach, make sure to configure your [Blueprint](`Eject.Blueprint`) module
 to include any Lib or Mix Dependencies of each data source's library. Also, be sure
 to include migrations and seeds related to the library.
 

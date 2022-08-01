@@ -1,4 +1,4 @@
-defmodule Eject.Plan.BeforeCompile do
+defmodule Eject.Blueprint.BeforeCompile do
   @moduledoc false
   defmacro __before_compile__(_env) do
     quote do
@@ -8,14 +8,14 @@ defmodule Eject.Plan.BeforeCompile do
   end
 end
 
-defmodule Eject.Plan do
+defmodule Eject.Blueprint do
   @moduledoc ~S"""
-  Defines the ejection plan for your project.
+  Defines the ejection blueprint for your project.
 
-  When used, the plan expects the `:templates` option. For example, the plan:
+  When used, the blueprint expects the `:templates` option. For example, the blueprint:
 
-      defmodule Plan do
-        use Eject.Plan, templates: "priv/eject-templates"
+      defmodule Blueprint do
+        use Eject.Blueprint, templates: "priv/eject-templates"
       end
 
   Would search for templates in the `priv/eject-templates` directory. See
@@ -26,8 +26,8 @@ defmodule Eject.Plan do
   The `base_files` section specifies files that should be ejected which aren't
   in `lib/my_app`. (When running `mix eject MyApp`.)
 
-      defmodule Plan do
-        use Eject.Plan, templates: "..."
+      defmodule Blueprint do
+        use Eject.Blueprint, templates: "..."
 
         base_files do
           file "my_main_app/application.ex"
@@ -53,11 +53,11 @@ defmodule Eject.Plan do
 
   ## The `deps` Section
 
-  Besides the `eject` section, the plan can also contain a `deps` section to
+  Besides the `eject` section, the blueprint can also contain a `deps` section to
   configure dependencies.
 
-      defmodule Plan do
-        use Eject.Plan, templates: "..."
+      defmodule Blueprint do
+        use Eject.Blueprint, templates: "..."
 
         deps do
           always do
@@ -79,8 +79,8 @@ defmodule Eject.Plan do
   file contents during ejection. You can specify a specific filepath
   or use a regex to match multiple files.
 
-      defmodule Plan do
-        use Eject.Plan, templates: "..."
+      defmodule Blueprint do
+        use Eject.Blueprint, templates: "..."
 
         modify "assets/js/app.js", fn file, app ->
           String.replace(file, "SOME_VALUE_PER_APP", app.extra[:some_value])
@@ -106,15 +106,15 @@ defmodule Eject.Plan do
 
   ## Full Example
 
-  Below is an example `Plan` module that shows off a majority of the features that can be used.
+  Below is an example `Blueprint` module that shows off a majority of the features that can be used.
 
-      defmodule MyApp.Eject.Plan do
-        use Eject.Plan, templates: "lib/eject/templates"
+      defmodule MyApp.Eject.Blueprint do
+        use Eject.Blueprint, templates: "lib/eject/templates"
 
         # do not delete this root file when clearing the destination
         @preserve [".env"]
 
-        @impl Eject.Plan
+        @impl Eject.Blueprint
         def extra(app) do
           theme =
             case app.name.underscore do
@@ -126,7 +126,7 @@ defmodule Eject.Plan do
           [theme: theme]
         end
 
-        @impl Eject.Plan
+        @impl Eject.Blueprint
         def target_path(path, app) do
           if is_web_file?(path) do
             # modify the path to put it in `lib/some_app_web`
@@ -289,27 +289,27 @@ defmodule Eject.Plan do
   @optional_callbacks extra: 1, target_path: 2, app_lib_except: 1
 
   @doc """
-       A macro for defining an ejection plan.
+       A macro for defining an ejection blueprint.
 
        The required `templates` path points to the EEx templates used by `Eject`.
 
        ### Examples
 
            defmodule MyBaseApp.Eject.Project do
-             use Eject.Plan, templates: "lib/my_base_app/eject/templates"
+             use Eject.Blueprint, templates: "lib/my_base_app/eject/templates"
 
        """ && false
   defmacro __using__(opts) do
     templates = opts[:templates]
 
     quote do
-      @behaviour Eject.Plan
-      @before_compile Eject.Plan.BeforeCompile
+      @behaviour Eject.Blueprint
+      @before_compile Eject.Blueprint.BeforeCompile
 
       # default value of @preserve
       @preserve []
 
-      import Eject.Plan, only: [modify: 2, deps: 1, base_files: 1]
+      import Eject.Blueprint, only: [modify: 2, deps: 1, base_files: 1]
       import Eject.App, only: [depends_on?: 3]
 
       def __template_dir__, do: unquote(templates)
@@ -382,7 +382,7 @@ defmodule Eject.Plan do
     fn_name = String.to_atom("__modify_line_#{__CALLER__.line}__")
 
     quote do
-      Eject.Plan.validate_path_or_regex!(unquote(path_or_regex))
+      Eject.Blueprint.validate_path_or_regex!(unquote(path_or_regex))
 
       Module.put_attribute(
         __MODULE__,
@@ -403,7 +403,7 @@ defmodule Eject.Plan do
 
   defmacro modify(path_or_regex, {:&, _, _} = fun) do
     quote do
-      Eject.Plan.validate_path_or_regex!(unquote(path_or_regex))
+      Eject.Blueprint.validate_path_or_regex!(unquote(path_or_regex))
       Module.put_attribute(__MODULE__, :modifiers, {unquote(path_or_regex), unquote(fun)})
     end
   end
@@ -556,7 +556,7 @@ defmodule Eject.Plan do
 
     quote do
       try do
-        import Eject.Plan, except: [eject: 1, only: 1]
+        import Eject.Blueprint, except: [eject: 1, only: 1]
 
         def __eject__(unquote(app)),
           do: unquote(items) |> List.flatten() |> Enum.reject(&is_nil/1)
@@ -606,7 +606,7 @@ defmodule Eject.Plan do
     prelude =
       quote do
         try do
-          import Eject.Plan, only: [lib: 1, lib: 2, mix: 1, mix: 2, always: 1]
+          import Eject.Blueprint, only: [lib: 1, lib: 2, mix: 1, mix: 2, always: 1]
           @deps_always_block false
           unquote(block)
         after
@@ -662,10 +662,10 @@ defmodule Eject.Plan do
   Since Eject is aware of all lib dependencies in `lib/`, you don't need to
   tell it about them.
 
-  However, there are a few scenarios where you do need to list them in your `Plan` module:
+  However, there are a few scenarios where you do need to list them in your `Blueprint` module:
 
   1. Specifying which lib dependencies should _always_ be ejected. (See
-  `Eject.Plan.always/1`.)
+  `Eject.Blueprint.always/1`.)
   2. To specify that a lib dependency has other mix or lib dependencies. (I.e.
   Other mix packages or lib directories should always be ejected along with
   it.)
@@ -738,8 +738,8 @@ defmodule Eject.Plan do
 
     quote do
       try do
-        import Eject.Plan
-        Eject.Plan.__lib__(__MODULE__, unquote(name), unquote(opts), @deps_always_block)
+        import Eject.Blueprint
+        Eject.Blueprint.__lib__(__MODULE__, unquote(name), unquote(opts), @deps_always_block)
       after
         :ok
       end
@@ -749,7 +749,7 @@ defmodule Eject.Plan do
   @doc false
   defmacro lib(name) do
     quote do
-      Eject.Plan.__lib__(__MODULE__, unquote(name), [], @deps_always_block)
+      Eject.Blueprint.__lib__(__MODULE__, unquote(name), [], @deps_always_block)
     end
   end
 
@@ -789,7 +789,7 @@ defmodule Eject.Plan do
   However, there are two scenarios where you do need to list out mix dependencies:
 
   1. Specifying which mix dependencies should _always_ be ejected. (See
-  `Eject.Plan.always/1`.)
+  `Eject.Blueprint.always/1`.)
   2. Whenever a mix dependency has other mix dependencies. (I.e. Other mix
   packages should always be ejected with it.)
 
@@ -825,8 +825,8 @@ defmodule Eject.Plan do
 
     quote do
       try do
-        import Eject.Plan, only: [mix_deps: 1]
-        Eject.Plan.__mix__(__MODULE__, unquote(name), unquote(opts), @deps_always_block)
+        import Eject.Blueprint, only: [mix_deps: 1]
+        Eject.Blueprint.__mix__(__MODULE__, unquote(name), unquote(opts), @deps_always_block)
       after
         :ok
       end
@@ -836,7 +836,7 @@ defmodule Eject.Plan do
   @doc false
   defmacro mix(name) do
     quote do
-      Eject.Plan.__mix__(__MODULE__, unquote(name), [], @deps_always_block)
+      Eject.Blueprint.__mix__(__MODULE__, unquote(name), [], @deps_always_block)
     end
   end
 
@@ -904,7 +904,7 @@ defmodule Eject.Plan do
   Eject templates use a "convention over configuration" model
   that works like this:
 
-  1. At the top of your `Plan` module, you specify a template directory
+  1. At the top of your `Blueprint` module, you specify a template directory
   like this:
 
       `use Eject, templates: "lib/eject/templates"`
@@ -1005,7 +1005,7 @@ defmodule Eject.Plan do
   def cp(path, opts \\ []), do: {:cp, {path, opts}}
 
   @doc """
-  In the `deps` section of your Plan, you can specify that a Lib Dependency
+  In the `deps` section of your Blueprint, you can specify that a Lib Dependency
   excludes certain files.
 
   This works much like the `except` option that can be given when importing
@@ -1024,7 +1024,7 @@ defmodule Eject.Plan do
   def except(paths), do: {:except, List.wrap(paths)}
 
   @doc """
-  In the `deps` section of your Plan, you can specify that a Lib Dependency
+  In the `deps` section of your Blueprint, you can specify that a Lib Dependency
   only includes certain files.
 
   These work much like the `only` option that can be given when importing

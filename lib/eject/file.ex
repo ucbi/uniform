@@ -31,12 +31,12 @@ defmodule Eject.File do
 
   def new(type, %App{} = app, source, opts \\ [])
       when type in [:text, :template, :cp, :cp_r] and is_binary(source) do
-    {:module, _} = Code.ensure_loaded(app.internal.config.plan)
+    {:module, _} = Code.ensure_loaded(app.internal.config.blueprint)
 
     destination =
-      if function_exported?(app.internal.config.plan, :target_path, 2) do
+      if function_exported?(app.internal.config.blueprint, :target_path, 2) do
         # call target_path callback, giving the developer a chance to modify the final path
-        app.internal.config.plan.target_path(source, app)
+        app.internal.config.blueprint.target_path(source, app)
       else
         source
       end
@@ -75,11 +75,11 @@ defmodule Eject.File do
 
   # Returns all files specified with file/template/cp/cp_r in the `eject` macro
   def base_files(app) do
-    {:module, _} = Code.ensure_loaded(app.internal.config.plan)
+    {:module, _} = Code.ensure_loaded(app.internal.config.blueprint)
 
-    if function_exported?(app.internal.config.plan, :__eject__, 1) do
+    if function_exported?(app.internal.config.blueprint, :__eject__, 1) do
       app
-      |> app.internal.config.plan.__eject__()
+      |> app.internal.config.blueprint.__eject__()
       |> Enum.flat_map(fn item ->
         case item do
           {type, {path_or_paths, opts}} when type in [:text, :template, :cp, :cp_r] ->
@@ -98,7 +98,7 @@ defmodule Eject.File do
   # Returns hardcoded base files that don't need to be specified
   @spec hardcoded_base_files(App.t()) :: [t]
   defp hardcoded_base_files(app) do
-    # If this list changes, update the moduledoc in `Eject.Plan`
+    # If this list changes, update the moduledoc in `Eject.Blueprint`
     files =
       [
         "mix.exs",
@@ -116,12 +116,12 @@ defmodule Eject.File do
   @spec app_lib_files(App.t()) :: [t]
   defp app_lib_files(app) do
     manifest_path = Manifest.manifest_path(app.name.underscore)
-    {:module, _} = Code.ensure_loaded(app.internal.config.plan)
+    {:module, _} = Code.ensure_loaded(app.internal.config.blueprint)
 
     # never eject the Eject manifest
     except =
-      if function_exported?(app.internal.config.plan, :app_lib_except, 1) do
-        [manifest_path | app.internal.config.plan.app_lib_except(app)]
+      if function_exported?(app.internal.config.blueprint, :app_lib_except, 1) do
+        [manifest_path | app.internal.config.blueprint.app_lib_except(app)]
       else
         [manifest_path]
       end
@@ -218,7 +218,7 @@ defmodule Eject.File do
         contents =
           case t do
             :template ->
-              template_dir = app.internal.config.plan.__template_dir__()
+              template_dir = app.internal.config.blueprint.__template_dir__()
 
               if !template_dir do
                 raise "`use Eject.Path, templates: \"...\"` must specify a templates directory"
@@ -257,8 +257,8 @@ defmodule Eject.File do
   ]
 
   defp apply_modifiers(contents, relative_path, app) do
-    # add `Plan.modify` transformations to hard-coded default transformations
-    modifiers = app.internal.config.plan.__modifiers__() ++ @default_modifiers
+    # add `Blueprint.modify` transformations to hard-coded default transformations
+    modifiers = app.internal.config.blueprint.__modifiers__() ++ @default_modifiers
 
     Enum.reduce(modifiers, contents, fn {path_or_regex, function}, contents ->
       if apply_modifier?(path_or_regex, relative_path) do

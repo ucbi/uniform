@@ -21,7 +21,7 @@ defmodule EjectTest do
     config = %Config{
       mix_project_app: :test_project,
       mix_project: TestProject.MixProject,
-      plan: TestProject.Eject.Plan,
+      blueprint: TestProject.Eject.Blueprint,
       destination: "../../ejected"
     }
 
@@ -94,17 +94,17 @@ defmodule EjectTest do
     assert file_exists?("lib/tweeter_changed/lib_dir_changed.txt")
 
     # `preserve`d files are never cleared
-    # (note: TestProject.Eject.Plan specifies to preserve .gitignore)
+    # (note: TestProject.Eject.Blueprint specifies to preserve .gitignore)
     Eject.clear_destination(app)
     assert file_exists?(".gitignore")
   end
 
-  test "ejecting with an empty Plan" do
+  test "ejecting with an empty Blueprint" do
     # the destination is gitignored; we can eject to it without adding to the git index
     config = %Config{
       mix_project_app: :test_project,
       mix_project: TestProject.MixProject,
-      plan: TestProject.Eject.EmptyPlan,
+      blueprint: TestProject.Eject.EmptyBlueprint,
       destination: "../../ejected"
     }
 

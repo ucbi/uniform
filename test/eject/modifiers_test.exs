@@ -7,7 +7,7 @@ defmodule Eject.ModifiersTest do
     config = %Config{
       mix_project_app: :test,
       mix_project: TestProject.MixProject,
-      plan: TestProject.Eject.Plan
+      blueprint: TestProject.Eject.Blueprint
     }
 
     manifest =

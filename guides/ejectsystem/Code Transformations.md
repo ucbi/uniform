@@ -6,28 +6,28 @@ These transformations happen to every file, except those ejected with `cp` and `
 They occur **in this order**.
 
 1. [Unused mix.exs Dependencies are Removed](#mix-exs-dependency-removal)
-2. [Plan Modifiers](#modifiers-from-the-ejection-plan) are ran
+2. [Blueprint Modifiers](#modifiers-from-the-ejection-blueprint) are ran
 3. [The Base Project Name is replaced](#replacing-the-base-project-name) with the ejected app's name
 4. [Code Fences](#code-fences) are processed
 
 > #### Disabling Code Transformations for a file {: .tip}
 >
 > If you have a file that should not have Code Transformations applied upon
-> ejection, use [`cp`](Eject.Plan.html#cp/2) instead of
-> [`file`](Eject.Plan.html#file/2).
+> ejection, use [`cp`](Eject.Blueprint.html#cp/2) instead of
+> [`file`](Eject.Blueprint.html#file/2).
 >
 > If there is an entire directory of contents that should not be modified, use
-> [`cp_r`](Eject.Plan.html#cp_r/2), which will be much faster.
+> [`cp_r`](Eject.Blueprint.html#cp_r/2), which will be much faster.
 
 ## mix.exs Dependency Removal
 
 Any Mix Dependency that is not directly or indirectly required by the app via
-`mix.exs` or the `Plan` module is removed from the ejected `mix.exs`.
+`mix.exs` or the `Blueprint` module is removed from the ejected `mix.exs`.
 
-## Modifiers from the Ejection Plan
+## Modifiers from the Ejection Blueprint
 
 Users can specify arbitrary modifications that should be applied to various
-files using the `modify` macro in the [Plan](`Eject.Plan`) module:
+files using the `modify` macro in the [Blueprint](`Eject.Blueprint`) module:
 
 ```elixir
 modify ~r/.+_worker.ex/, fn file, app ->
