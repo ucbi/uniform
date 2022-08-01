@@ -1,22 +1,25 @@
 defmodule Eject.Modifiers do
-  @moduledoc false
+  @moduledoc """
+  Utilities for building code transformations with `modify` in your
+  `Eject.Blueprint` module.
+  """
 
   #
   # mix.exs Dependency Removal
   #
 
   @doc """
-  Given the contents of a mix.exs file and an `%App{}`,
-  look for the following code fence that should be wrapping the mix deps:
+       Given the contents of a mix.exs file and an `%App{}`,
+       look for the following code fence that should be wrapping the mix deps:
 
-      # eject:deps
+           # eject:deps
 
-      ...
+           ...
 
-      # /eject:deps
+           # /eject:deps
 
-  ...and filter out the deps that should not be included in this app.
-  """
+       ...and filter out the deps that should not be included in this app.
+       """ && false
   def remove_unused_mix_deps(file_contents, app) do
     file_contents
     |> String.replace(~r/\n *# eject:deps(.+?)# \/eject:deps/s, fn deps ->
@@ -37,50 +40,72 @@ defmodule Eject.Modifiers do
   # Code Fences
   #
 
+  @doc """
+       Code fences are in this format:
+
+           some_code()
+
+           # eject:lib:foo_bar
+           #
+           # ... code that will be removed if the lib called foo_bar isn't included
+           #
+           # /eject:lib:foo_bar
+
+           more_code()
+
+           # eject:mix:foo_bar
+           #
+           # ... code that will be removed if the mix dep called foo_bar isn't included
+           #
+           # /eject:mix:foo_bar
+
+           more_code()
+
+           # eject:app:foo_bar
+           #
+           # ... code that will be removed if the current app isn't called foo_bar
+           #
+           # /eject:app:foo_bar
+
+           more_code()
+
+           # eject:remove
+           #
+           # ... code that will always be removed upon ejection
+           #
+           # /eject:remove
+
+       """ && false
   def elixir_code_fences(file_contents, app) do
     code_fences(file_contents, app, "#")
   end
 
+  @doc false
   def js_code_fences(file_contents, app) do
     code_fences(file_contents, app, "//")
   end
 
   @doc """
-  Code fences are in this format:
+  Build code transformations to apply [Code
+  Fences](code-transformations.html#code-fences) with this function.
 
-      some_code()
+  Note that code fences are already applied automatically to `.ex/.exs` files
+  as well as `.js/.jsx/.ts/.tsx` files.
 
-      # eject:lib:foo_bar
-      #
-      # ... code that will be removed if the lib called foo_bar isn't included
-      #
-      # /eject:lib:foo_bar
+  ## Examples
 
-      more_code()
+      # code fences for SQL files
+      modify ~r/\.sql$/, fn file, app ->
+        Eject.Modifiers.code_fences(file, app, "--")
+      end
 
-      # eject:mix:foo_bar
-      #
-      # ... code that will be removed if the mix dep called foo_bar isn't included
-      #
-      # /eject:mix:foo_bar
-
-      more_code()
-
-      # eject:app:foo_bar
-      #
-      # ... code that will be removed if the current app isn't called foo_bar
-      #
-      # /eject:app:foo_bar
-
-      more_code()
-
-      # eject:remove
-      #
-      # ... code that will always be removed upon ejection
-      #
-      # /eject:remove
+      # code fences for Rust files
+      modify ~r/\.rs$/, fn file, app ->
+        Eject.Modifiers.code_fences(file, app, "//")
+      end
 
   """
+  @spec code_fences(String.t(), Eject.App.t(), String.t()) :: String.t()
   def code_fences(file_contents, app, comment_prefix) do
     remove_regex =
       Regex.compile!(
@@ -149,7 +174,7 @@ defmodule Eject.Modifiers do
   # Base Project Name Replacement
   #
 
-  @doc "Replace the base project name with the ejected app name."
+  @doc "Replace the base project name with the ejected app name." && false
   def replace_base_project_name(file_contents, app) do
     underscore = to_string(app.internal.config.mix_project_app)
 
