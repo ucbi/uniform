@@ -4,7 +4,10 @@ With the Eject System, multiple apps are maintained together in a single Elixir
 codebase. When you're ready to deploy an app, it's "ejected" out into separate
 codebases that only contains the code needed by the app.
 
-## Project Structure
+## What is a Base Project?
+
+A Base Project is the single Elixir application that developers directly modify
+when maintaining code with the Eject System.
 
 Since Eject projects are just an Elixir application, the `lib` directory is
 central. It contains directories for:
@@ -12,7 +15,10 @@ central. It contains directories for:
 1. [Ejectable Apps](how-it-works.html#what-is-an-ejectable-app)
 2. [Lib Dependencies](dependencies.html#lib-dependencies) (shared libraries)
 
-A basic directory structure might look like this.
+It also contrains a [Blueprint](Eject.Blueprint.html) module configuring which
+files are copied to ejected repositories.
+
+A Base Project directory structure might look like this.
 
 ```bash
 + my_base_app
@@ -22,18 +28,6 @@ A basic directory structure might look like this.
     + utilities
     + ui_components
 ```
-
-## What is a Base Project?
-
-A Base Project is the single Elixir application that developers directly modify
-when maintaining code with the Eject paradigm.
-
-The Base Project contains:
-
-1. Code for multiple [Ejectable Apps](#what-is-an-ejectable-app)
-2. [Libraries](dependencies.html#lib-dependencies) shared between the applications
-3. A [Blueprint](Eject.Blueprint.html) module configuring which files are copied to
-   ejected repositories.
 
 ## What is "Ejecting"?
 
@@ -110,15 +104,20 @@ file inside the directory.**
 Whenever you run `mix eject MyApp`, there are 4 simple rules that the library
 uses to decide which files to include or exclude from the ejected codebase.
 
-1. All files specified by the [eject section](Eject.Blueprint.html#eject/2) of the
-   Blueprint are included. These are "base files" to include with every app.
+1. All files specified by the [base_files](Eject.Blueprint.html#base_files/2)
+   section of the Blueprint are included. These are files to include with every
+   app.
 2. All files in `lib/my_app` and `test/my_app` are included.
 3. For every [Lib Dependency](dependencies.html#lib-dependencies), all files in
    `lib/dep_name` and `test/dep_name` are included.
 4. [A small handful of files](Eject.Blueprint.html#module-files-that-are-always-ejected)
    common to most Elixir projects are always included.
 
-> The only caveat to these rules is that the files in rules 2 and 3 (the
-> `lib/foo` and `test/foo` files for your ejected app and Lib Dependencies) are
-> subject to [only](Eject.Blueprint.html#only/1) and
+> There are some caveats to these rules.
+>
+> The files in rule 2 are subject to the
+> [lib_app_except](Eject.Blueprint.html#c:app_lib_except/1) callback.
+>
+> The files in rule 3 are subject to [only](Eject.Blueprint.html#only/1) and
 > [except](Eject.Blueprint.html#except/1) instructions.
+
