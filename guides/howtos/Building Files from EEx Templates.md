@@ -69,9 +69,9 @@ config :my_base_app, MyBaseApp.Repo,
   priv: "priv/my_base_app_repo",
   url: System.get_env("DATABASE_URL")
 
-# <eject:app:some_app>
+# eject:app:some_app
 config :my_base_app, some_configuration: "just for some_app"
-# </eject:app:some_app>
+# /eject:app:some_app
 ```
 
 > #### The App struct in templates {: .tip}

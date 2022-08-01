@@ -118,42 +118,42 @@ To remove code unless the ejected app depends on a Lib Dependency called
 `my_lib`, wrap it in these comments:
 
 ```elixir
-# <eject:lib:my_lib>
+# eject:lib:my_lib
 # ... code
-# </eject:lib:my_lib>
+# /eject:lib:my_lib
 ```
 
 To remove code unless the ejected app depends on a Mix Dependency called
 `absinthe`, wrap it in these comments:
 
 ```elixir
-# <eject:mix:absinthe>
+# eject:mix:absinthe
 # ... code
-# </eject:mix:absinthe>
+# /eject:mix:absinthe
 ```
 
 To remove code unless the ejected app is called `MyApp`, wrap it in these
 comments:
 
 ```elixir
-# <eject:app:my_app>
+# eject:app:my_app
 # ... code
-# </eject:app:my_app>
+# /eject:app:my_app
 ```
 
 Finally, to **always** remove a chunk of code whenever ejection happens, wrap
 it in these comments:
 
 ```elixir
-# <eject:remove>
+# eject:remove
 # ... code
-# </eject:remove>
+# /eject:remove
 ```
 
 > #### Code Fence comments are removed on ejection {: .info}
 >
 > Note that regardless of whether `mix eject` keeps or deletes the code in a
-> code fence, the code fence comments themselves (like `# <eject:app:my_app>`)
+> code fence, the code fence comments themselves (like `# eject:app:my_app`)
 > are always removed.
 >
 > Furthermore, `mix eject` runs `mix format` on the ejected codebase at the

@@ -196,7 +196,7 @@ defmodule MyBaseAppWeb.Router do
     # ...
   end
 
-  # <eject:remove>
+  # eject:remove
 
   # Place "internal pages" that should never be ejected here.
   # See "Internal Pages" below this code example.
@@ -206,9 +206,9 @@ defmodule MyBaseAppWeb.Router do
     get "/internal-team-page", InternalTeamController, :index
   end
 
-  # </eject:remove>
+  # /eject:remove
 
-  # <eject:app:some_app>
+  # eject:app:some_app
   scope "/some-app", SomeAppWeb do
     pipe_through :browser
 
@@ -217,9 +217,9 @@ defmodule MyBaseAppWeb.Router do
     post "/widgets/new", WidgetController, :create
     get "/widgets/:widget_id", WidgetController, :show
   end
-  # </eject:app:some_app>
+  # /eject:app:some_app
 
-  # <eject:app:another_app>
+  # eject:app:another_app
   scope "/another-app", SomeAppWeb do
     pipe_through :browser
 
@@ -228,7 +228,7 @@ defmodule MyBaseAppWeb.Router do
     post "/widgets/new", WidgetController, :create
     get "/widgets/:widget_id", WidgetController, :show
   end
-  # </eject:app:another_app>
+  # /eject:app:another_app
 end
 ```
 
@@ -246,7 +246,7 @@ defmodule MyBaseApp.Eject.Blueprint do
 end
 ```
 
-The Code Fences (comments like this: `# <eject:app:some_app>`) will cause the
+The Code Fences (comments like this: `# eject:app:some_app`) will cause the
 code to be removed when ejecting a different app. The simple code transformer
 defined with `modify` changes
 
@@ -274,7 +274,7 @@ pages that aren't intended to be ejected with any app. For example, a page that
 catalogs and links to your various apps.
 
 We recommend adding these as often as you like, and wrapping them all in
-`# <eject:remove>` Code Fences as in the example above.
+`# eject:remove` Code Fences as in the example above.
 
 ## Code Fences Everywhere!
 
@@ -306,22 +306,22 @@ defmodule MyBaseApp.Application do
       MyBaseAppWeb.Presence,
       MyBaseAppWeb.Telemetry,
 
-      # <eject:lib:my_first_data_lib>
+      # eject:lib:my_first_data_lib
       MyFirstDataLib.Repo,
-      # </eject:lib:my_first_data_lib>
+      # /eject:lib:my_first_data_lib
 
-      # <eject:lib:my_second_data_lib>
+      # eject:lib:my_second_data_lib
       MySecondDataLib.Repo,
       MySecondDataLib.Vault,
-      # </eject:lib:my_second_data_lib>
+      # /eject:lib:my_second_data_lib
 
-      # <eject:remove>
+      # eject:remove
       SomeDevelopmentOnlyDB.Repo,
-      # </eject:remove>
+      # /eject:remove
 
-      # <eject:mix:oban>
+      # eject:mix:oban
       {Oban, ...},
-      # </eject:mix:oban>
+      # /eject:mix:oban
     ]
 
     # ...
@@ -355,9 +355,9 @@ def application do
   [
     applications: [
       :logger,
-      # <eject:mix:exq>
+      # eject:mix:exq
       :exq
-      # </eject:mix:exq>
+      # /eject:mix:exq
     ],
     # ...
   ]
@@ -374,9 +374,9 @@ So this would not be required.
     # ❌ Do NOT wrap deps in code fences
     defp deps do
       [
-        # <eject:mix:jason>
+        # eject:mix:jason
         {:jason, "~> 1.0"}
-        # </eject:mix:jason>
+        # /eject:mix:jason
       ]
     end
 
@@ -386,9 +386,9 @@ Many dependencies also require configuration. Apply code fences in your
 configuration files for the same result.
 
 ```elixir
-# <eject:mix:guardian>
+# eject:mix:guardian
 config :my_base_app, MyBaseApp.Guardian,
        issuer: "my_base_app",
        secret_key: ...
-# </eject:mix:guardian>
+# /eject:mix:guardian
 ```
