@@ -3,17 +3,17 @@
 ## Add Eject to mix.exs
 
 Add `:eject` as a dependency in `mix.exs` and wrap your entire dependency list in
-`# <eject:deps>` and `# </eject:deps>` comments, like this.
+`# eject:deps` and `# /eject:deps` comments, like this.
 
 
 ```elixir
 defp deps do
-  # <eject:deps>
+  # eject:deps
   [
     {:eject, "~> 0.1.0"},
     ...
   ]
-  # </eject:deps>
+  # /eject:deps
 end
 ```
 

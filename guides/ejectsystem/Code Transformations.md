@@ -111,51 +111,76 @@ end
 
 ## Code Fences
 
-In any file, you can use "code fence" comments to remove code unless certain
-criteria are met.
+In any `.ex` or `.exs` file, you can use "code fence" comments to remove code
+unless certain criteria are met.
 
 To remove code unless the ejected app depends on a Lib Dependency called
 `my_lib`, wrap it in these comments:
 
 ```elixir
-# <eject:lib:my_lib>
+# eject:lib:my_lib
 # ... code
-# </eject:lib:my_lib>
+# /eject:lib:my_lib
 ```
 
 To remove code unless the ejected app depends on a Mix Dependency called
 `absinthe`, wrap it in these comments:
 
 ```elixir
-# <eject:mix:absinthe>
+# eject:mix:absinthe
 # ... code
-# </eject:mix:absinthe>
+# /eject:mix:absinthe
 ```
 
 To remove code unless the ejected app is called `MyApp`, wrap it in these
 comments:
 
 ```elixir
-# <eject:app:my_app>
+# eject:app:my_app
 # ... code
-# </eject:app:my_app>
+# /eject:app:my_app
 ```
 
 Finally, to **always** remove a chunk of code whenever ejection happens, wrap
 it in these comments:
 
 ```elixir
-# <eject:remove>
+# eject:remove
 # ... code
-# </eject:remove>
+# /eject:remove
 ```
 
 > #### Code Fence comments are removed on ejection {: .info}
 >
 > Note that regardless of whether `mix eject` keeps or deletes the code in a
-> code fence, the code fence comments themselves (like `# <eject:app:my_app>`)
+> code fence, the code fence comments themselves (like `# eject:app:my_app`)
 > are always removed.
 >
 > Furthermore, `mix eject` runs `mix format` on the ejected codebase at the
 > end. So you always end up with "clean" looking code.
 
+### Code Fences for other languages
+
+Code Fences are also processed for `.js`/`.ts`/`.jsx`/`.tsx` files using JS
+single-line comments.
+
+```js
+// eject:lib:my_lib
+// ...
+// /eject:lib:my_lib
+```
+
+If you would like to support Code Fences for other languages or file types,
+you can do so using `Eject.Blueprint.modify/2` and `Eject.Modifiers.code_fences/3`.
+
+```elixir
+# code fences for SQL files
+modify ~r/\.sql$/, fn file, app ->
+  Eject.Modifiers.code_fences(file, app, "--")
+end
+
+# code fences for Rust files
+modify ~r/\.rs$/, fn file, app ->
+  Eject.Modifiers.code_fences(file, app, "//")
+end
+```
