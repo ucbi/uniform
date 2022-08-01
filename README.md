@@ -1,6 +1,11 @@
 # Eject
 
-Part architectural pattern, part template this is a way of working that enables developers to work on a primary, unified application, similar to a monolith, but unlike a monolith can be split into smaller completely uncoupled applications with no trace of the original monolith from whence they came.
+The Eject System is an architecture for maintaining multiple Elixir apps from a
+single Elixir project in a way that minimizes duplicate work and maximizes
+sharing capabilities.
+
+It's like a monolith. But unlike a monolith, the apps can be "ejected" into
+separate codebases that only contain the code needed by each app.
 
 The complete documentation for Eject is located [here](https://hexdocs.pm/eject/).
 
@@ -22,9 +27,6 @@ recommended if you're building Phoenix apps.
 ```bash
 mix eject Tweeter
 ```
-
-Read about [the Eject System](https://hexdocs.pm/eject/how-it-works.html) for details about how it
-works.
 
 ## Installation
 
