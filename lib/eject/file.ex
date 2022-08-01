@@ -252,8 +252,8 @@ defmodule Eject.File do
 
   @default_modifiers [
     {"mix.exs", &Eject.Modifiers.remove_unused_mix_deps/2},
-    {~r/.(ex|exs)$/, &Eject.Modifiers.elixir_code_fences/2},
-    {~r/.(js|ts|jsx|tsx)$/, &Eject.Modifiers.js_code_fences/2},
+    {~r/\.(ex|exs)$/, &Eject.Modifiers.elixir_code_fences/2},
+    {~r/\.(js|ts|jsx|tsx)$/, &Eject.Modifiers.js_code_fences/2},
     {:all, &Eject.Modifiers.replace_base_project_name/2}
   ]
 

@@ -111,8 +111,8 @@ end
 
 ## Code Fences
 
-In any file, you can use "code fence" comments to remove code unless certain
-criteria are met.
+In any `.ex` or `.exs` file, you can use "code fence" comments to remove code
+unless certain criteria are met.
 
 To remove code unless the ejected app depends on a Lib Dependency called
 `my_lib`, wrap it in these comments:
@@ -159,3 +159,28 @@ it in these comments:
 > Furthermore, `mix eject` runs `mix format` on the ejected codebase at the
 > end. So you always end up with "clean" looking code.
 
+### Code Fences for other languages
+
+Code Fences are also processed for `.js`/`.ts`/`.jsx`/`.tsx` files using JS
+single-line comments.
+
+```js
+// eject:lib:my_lib
+// ...
+// /eject:lib:my_lib
+```
+
+If you would like to support Code Fences for other languages or file types,
+you can do so using `Eject.Blueprint.modify/2` and `Eject.Modifiers.code_fences/3`.
+
+```elixir
+# code fences for SQL files
+modify ~r/\.sql$/, fn file, app ->
+  Eject.Modifiers.code_fences(file, app, "--")
+end
+
+# code fences for Rust files
+modify ~r/\.rs$/, fn file, app ->
+  Eject.Modifiers.code_fences(file, app, "//")
+end
+```
