@@ -48,9 +48,9 @@ of applications that have many similarities or could share many capabilities.
 
 - **Novelty.** When new developers join the team, contributors have to learn
   a new way of working.
-- **No contributing to ejected codebases.** Changes made to an ejected cannot
-  be integrated back into the primary repository, so contributors must have
-  access to the entire portfolio.
+- **No contributing to ejected codebases.** Changes made directly to an ejected
+  codebase cannot be automatically integrated back into the Base Project, so
+  contributors must have access to the entire portfolio.
 - **Complications from running multiple apps at once.** Your development
   environment is more complicated when you're running an entire suite of apps
   side-by-side. Teams are required to take a disciplined approach to deal with
