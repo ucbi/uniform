@@ -1,11 +1,11 @@
 defmodule Eject do
   @moduledoc """
-  A system for maintaining multiple homogenous Elixir apps from a single Elixir
-  project in a way that minimizes duplicate work.
+  The Eject System is an architecture for maintaining multiple Elixir apps from
+  a single Elixir project in a way that minimizes duplicate work and maximizes
+  sharing capabilities.
 
-  With [the Eject System](how-it-works.html), the apps are maintained together
-  in development. But when you're ready to deploy them, they're "ejected" out
-  into separate codebases that only contains the code needed by the app.
+  It's like a monolith. But unlike a monolith, the apps can be "ejected" into
+  separate codebases that only contain the code needed by each app.
 
   ## Recommended Guides
 

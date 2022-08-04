@@ -6,8 +6,9 @@ codebases that only contains the code needed by the app.
 
 ## What is a Base Project?
 
-A Base Project is the single Elixir application that developers directly modify
-when maintaining code with the Eject System.
+A Base Project is the single Elixir application that houses all of the
+applications. When you run the Base Project in your development environment,
+you are running your entire portfolio of applications simultaneously.
 
 Since Eject projects are just an Elixir application, the `lib` directory is
 central. It contains directories for:
