@@ -1,20 +1,20 @@
-defmodule Eject.AppTest do
-  use Eject.TestProjectCase
-  doctest Eject.App, import: true
+defmodule Uniform.AppTest do
+  use Uniform.TestProjectCase
+  doctest Uniform.App, import: true
 
-  alias Eject.{Config, Manifest, App, LibDep, MixDep}
+  alias Uniform.{Config, Manifest, App, LibDep, MixDep}
 
   test "new!/3" do
     config = %Config{
       mix_project_app: :test_project,
       mix_project: TestProject.MixProject,
-      blueprint: TestProject.Eject.Blueprint,
+      blueprint: TestProject.Uniform.Blueprint,
       destination: "/Users/me/code"
     }
 
     manifest = %Manifest{
       lib_deps: [:included_lib],
-      extra: [some_data: "from eject.exs"]
+      extra: [some_data: "from uniform.exs"]
     }
 
     %App{} = app = App.new!(config, manifest, Tweeter)
@@ -29,12 +29,12 @@ defmodule Eject.AppTest do
     assert app.internal.config == %Config{
              mix_project_app: :test_project,
              mix_project: TestProject.MixProject,
-             blueprint: TestProject.Eject.Blueprint,
+             blueprint: TestProject.Uniform.Blueprint,
              destination: "/Users/me/code"
            }
 
     assert app.destination == "/Users/me/code/tweeter"
-    assert app.extra == [company: :fake_co, logo_file: "pixel", some_data: "from eject.exs"]
+    assert app.extra == [company: :fake_co, logo_file: "pixel", some_data: "from uniform.exs"]
 
     assert %LibDep{mix_deps: [:included_mix], lib_deps: [:indirectly_included_lib, :with_only]} =
              app.internal.deps.lib.included_lib
@@ -58,11 +58,11 @@ defmodule Eject.AppTest do
 
     assert app.internal.deps.all.lib == [
              :always_included_lib,
-             :eject,
              :excluded_lib,
              :included_lib,
              :indirectly_included_lib,
              :tweeter,
+             :uniform,
              :with_only
            ]
 
@@ -76,7 +76,7 @@ defmodule Eject.AppTest do
 
   test "depends_on?/1" do
     assert App.depends_on?(
-             %Eject.App{
+             %Uniform.App{
                internal: %{
                  deps: %{
                    included: %{
@@ -90,13 +90,13 @@ defmodule Eject.AppTest do
            )
 
     refute App.depends_on?(
-             %Eject.App{internal: %{deps: %{included: %{mix: [:included]}}}},
+             %Uniform.App{internal: %{deps: %{included: %{mix: [:included]}}}},
              :mix,
              :not_included_dep
            )
 
     assert App.depends_on?(
-             %Eject.App{internal: %{deps: %{included: %{lib: [:some_included_lib]}}}},
+             %Uniform.App{internal: %{deps: %{included: %{lib: [:some_included_lib]}}}},
              :lib,
              :some_included_lib
            )

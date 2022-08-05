@@ -1,44 +1,44 @@
-# Eject
+# Uniform
 
-The Eject System is an architecture for maintaining multiple Elixir apps from a
+The Uniform System is an architecture for maintaining multiple Elixir apps from a
 single Elixir project in a way that minimizes duplicate work and maximizes
 sharing capabilities.
 
 It's like a monolith. But unlike a monolith, the apps can be "ejected" into
 separate codebases that only contain the code needed by each app.
 
-The complete documentation for Eject is located [here](https://hexdocs.pm/eject/).
+The complete documentation for Uniform is located [here](https://hexdocs.pm/uniform/).
 
 ## Recommended Guides
 
 In order to understand and use this library, we heavily recommend reading the
 following guides:
 
-- [The Eject System: How It Works](https://hexdocs.pm/eject/how-it-works.html)
-- [Dependencies](https://hexdocs.pm/eject/dependencies.html)
-- [Code Transformations](https://hexdocs.pm/eject/code-transformations.html)
+- [The Uniform System: How It Works](https://hexdocs.pm/uniform/how-it-works.html)
+- [Dependencies](https://hexdocs.pm/uniform/dependencies.html)
+- [Code Transformations](https://hexdocs.pm/uniform/code-transformations.html)
 
 The [Setting up a Phoenix
-project](https://hexdocs.pm/eject/setting-up-a-phoenix-project.html) guide is
+project](https://hexdocs.pm/uniform/setting-up-a-phoenix-project.html) guide is
 recommended if you're building Phoenix apps.
 
 ## Usage
 
 ```bash
-mix eject Tweeter
+mix uniform.eject Tweeter
 ```
 
 ## Installation
 
-Consult the [Getting Started](https://hexdocs.pm/eject/getting-started.html)
-guide to add `Eject` to an Elixir application.
+Consult the [Getting Started](https://hexdocs.pm/uniform/getting-started.html)
+guide to add `Uniform` to an Elixir application.
 
 In summary, you'll need to:
 
-1. Add the dep in `mix.exs`: `{:eject, "~> 0.1.0"}`
-2. Add a [Plan](https://hexdocs.pm/eject/Eject.Plan.html) module to your project
+1. Add the dep in `mix.exs`: `{:uniform, "~> 0.1.0"}`
+2. Add a [Plan](https://hexdocs.pm/uniform/Uniform.Plan.html) module to your project
 3. Configure your Elixir app to point to the Plan module
-4. Add `eject.exs` manifests to each Ejectable Application
+4. Add `uniform.exs` manifests to each Ejectable Application
 
 ## License
 

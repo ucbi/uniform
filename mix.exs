@@ -1,12 +1,12 @@
-defmodule Eject.MixProject do
+defmodule Uniform.MixProject do
   use Mix.Project
 
   @version "0.1.0"
-  @source_url "https://github.com/ucbi/eject"
+  @source_url "https://github.com/ucbi/uniform"
 
   def project do
     [
-      app: :eject,
+      app: :uniform,
       version: @version,
       elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
@@ -18,7 +18,7 @@ defmodule Eject.MixProject do
       package: package(),
 
       # Docs
-      name: "Eject",
+      name: "Uniform",
       docs: docs()
     ]
   end
@@ -44,15 +44,15 @@ defmodule Eject.MixProject do
 
   defp docs do
     [
-      main: "Eject",
+      main: "Uniform",
       source_ref: "v#{@version}",
       source_url: @source_url,
       extra_section: "GUIDES",
       extras: [
         "guides/introduction/Getting Started.md",
-        "guides/ejectsystem/How It Works.md",
-        "guides/ejectsystem/Dependencies.md",
-        "guides/ejectsystem/Code Transformations.md",
+        "guides/uniformsystem/How It Works.md",
+        "guides/uniformsystem/Dependencies.md",
+        "guides/uniformsystem/Code Transformations.md",
         "guides/howtos/Setting up a Phoenix project.md",
         "guides/howtos/Handling Multiple Databases.md",
         "guides/howtos/Building files from EEx templates.md",
@@ -61,7 +61,7 @@ defmodule Eject.MixProject do
       ],
       groups_for_extras: [
         Introduction: ~r/guides\/introduction\/.?/,
-        "The Eject System": ~r/guides\/ejectsystem\/.?/,
+        "The Uniform System": ~r/guides\/uniformsystem\/.?/,
         "How-To's": ~r/guides\/howtos\/.?/,
         "Assessing the Model": ~r/guides\/assessment\/.?/
       ]

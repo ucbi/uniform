@@ -1,7 +1,7 @@
-defmodule Eject.FileTest do
-  use Eject.TestProjectCase
+defmodule Uniform.FileTest do
+  use Uniform.TestProjectCase
 
-  alias Eject.{App, Manifest, Config}
+  alias Uniform.{App, Manifest, Config}
 
   setup do
     cwd = File.cwd!()
@@ -18,7 +18,7 @@ defmodule Eject.FileTest do
     config = %Config{
       mix_project_app: :test_project,
       mix_project: TestProject.MixProject,
-      blueprint: TestProject.Eject.Blueprint
+      blueprint: TestProject.Uniform.Blueprint
     }
 
     manifest = %Manifest{lib_deps: [:included_lib], mix_deps: [:included_mix]}
@@ -29,25 +29,25 @@ defmodule Eject.FileTest do
   test "all_for_app/1 returns all files the app is configured to eject (and only those)", %{
     app: app
   } do
-    files = Eject.File.all_for_app(app)
+    files = Uniform.File.all_for_app(app)
 
     # expected to be included
-    assert Enum.find(files, &match?(%Eject.File{source: ".dotfile"}, &1))
+    assert Enum.find(files, &match?(%Uniform.File{source: ".dotfile"}, &1))
 
     assert Enum.find(
              files,
-             &match?(%Eject.File{source: "config/runtime.exs", type: :template}, &1)
+             &match?(%Uniform.File{source: "config/runtime.exs", type: :template}, &1)
            )
 
     assert Enum.find(
              files,
-             &match?(%Eject.File{source: "lib/included_lib/included.ex"}, &1)
+             &match?(%Uniform.File{source: "lib/included_lib/included.ex"}, &1)
            )
 
     # not expected to be included
     refute Enum.find(
              files,
-             &match?(%Eject.File{source: "lib/excluded_lib" <> _}, &1)
+             &match?(%Uniform.File{source: "lib/excluded_lib" <> _}, &1)
            )
   end
 end

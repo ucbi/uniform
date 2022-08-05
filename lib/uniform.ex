@@ -1,6 +1,6 @@
-defmodule Eject do
+defmodule Uniform do
   @moduledoc """
-  The Eject System is an architecture for maintaining multiple Elixir apps from
+  The Uniform System is an architecture for maintaining multiple Elixir apps from
   a single Elixir project in a way that minimizes duplicate work and maximizes
   sharing capabilities.
 
@@ -12,7 +12,7 @@ defmodule Eject do
   In order to understand and use this library, we heavily recommend reading the
   following guides:
 
-  - [The Eject System: How It Works](how-it-works.html)
+  - [The Uniform System: How It Works](how-it-works.html)
   - [Dependencies](dependencies.html)
   - [Code Transformations](code-transformations.html)
 
@@ -22,23 +22,23 @@ defmodule Eject do
   ## Usage
 
   ```bash
-  mix eject Tweeter
+  mix uniform.eject Tweeter
   ```
 
-  Read about [the Eject System](how-it-works.html) for details about how it
+  Read about [the Uniform System](how-it-works.html) for details about how it
   works.
 
   ## Installation
 
-  Consult the [Getting Started](getting-started.html) guide to add `Eject` to
+  Consult the [Getting Started](getting-started.html) guide to add `Uniform` to
   an Elixir application.
 
   In summary, you'll need to:
 
-  1. Add the dep in `mix.exs`: `{:eject, "~> 0.1.0"}`
-  2. Add a [Blueprint](Eject.Blueprint) module to your project
+  1. Add the dep in `mix.exs`: `{:uniform, "~> 0.1.0"}`
+  2. Add a [Blueprint](Uniform.Blueprint) module to your project
   3. Configure your Elixir app to point to the Blueprint module
-  4. Add `eject.exs` manifests to each Ejectable Application
+  4. Add `uniform.exs` manifests to each Ejectable Application
   5. Add to the Blueprint module all the files necessary to eject a working
      application
 
@@ -51,14 +51,14 @@ defmodule Eject do
   @doc """
        Returns a list of ejectable application names.
 
-       Identified by the existence of a `lib/<my_app>/ejector.exs` file.
+       Identified by the existence of a `lib/<my_app>/uniform.exs` file.
 
        ### Examples
 
-           $ fd eject.exs
-           lib/tweeter/eject.exs
-           lib/trillo/eject.exs
-           lib/hatmail/eject.exs
+           $ fd uniform.exs
+           lib/tweeter/uniform.exs
+           lib/trillo/uniform.exs
+           lib/hatmail/uniform.exs
 
            iex> ejectables()
            ["Tweeter", "Trillo", "Hatmail"]
@@ -66,14 +66,14 @@ defmodule Eject do
        """ && false
   @spec ejectables :: [String.t()]
   def ejectables do
-    "lib/*/eject.exs"
+    "lib/*/uniform.exs"
     |> Path.wildcard()
     |> Enum.map(&(&1 |> Path.dirname() |> Path.basename() |> Macro.camelize()))
     |> Enum.sort()
   end
 
   @doc "Return a list of all ejectable `%App{}`s" && false
-  @spec ejectable_apps :: [Eject.App.t()]
+  @spec ejectable_apps :: [Uniform.App.t()]
   def ejectable_apps do
     for name <- ejectables() do
       # credo:disable-for-next-line Credo.Check.Warning.UnsafeToAtom
@@ -83,7 +83,7 @@ defmodule Eject do
   end
 
   @doc """
-       Prepares the `t:Eject.App.t/0` struct with all information needed for ejection.
+       Prepares the `t:Uniform.App.t/0` struct with all information needed for ejection.
 
        When ejecting an app, this step runs prior to the actual `eject/1` process,
        allowing the user to see pertinent information about what decisions will be made
@@ -91,12 +91,12 @@ defmodule Eject do
        disk the ejected app will be written, etc.). If there is a mistake, the user will
        have a chance to abort before performing a potentially destructive action.
        """ && false
-  @spec prepare(init :: %{name: atom, opts: [prepare_opt]}) :: Eject.App.t()
+  @spec prepare(init :: %{name: atom, opts: [prepare_opt]}) :: Uniform.App.t()
   def prepare(%{name: name, opts: opts}) do
     if not is_atom(name) do
       raise ArgumentError,
         message:
-          "🤖 Please pass in a module name corresponding to a directory in lib/ containing an `eject.exs` file. E.g. Tweeter (received #{inspect(name)})"
+          "🤖 Please pass in a module name corresponding to a directory in lib/ containing an `uniform.exs` file. E.g. Tweeter (received #{inspect(name)})"
     end
 
     # ensure the name was passed in CamelCase format; otherwise subtle bugs happen
@@ -107,16 +107,16 @@ defmodule Eject do
 
         For example, to eject `lib/my_app`, do:
 
-            mix eject MyApp
+            mix uniform.eject MyApp
 
         """
     end
 
     Mix.Task.run("compile", [])
 
-    config = Eject.Config.build()
-    manifest = Eject.Manifest.eval_and_parse(config, Macro.underscore(name))
-    Eject.App.new!(config, manifest, name, opts)
+    config = Uniform.Config.build()
+    manifest = Uniform.Manifest.eval_and_parse(config, Macro.underscore(name))
+    Uniform.App.new!(config, manifest, name, opts)
   end
 
   @doc """
@@ -128,9 +128,9 @@ defmodule Eject do
     Logger.info("📂 #{app.destination}")
     File.mkdir_p!(app.destination)
 
-    for ejectable <- Eject.File.all_for_app(app) do
+    for ejectable <- Uniform.File.all_for_app(app) do
       Logger.info("💾 [#{ejectable.type}] #{ejectable.destination}")
-      Eject.File.eject!(ejectable, app)
+      Uniform.File.eject!(ejectable, app)
     end
 
     # remove mix deps that are not needed for this project from mix.lock

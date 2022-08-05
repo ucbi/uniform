@@ -1,8 +1,8 @@
-defmodule Eject.File do
+defmodule Uniform.File do
   @moduledoc """
              Functions for writing files to an ejection destination.
 
-             An `t:Eject.File.t/0` can be any of the following:
+             An `t:Uniform.File.t/0` can be any of the following:
 
              - A text file to copy with modifications (such as a `.ex`, `.exs`, or `.json` file)
              - A file to copy without modifications (such as a `.png` file)
@@ -11,7 +11,7 @@ defmodule Eject.File do
 
              """ && false
 
-  alias Eject.{App, Manifest, Rules}
+  alias Uniform.{App, Manifest}
 
   defstruct [:type, :source, :destination, :chmod]
 
@@ -58,10 +58,10 @@ defmodule Eject.File do
   end
 
   #
-  # Functions for gathering all Eject.Files for a given app
+  # Functions for gathering all Uniform.Files for a given app
   #
 
-  @doc "Returns all Eject.Files for the given app."
+  @doc "Returns all Uniform.Files for the given app."
   @spec all_for_app(App.t()) :: [t]
   def all_for_app(app) do
     # for our purposes, we keep `app_lib_files` last since sometimes the
@@ -73,13 +73,13 @@ defmodule Eject.File do
       app_lib_files(app)
   end
 
-  # Returns all files specified with file/template/cp/cp_r in the `eject` macro
+  # Returns all files specified with file/template/cp/cp_r in the `base_files` macro
   def base_files(app) do
     {:module, _} = Code.ensure_loaded(app.internal.config.blueprint)
 
-    if function_exported?(app.internal.config.blueprint, :__eject__, 1) do
+    if function_exported?(app.internal.config.blueprint, :__base_files__, 1) do
       app
-      |> app.internal.config.blueprint.__eject__()
+      |> app.internal.config.blueprint.__base_files__()
       |> Enum.flat_map(fn item ->
         case item do
           {type, {path_or_paths, opts}} when type in [:text, :template, :cp, :cp_r] ->
@@ -98,7 +98,7 @@ defmodule Eject.File do
   # Returns hardcoded base files that don't need to be specified
   @spec hardcoded_base_files(App.t()) :: [t]
   defp hardcoded_base_files(app) do
-    # If this list changes, update the moduledoc in `Eject.Blueprint`
+    # If this list changes, update the moduledoc in `Uniform.Blueprint`
     files =
       [
         "mix.exs",
@@ -118,7 +118,7 @@ defmodule Eject.File do
     manifest_path = Manifest.manifest_path(app.name.underscore)
     {:module, _} = Code.ensure_loaded(app.internal.config.blueprint)
 
-    # never eject the Eject manifest
+    # never eject the Uniform manifest
     except =
       if function_exported?(app.internal.config.blueprint, :app_lib_except, 1) do
         [manifest_path | app.internal.config.blueprint.app_lib_except(app)]
@@ -144,7 +144,7 @@ defmodule Eject.File do
   # Given a directory, return which paths to eject based on the rules
   # associated with that directory. Includes files in `lib/<lib_dir>`
   # as well as `test/<lib_dir>`
-  @spec lib_dir_files(App.t(), String.t(), Rules.t()) :: [Eject.File.t()]
+  @spec lib_dir_files(App.t(), String.t(), keyword) :: [Uniform.File.t()]
   defp lib_dir_files(app, lib_dir, opts) do
     # location of lib and test cp_r is configurable for testing
     only = opts[:only]
@@ -190,7 +190,10 @@ defmodule Eject.File do
   the same directory in the ejected app. (Replacing `my_app` in the path with
   the ejected app's name.)
   """
-  def eject!(%Eject.File{source: source, type: type, destination: destination, chmod: chmod}, app) do
+  def eject!(
+        %Uniform.File{source: source, type: type, destination: destination, chmod: chmod},
+        app
+      ) do
     # ensure the base directory exists before trying to write the file
     dirname = Path.dirname(Path.expand(destination))
 
@@ -221,17 +224,17 @@ defmodule Eject.File do
               template_dir = app.internal.config.blueprint.__template_dir__()
 
               if !template_dir do
-                raise "`use Eject.Path, templates: \"...\"` must specify a templates directory"
+                raise "`use Uniform.Path, templates: \"...\"` must specify a templates directory"
               end
 
               if !File.dir?(Path.expand(template_dir)) do
-                raise "String given to `use Eject.Path, templates: \"...\"` is not a directory (Expands to #{Path.expand(template_dir)})"
+                raise "String given to `use Uniform.Path, templates: \"...\"` is not a directory (Expands to #{Path.expand(template_dir)})"
               end
 
               EEx.eval_file(
                 Path.join(template_dir, source <> ".eex"),
                 app: app,
-                depends_on?: &Eject.App.depends_on?/3
+                depends_on?: &Uniform.App.depends_on?/3
               )
 
             :text ->
@@ -251,10 +254,10 @@ defmodule Eject.File do
   end
 
   @default_modifiers [
-    {"mix.exs", &Eject.Modifiers.remove_unused_mix_deps/2},
-    {~r/\.(ex|exs)$/, &Eject.Modifiers.elixir_code_fences/2},
-    {~r/\.(js|ts|jsx|tsx)$/, &Eject.Modifiers.js_code_fences/2},
-    {:all, &Eject.Modifiers.replace_base_project_name/2}
+    {"mix.exs", &Uniform.Modifiers.remove_unused_mix_deps/2},
+    {~r/\.(ex|exs)$/, &Uniform.Modifiers.elixir_code_fences/2},
+    {~r/\.(js|ts|jsx|tsx)$/, &Uniform.Modifiers.js_code_fences/2},
+    {:all, &Uniform.Modifiers.replace_base_project_name/2}
   ]
 
   defp apply_modifiers(contents, relative_path, app) do

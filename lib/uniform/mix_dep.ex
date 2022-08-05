@@ -1,4 +1,4 @@
-defmodule Eject.MixDep do
+defmodule Uniform.MixDep do
   @moduledoc "A struct for a dependency in mix.exs." && false
 
   @enforce_keys [:name, :always, :mix_deps]
@@ -23,7 +23,7 @@ defmodule Eject.MixDep do
       ...>   always: true,
       ...>   mix_deps: [:phoenix_swoosh]
       ...> })
-      %Eject.MixDep{
+      %Uniform.MixDep{
         name: :swoosh,
         always: true,
         mix_deps: [:phoenix_swoosh]

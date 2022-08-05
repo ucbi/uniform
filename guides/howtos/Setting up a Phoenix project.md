@@ -1,24 +1,24 @@
 # Setting up a Phoenix project
 
 > This guide walks through a typical process for setting up a Phoenix project.
-> It assumes that you're familiar with [The Eject System](how-it-works.html)
+> It assumes that you're familiar with [The Uniform System](how-it-works.html)
 > and have gone through the [Getting Started](#getting-started.html) guide.
 
 Imagine creating an entire new application simply by adding a Route and a
 single LiveView to an existing Elixir project.
 
-This is in fact the vision that drove the creation of `Eject`. The overhead of
+This is in fact the vision that drove the creation of `Uniform`. The overhead of
 experimenting with new apps becomes extremely low, incentivizing the team to
 try out ideas without being inhibited by initial setup time.
 
 ## Setting up your Blueprint module
 
-Below is an example [Blueprint](Eject.Blueprint.html) module for ejecting the files
+Below is an example [Blueprint](Uniform.Blueprint.html) module for ejecting the files
 common to Phoenix applications.
 
 ```elixir
-defmodule MyBaseApp.Eject.Blueprint do
-  use Eject.Blueprint, templates: "lib/my_base_app/eject/templates"
+defmodule MyBaseApp.Uniform.Blueprint do
+  use Uniform.Blueprint, templates: "lib/my_base_app/uniform/templates"
 
   base_files do
     cp_r "assets"
@@ -80,7 +80,7 @@ base_files do
 end
 ```
 
-In the [base_files](Eject.Blueprint.html#base_files/1) section, we specify files that should _always_
+In the [base_files](Uniform.Blueprint.html#base_files/1) section, we specify files that should _always_
 be ejected in every app. Phoenix apps will typically have CSS and JS assets in
 the `assets` directory. They'll also have static files to be served as-is in
 `priv/static`. Some of these files are binary (non-text) files, and we assume
@@ -93,13 +93,13 @@ cp_r "assets"
 cp_r "priv/static"
 ```
 
-Note that `cp_r` instructs `mix eject` to copy all the directory contents
+Note that `cp_r` instructs `mix uniform.eject` to copy all the directory contents
 (using `File.cp_r!/3`).
 
 Phoenix apps typically have an `Web` module which is used to construct
 Controllers, Views, Routers, and LiveViews. Since this file is typically
 in `lib/` directly (and not in a sub-directory of `lib/`), we include it
-here in the `eject` section.
+here in the `base_files` section.
 
 ```elixir
 file "lib/my_base_app_web.ex"
@@ -117,7 +117,7 @@ file Path.wildcard("config/**/*.exs")
 In the `deps` section, we put both `lib :my_base_app` and `lib
 :my_base_app_web` inside `always do` so that their contents are
 always ejected without having to specify `lib_deps: [:my_base_app,
-:my_base_app_web]` in the `eject.exs` manifest of every app.
+:my_base_app_web]` in the `uniform.exs` manifest of every app.
 
 ```elixir
 deps do
@@ -179,7 +179,7 @@ end
 ## The Phoenix Router
 
 A simple way to set up your `Phoenix.Router` is to use [Code
-Fences](code-transformations.html#code-fences) and `Eject.Blueprint.modify/2`.
+Fences](code-transformations.html#code-fences) and `Uniform.Blueprint.modify/2`.
 
 Routes for all of your apps are all placed in the router, with two caveats:
 
@@ -196,7 +196,7 @@ defmodule MyBaseAppWeb.Router do
     # ...
   end
 
-  # eject:remove
+  # uniform:remove
 
   # Place "internal pages" that should never be ejected here.
   # See "Internal Pages" below this code example.
@@ -206,9 +206,9 @@ defmodule MyBaseAppWeb.Router do
     get "/internal-team-page", InternalTeamController, :index
   end
 
-  # /eject:remove
+  # /uniform:remove
 
-  # eject:app:some_app
+  # uniform:app:some_app
   scope "/some-app", SomeAppWeb do
     pipe_through :browser
 
@@ -217,9 +217,9 @@ defmodule MyBaseAppWeb.Router do
     post "/widgets/new", WidgetController, :create
     get "/widgets/:widget_id", WidgetController, :show
   end
-  # /eject:app:some_app
+  # /uniform:app:some_app
 
-  # eject:app:another_app
+  # uniform:app:another_app
   scope "/another-app", SomeAppWeb do
     pipe_through :browser
 
@@ -228,13 +228,13 @@ defmodule MyBaseAppWeb.Router do
     post "/widgets/new", WidgetController, :create
     get "/widgets/:widget_id", WidgetController, :show
   end
-  # /eject:app:another_app
+  # /uniform:app:another_app
 end
 ```
 
 ```elixir
-defmodule MyBaseApp.Eject.Blueprint do
-  use Eject.Blueprint, templates: "..."
+defmodule MyBaseApp.Uniform.Blueprint do
+  use Uniform.Blueprint, templates: "..."
 
   modify "lib/my_base_app_web/router.ex", fn file, app ->
     String.replace(
@@ -246,7 +246,7 @@ defmodule MyBaseApp.Eject.Blueprint do
 end
 ```
 
-The Code Fences (comments like this: `# eject:app:some_app`) will cause the
+The Code Fences (comments like this: `# uniform:app:some_app`) will cause the
 code to be removed when ejecting a different app. The simple code transformer
 defined with `modify` changes
 
@@ -274,7 +274,7 @@ pages that aren't intended to be ejected with any app. For example, a page that
 catalogs and links to your various apps.
 
 We recommend adding these as often as you like, and wrapping them all in
-`# eject:remove` Code Fences as in the example above.
+`# uniform:remove` Code Fences as in the example above.
 
 ## Code Fences Everywhere!
 
@@ -306,22 +306,22 @@ defmodule MyBaseApp.Application do
       MyBaseAppWeb.Presence,
       MyBaseAppWeb.Telemetry,
 
-      # eject:lib:my_first_data_lib
+      # uniform:lib:my_first_data_lib
       MyFirstDataLib.Repo,
-      # /eject:lib:my_first_data_lib
+      # /uniform:lib:my_first_data_lib
 
-      # eject:lib:my_second_data_lib
+      # uniform:lib:my_second_data_lib
       MySecondDataLib.Repo,
       MySecondDataLib.Vault,
-      # /eject:lib:my_second_data_lib
+      # /uniform:lib:my_second_data_lib
 
-      # eject:remove
+      # uniform:remove
       SomeDevelopmentOnlyDB.Repo,
-      # /eject:remove
+      # /uniform:remove
 
-      # eject:mix:oban
+      # uniform:mix:oban
       {Oban, ...},
-      # /eject:mix:oban
+      # /uniform:mix:oban
     ]
 
     # ...
@@ -355,9 +355,9 @@ def application do
   [
     applications: [
       :logger,
-      # eject:mix:exq
+      # uniform:mix:exq
       :exq
-      # /eject:mix:exq
+      # /uniform:mix:exq
     ],
     # ...
   ]
@@ -374,9 +374,9 @@ So this would not be required.
     # ❌ Do NOT wrap deps in code fences
     defp deps do
       [
-        # eject:mix:jason
+        # uniform:mix:jason
         {:jason, "~> 1.0"}
-        # /eject:mix:jason
+        # /uniform:mix:jason
       ]
     end
 
@@ -386,9 +386,9 @@ Many dependencies also require configuration. Apply code fences in your
 configuration files for the same result.
 
 ```elixir
-# eject:mix:guardian
+# uniform:mix:guardian
 config :my_base_app, MyBaseApp.Guardian,
        issuer: "my_base_app",
        secret_key: ...
-# /eject:mix:guardian
+# /uniform:mix:guardian
 ```

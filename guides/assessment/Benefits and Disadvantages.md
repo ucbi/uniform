@@ -1,6 +1,6 @@
 # Benefits and Disadvantages
 
-The Eject System is not for everyone, but it can be very powerful in
+The Uniform System is not for everyone, but it can be very powerful in
 environments where a team or developer is tasked with developing a large base
 of applications that have many similarities or could share many capabilities.
 
@@ -25,7 +25,7 @@ of applications that have many similarities or could share many capabilities.
   moment we start adding a feature. Many advocate for the WET principle (Write
   Everything Twice) by contrast, since making abstractions too early can often
   result in an abstraction that "leaks" or is otherwise ill-suited to the
-  specific use case. Since the Eject System lowers the amount of overhead for
+  specific use case. Since the Uniform System lowers the amount of overhead for
   shared internal libraries, there are no distinct packages to create up front
   which makes it much easier to refactor as the API evolves.
 - **Global Refactors with peace of mind.** When the entire portfolio of
@@ -38,10 +38,10 @@ of applications that have many similarities or could share many capabilities.
   control of an ejected application to another entity such as a different
   development agency, the ejected codebase is already ready as a standalone
   project.
-- **Self-healing properties.** - Since `mix eject` starts by deleting the
+- **Self-healing properties.** - Since `mix uniform.eject` starts by deleting the
   contents of the destination codebase, it's possible to modify an ejected
   codebase temporarily, and then "bring it back in sync" with your Base Project
-  by running `mix eject` again. Ejecting an app with `mix eject` is meant to be
+  by running `mix uniform.eject` again. Ejecting an app with `mix uniform.eject` is meant to be
   something that can be done over and over without preparation or ceremony.
 
 ## Disadvantages

@@ -1,7 +1,7 @@
-defmodule <%= @app_module %>.Eject.Blueprint do
-  use Eject.Blueprint, templates: "lib/<%= @app_underscore %>/eject/templates"
+defmodule <%= @app_module %>.Uniform.Blueprint do
+  use Uniform.Blueprint, templates: "lib/<%= @app_underscore %>/uniform/templates"
 
-  @impl Eject.Blueprint
+  @impl Uniform.Blueprint
   def extra(_app) do
     # keyword list with data to access in `base_files`, templates, and `modify`
     []
@@ -83,11 +83,11 @@ defmodule <%= @app_module %>.Eject.Blueprint do
     # end
   end
 
-  # uncomment this line to not delete these root-level files on `mix eject`
+  # uncomment this line to not delete these root-level files on `mix uniform.eject`
   # @preserve [".vscode"]
 
   # uncomment to Specify files NOT to eject from the lib directory of the app
-  # @impl Eject.Blueprint
+  # @impl Uniform.Blueprint
   # def app_lib_except(_app) do
   #   # add specific file paths or regexes
   #   [
@@ -98,7 +98,7 @@ defmodule <%= @app_module %>.Eject.Blueprint do
 
   # Uncomment this hook to change the destination path of files.
   # Remember to include a fallback for files you don't want to modify.
-  # @impl Eject.Blueprint
+  # @impl Uniform.Blueprint
   # def target_path("some/path.ex", app) do
   #   "some/new/path.ex"
   # end
