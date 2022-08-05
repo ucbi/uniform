@@ -7,7 +7,8 @@ the Base Project.
 
 Imagine you do not use [runtime
 configuration](https://hexdocs.pm/elixir/main/Config.html#module-config-runtime-exs)
-in your Base Project, but you want a `config/runtime.exs` in your ejected applications.
+in your Base Project, but you want a `config/runtime.exs` in your ejected
+applications.
 
 Furthermore, imagine the contents of `runtime.exs` need to be wildly different
 between apps based on the Lib and Mix Dependencies of the app.
@@ -24,8 +25,8 @@ defmodule MyApp.Uniform.Blueprint do
 
 ## Step 2: Add the EEx file in the correct relative path
 
-EEx templates must be added in the destination path, **relative to the templates
-directory**.
+EEx templates must be added in the destination path, **relative to the
+templates directory**.
 
 So to emit our file into `config/runtime.exs`, we must create it in
 
@@ -36,8 +37,8 @@ lib/uniform/templates/config/runtime.exs.eex
 templates directory     destination    .eex suffix
 ```
 
-The path "prefix", `lib/uniform/templates`, must match the `templates` directory
-specified with `use Uniform.Blueprint` above.
+The path "prefix", `lib/uniform/templates`, must match the `templates`
+directory specified with `use Uniform.Blueprint` above.
 
 > #### Don't forget the .eex suffix {: .tip}
 >
@@ -76,12 +77,12 @@ config :my_base_app, some_configuration: "just for some_app"
 
 > #### The App struct in templates {: .tip}
 >
-> In EEx templates, the `Uniform.App` struct will be available as `app`. You can
-> use the contents of `app.extra` to make decisions about what to render in the
-> template.
+> In EEx templates, the `Uniform.App` struct will be available as `app`. You
+> can use the contents of `app.extra` to make decisions about what to render in
+> the template.
 >
-> Also, the `Uniform.App.depends_on?/3` utility is available as `depends_on?` and
-> can be used like this: `depends_on?.(app, :mix, :absinthe)`
+> Also, the `Uniform.App.depends_on?/3` utility is available as `depends_on?`
+> and can be used like this: `depends_on?.(app, :mix, :absinthe)`
 
 > #### Code Transformations and templates {: .info}
 >

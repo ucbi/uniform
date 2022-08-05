@@ -12,7 +12,8 @@ defmodule Uniform.Blueprint do
   @moduledoc ~S"""
   Defines the ejection blueprint for your project.
 
-  When used, the blueprint expects the `:templates` option. For example, the blueprint:
+  When used, the blueprint expects the `:templates` option. For example, the
+  blueprint:
 
       defmodule Blueprint do
         use Uniform.Blueprint, templates: "priv/uniform-templates"
@@ -53,8 +54,8 @@ defmodule Uniform.Blueprint do
 
   ## The `deps` Section
 
-  Besides the `base_files` section, the blueprint can also contain a `deps` section to
-  configure dependencies.
+  Besides the `base_files` section, the blueprint can also contain a `deps`
+  section to configure dependencies.
 
       defmodule Blueprint do
         use Uniform.Blueprint, templates: "..."
@@ -75,9 +76,9 @@ defmodule Uniform.Blueprint do
 
   ## Modifying files programmatically with `modify`
 
-  Lastly, `modify` can be used whenever you want to transform
-  file contents during ejection. You can specify a specific filepath
-  or use a regex to match multiple files.
+  Lastly, `modify` can be used whenever you want to transform file contents
+  during ejection. You can specify a specific filepath or use a regex to match
+  multiple files.
 
       defmodule Blueprint do
         use Uniform.Blueprint, templates: "..."
@@ -92,8 +93,9 @@ defmodule Uniform.Blueprint do
 
   ## Preserving files
 
-  Whenever running `mix uniform.eject`, the contents in the destination directory will
-  be deleted except for the `.git`, `deps`, and `_build` directories.
+  Whenever running `mix uniform.eject`, the contents in the destination
+  directory will be deleted except for the `.git`, `deps`, and `_build`
+  directories.
 
   If there are any other files or directories *in the project's root folder*
   that you would like to preserve (by not deleting them), specify them with
@@ -106,7 +108,8 @@ defmodule Uniform.Blueprint do
 
   ## Full Example
 
-  Below is an example `Blueprint` module that shows off a majority of the features that can be used.
+  Below is an example `Blueprint` module that shows off a majority of the
+  features that can be used.
 
       defmodule MyApp.Uniform.Blueprint do
         use Uniform.Blueprint, templates: "lib/uniform/templates"
@@ -219,8 +222,8 @@ defmodule Uniform.Blueprint do
   """
 
   @doc """
-  A hook to add more data to `app.extra`, beyond what's in the [Uniform Manifest
-  file](./getting-started.html#add-uniform-manifests).
+  A hook to add more data to `app.extra`, beyond what's in the [Uniform
+  Manifest file](./getting-started.html#add-uniform-manifests).
 
   ## Example
 
@@ -244,8 +247,8 @@ defmodule Uniform.Blueprint do
 
   @doc ~S"""
   Use this callback to modify the path of ejected files. It will be called for
-  every file in a lib directory, along with every file specified via `file`, `template`,
-  `cp`, and `cp_r`.
+  every file in a lib directory, along with every file specified via `file`,
+  `template`, `cp`, and `cp_r`.
 
   If you don't want to modify the `path`, just return it.
 
@@ -255,9 +258,10 @@ defmodule Uniform.Blueprint do
 
   ## Example
 
-  You may want to place certain files in `lib/ejected_app_web` instead of `lib/ejected_app`.
-  Let's say you have an `is_web_file?` function that identifies whether the file belongs in
-  the `_web` directory. `target_path` might be something like this:
+  You may want to place certain files in `lib/ejected_app_web` instead of
+  `lib/ejected_app`.  Let's say you have an `is_web_file?` function that
+  identifies whether the file belongs in the `_web` directory. `target_path`
+  might be something like this:
 
       def target_path(path, app) do
         if is_web_file?(path) do
@@ -275,9 +279,9 @@ defmodule Uniform.Blueprint do
   This callback works like the `except/1` instruction for Lib Dependencies,
   except that it applies to the `lib` folder of the ejected app itself.
 
-  When running `mix uniform.eject MyApp`, any files in `lib/my_app` or `test/my_app`
-  which match the paths or regexes returned by `app_lib_except` will **not** be
-  ejected.
+  When running `mix uniform.eject MyApp`, any files in `lib/my_app` or
+  `test/my_app` which match the paths or regexes returned by `app_lib_except`
+  will **not** be ejected.
 
       def app_lib_except(app) do
         ["lib/#{app.name.underscore}/hidden_file.ex"]
@@ -291,7 +295,8 @@ defmodule Uniform.Blueprint do
   @doc """
        A macro for defining an ejection blueprint.
 
-       The required `templates` path points to the EEx templates used by `Uniform`.
+       The required `templates` path points to the EEx templates used by
+       Uniform.
 
        ### Examples
 
@@ -572,11 +577,12 @@ defmodule Uniform.Blueprint do
   #
 
   @doc """
-  Uniform automatically catalogs all Mix deps by looking into `mix.exs` to discover all Mix deps.
-  It also catalogs all Lib deps by scanning the `lib/` directory.
+  Uniform automatically catalogs all Mix deps by looking into `mix.exs` to
+  discover all Mix deps.  It also catalogs all Lib deps by scanning the `lib/`
+  directory.
 
-  If you need to configure anything about a Mix or Lib dep, such as other dependencies
-  that must be bundled along with it, use the `deps` block.
+  If you need to configure anything about a Mix or Lib dep, such as other
+  dependencies that must be bundled along with it, use the `deps` block.
 
   See `mix/2`, `lib/2`, and `always/1` for more details.
 
@@ -657,8 +663,8 @@ defmodule Uniform.Blueprint do
   end
 
   @doc """
-  Uniform considers all directories in the project root's `lib/` directory
-  to be "lib dependencies".
+  Uniform considers all directories in the project root's `lib/` directory to
+  be "lib dependencies".
 
   Since Uniform is aware of all lib dependencies in `lib/`, you don't need to
   tell it about them.
@@ -666,19 +672,19 @@ defmodule Uniform.Blueprint do
   However, there are a few scenarios where you do need to list them in your `Blueprint` module:
 
   1. Specifying which lib dependencies should _always_ be ejected. (See
-  `Uniform.Blueprint.always/1`.)
+     `Uniform.Blueprint.always/1`.)
   2. To specify that a lib dependency has other mix or lib dependencies. (I.e.
-  Other mix packages or lib directories should always be ejected along with
-  it.)
+     Other mix packages or lib directories should always be ejected along with
+     it.)
   3. To specify to eject other files that aren't in a `lib/` directory
-  alongside a lib dependency.
+     alongside a lib dependency.
 
   > #### Including Lib Dependencies in an App {: .info}
   >
   > To eject a lib dependency with a specific app (but not all), make sure to
-  > put it in the app's
-  > [Uniform Manifest file](./getting-started.html#add-uniform-manifests),
-  > or make it a `lib_dependency` of another dependency in the Manifest.
+  > put it in the app's [Uniform Manifest
+  > file](./getting-started.html#add-uniform-manifests), or make it a
+  > `lib_dependency` of another dependency in the Manifest.
 
   ## Examples
 
@@ -713,8 +719,8 @@ defmodule Uniform.Blueprint do
   Sometimes, when a Lib Dependency is ejected with an app, there are other
   files outside of `lib/that_library` which should also be ejected.
 
-  In this scenario, you can use these instructions used in `base_files/1` to denote
-  them.
+  In this scenario, you can use these instructions used in `base_files/1` to
+  denote them.
 
   - `file/2`
   - `template/2`
@@ -784,21 +790,22 @@ defmodule Uniform.Blueprint do
   end
 
   @doc """
-  Since Uniform is aware of all mix dependencies in `mix.exs`, you don't need to
-  tell it about them.
+  Since Uniform is aware of all mix dependencies in `mix.exs`, you don't need
+  to tell it about them.
 
-  However, there are two scenarios where you do need to list out mix dependencies:
+  However, there are two scenarios where you do need to list out mix
+  dependencies:
 
   1. Specifying which mix dependencies should _always_ be ejected. (See
-  `Uniform.Blueprint.always/1`.)
+     `Uniform.Blueprint.always/1`.)
   2. Whenever a mix dependency has other mix dependencies. (I.e. Other mix
-  packages should always be ejected with it.)
+     packages should always be ejected with it.)
 
   > #### Including Mix Dependencies in an App {: .info}
   >
   > To eject a mix dependency with a specific app (but not all), make sure to
-  > include it as a dependency of lib dependencies (see `lib/2`) or put it in the
-  > app's [Uniform Manifest
+  > include it as a dependency of lib dependencies (see `lib/2`) or put it in
+  > the app's [Uniform Manifest
   > file](./getting-started.html#add-uniform-manifests).
 
   ### Examples
@@ -860,9 +867,9 @@ defmodule Uniform.Blueprint do
   defmacro lib_deps(deps), do: {:lib_deps, List.wrap(deps)}
 
   @doc """
-  In `base_files` and `lib` blocks, `file` is used to specify **files that are not
-  in a `lib/` directory** which should be ejected in the app or along with the
-  lib.
+  In `base_files` and `lib` blocks, `file` is used to specify **files that are
+  not in a `lib/` directory** which should be ejected in the app or along with
+  the lib.
 
   > #### Use `Path.wildcard/1` for shorter code {: .tip}
   >
@@ -897,21 +904,21 @@ defmodule Uniform.Blueprint do
   def file(path, opts \\ []), do: {:text, {path, opts}}
 
   @doc """
-  In `base_files` and `lib` blocks, `template` is used to specify EEx templates that
-  should be rendered and then ejected.
+  In `base_files` and `lib` blocks, `template` is used to specify EEx templates
+  that should be rendered and then ejected.
 
   ## Template Directory and Destination Path
 
-  Uniform templates use a "convention over configuration" model
-  that works like this:
+  Uniform templates use a "convention over configuration" model that works like
+  this:
 
   1. At the top of your `Blueprint` module, you specify a template directory
-  like this:
+     like this:
 
       `use Uniform, templates: "lib/uniform/templates"`
 
-  2. Templates must be placed in this directory at the relative path
-  that they should be placed in, in the ejected directory.
+  2. Templates must be placed in this directory at the relative path that they
+     should be placed in, in the ejected directory.
   3. Templates must have the destination filename, appended with `.eex`.
 
   > #### Companion guide {: .tip}
@@ -949,17 +956,18 @@ defmodule Uniform.Blueprint do
   def template(path, opts \\ []), do: {:template, {path, opts}}
 
   @doc """
-  `cp_r` works like `cp/2`, but for directory instead of a file.
-  The directory is copied as-is with `File.cp_r!/3`.
+  `cp_r` works like `cp/2`, but for directory instead of a file.  The directory
+  is copied as-is with `File.cp_r!/3`.
 
   **None of the files are ran through Code Modifiers.**
 
-  This is useful for directories that do not require modification,
-  and contain many files.
+  This is useful for directories that do not require modification, and contain
+  many files.
 
   For example, the `assets/node_modules` directory in a Phoenix application
-  would take ages to copy with `file Path.wildcard("assets/node_modules/**/*")`.
-  Instead, use `cp_r "assets/node_modules"`.
+  would take ages to copy with `file
+  Path.wildcard("assets/node_modules/**/*")`. Instead, use `cp_r
+  "assets/node_modules"`.
 
   ## Examples
 
@@ -977,8 +985,8 @@ defmodule Uniform.Blueprint do
   def cp_r(path, opts \\ []), do: {:cp_r, {path, opts}}
 
   @doc """
-  `cp` works exactly like `file/2`, except that **no transformations
-  are applied to the file**.
+  `cp` works exactly like `file/2`, except that **no transformations are
+  applied to the file**.
 
   The file is copied as-is with `File.cp!/3`.
 
@@ -1006,8 +1014,8 @@ defmodule Uniform.Blueprint do
   def cp(path, opts \\ []), do: {:cp, {path, opts}}
 
   @doc """
-  In the `deps` section of your Blueprint, you can specify that a Lib Dependency
-  excludes certain files.
+  In the `deps` section of your Blueprint, you can specify that a Lib
+  Dependency excludes certain files.
 
   This works much like the `except` option that can be given when importing
   functions with `import/2`.
@@ -1025,8 +1033,8 @@ defmodule Uniform.Blueprint do
   def except(paths), do: {:except, List.wrap(paths)}
 
   @doc """
-  In the `deps` section of your Blueprint, you can specify that a Lib Dependency
-  only includes certain files.
+  In the `deps` section of your Blueprint, you can specify that a Lib
+  Dependency only includes certain files.
 
   These work much like the `only` option that can be given when importing
   functions with `import/2`.

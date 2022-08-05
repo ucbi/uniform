@@ -9,8 +9,8 @@ The Uniform System is powerful in scenarios in which you want to:
 3. Keep many aspects of them in sync.
 4. Share capabilities between apps.
 
-This makes the Uniform System especially powerful for software organizations that
-do not have an entire team dedicated to each application.
+This makes the Uniform System especially powerful for software organizations
+that do not have an entire team dedicated to each application.
 
 ## Enterprises
 

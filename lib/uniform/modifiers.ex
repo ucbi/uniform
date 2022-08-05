@@ -5,85 +5,8 @@ defmodule Uniform.Modifiers do
   """
 
   #
-  # mix.exs Dependency Removal
-  #
-
-  @doc """
-       Given the contents of a mix.exs file and an `%App{}`,
-       look for the following code fence that should be wrapping the mix deps:
-
-           # uniform:deps
-
-           ...
-
-           # /uniform:deps
-
-       ...and filter out the deps that should not be included in this app.
-       """ && false
-  def remove_unused_mix_deps(file_contents, app) do
-    file_contents
-    |> String.replace(~r/\n *# uniform:deps(.+?)# \/uniform:deps/s, fn deps ->
-      deps
-      |> Code.string_to_quoted!()
-      |> Enum.filter(&(dep_name(&1) in app.internal.deps.included.mix))
-      |> Macro.to_string()
-    end)
-  end
-
-  defp dep_name({dep, version}) when is_binary(version), do: dep
-  defp dep_name({dep, opts}) when is_list(opts), do: dep
-  defp dep_name({:{}, _meta, [dep, _version, opts]}) when is_list(opts), do: dep
-  defp dep_name({:{}, _meta, [dep, opts]}) when is_list(opts), do: dep
-  defp dep_name(quoted), do: raise("did not parse quoted AST `#{inspect(quoted)}` in mix deps")
-
-  #
   # Code Fences
   #
-
-  @doc """
-       Code fences are in this format:
-
-           some_code()
-
-           # uniform:lib:foo_bar
-           #
-           # ... code that will be removed if the lib called foo_bar isn't included
-           #
-           # /uniform:lib:foo_bar
-
-           more_code()
-
-           # uniform:mix:foo_bar
-           #
-           # ... code that will be removed if the mix dep called foo_bar isn't included
-           #
-           # /uniform:mix:foo_bar
-
-           more_code()
-
-           # uniform:app:foo_bar
-           #
-           # ... code that will be removed if the current app isn't called foo_bar
-           #
-           # /uniform:app:foo_bar
-
-           more_code()
-
-           # uniform:remove
-           #
-           # ... code that will always be removed upon ejection
-           #
-           # /uniform:remove
-
-       """ && false
-  def elixir_code_fences(file_contents, app) do
-    code_fences(file_contents, app, "#")
-  end
-
-  @doc false
-  def js_code_fences(file_contents, app) do
-    code_fences(file_contents, app, "//")
-  end
 
   @doc """
   Build code transformations to apply [Code
@@ -169,6 +92,83 @@ defmodule Uniform.Modifiers do
       ""
     end
   end
+
+  @doc """
+       Code fences are in this format:
+
+           some_code()
+
+           # uniform:lib:foo_bar
+           #
+           # ... code that will be removed if the lib called foo_bar isn't included
+           #
+           # /uniform:lib:foo_bar
+
+           more_code()
+
+           # uniform:mix:foo_bar
+           #
+           # ... code that will be removed if the mix dep called foo_bar isn't included
+           #
+           # /uniform:mix:foo_bar
+
+           more_code()
+
+           # uniform:app:foo_bar
+           #
+           # ... code that will be removed if the current app isn't called foo_bar
+           #
+           # /uniform:app:foo_bar
+
+           more_code()
+
+           # uniform:remove
+           #
+           # ... code that will always be removed upon ejection
+           #
+           # /uniform:remove
+
+       """ && false
+  def elixir_code_fences(file_contents, app) do
+    code_fences(file_contents, app, "#")
+  end
+
+  @doc false
+  def js_code_fences(file_contents, app) do
+    code_fences(file_contents, app, "//")
+  end
+
+  #
+  # mix.exs Dependency Removal
+  #
+
+  @doc """
+       Given the contents of a mix.exs file and an `%App{}`, look for the
+       following code fence that should be wrapping the mix deps:
+
+           # uniform:deps
+
+           ...
+
+           # /uniform:deps
+
+       ...and filter out the deps that should not be included in this app.
+       """ && false
+  def remove_unused_mix_deps(file_contents, app) do
+    file_contents
+    |> String.replace(~r/\n *# uniform:deps(.+?)# \/uniform:deps/s, fn deps ->
+      deps
+      |> Code.string_to_quoted!()
+      |> Enum.filter(&(dep_name(&1) in app.internal.deps.included.mix))
+      |> Macro.to_string()
+    end)
+  end
+
+  defp dep_name({dep, version}) when is_binary(version), do: dep
+  defp dep_name({dep, opts}) when is_list(opts), do: dep
+  defp dep_name({:{}, _meta, [dep, _version, opts]}) when is_list(opts), do: dep
+  defp dep_name({:{}, _meta, [dep, opts]}) when is_list(opts), do: dep
+  defp dep_name(quoted), do: raise("did not parse quoted AST `#{inspect(quoted)}` in mix deps")
 
   #
   # Base Project Name Replacement

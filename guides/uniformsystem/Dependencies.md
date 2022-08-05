@@ -13,8 +13,8 @@ less ceremony than other mechanisms like private Hex packages.
 A Lib Dependency is referenced by an atom that matches the name of the
 directory in `lib/`.
 
-For example, a library in `lib/utilities` would be referenced in `uniform.exs` or
-in the [Blueprint](Uniform.Blueprint.html) module as `:utilities`.
+For example, a library in `lib/utilities` would be referenced in `uniform.exs`
+or in the [Blueprint](Uniform.Blueprint.html) module as `:utilities`.
 
 ## Mix Dependencies
 
@@ -50,9 +50,9 @@ by an App:
 ]
 ```
 
-2. Include the depencency in **all Ejectable Apps** by placing the dependency in
-   the [always](`Uniform.Blueprint.always/1`) section of your [Blueprint](Uniform.Blueprint.html)
-   module.
+2. Include the depencency in **all Ejectable Apps** by placing the dependency
+   in the [always](`Uniform.Blueprint.always/1`) section of your
+   [Blueprint](Uniform.Blueprint.html) module.
 
 ```elixir
 deps do
@@ -64,8 +64,8 @@ end
 ```
 
 3. Make it a "sub-dependency" of a dependency from method 1 or 2 by using the
-   `lib_deps` or `mix_deps` macros in your [deps section](`Uniform.Blueprint.deps/1`).
-   (See "Chained Dependencies" below.)
+   `lib_deps` or `mix_deps` macros in your [deps
+   section](`Uniform.Blueprint.deps/1`). (See "Chained Dependencies" below.)
 
 ```elixir
 deps do

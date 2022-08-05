@@ -1,7 +1,8 @@
 # Code Transformations
 
-During `mix uniform.eject`, there are 4 code transformations applied to file contents.
-These transformations happen to every file, except those ejected with `cp` and `cp_r`.
+During `mix uniform.eject`, there are 4 code transformations applied to file
+contents.  These transformations happen to every file, except those ejected
+with `cp` and `cp_r`.
 
 They occur **in this order**.
 
@@ -75,8 +76,9 @@ Given the above `mix.exs`, if you were to run `mix uniform.eject MyEjectableApp`
 
 > #### Replacement in file paths {: .info}
 >
-> This same replacement of `base_project_name` to `ejected_app_name` also occurs
-> in file paths, but only with `this_format`. (Not `this-format` or `ThisFormat`.)
+> This same replacement of `base_project_name` to `ejected_app_name` also
+> occurs in file paths, but only with `this_format`. (Not `this-format` or
+> `ThisFormat`.)
 >
 > This means a file at `lib/base_project_name/foo.ex` would be ejected to
 > `lib/ejected_app_name/foo.ex`.
@@ -156,8 +158,8 @@ it in these comments:
 > code fence, the code fence comments themselves (like `# uniform:app:my_app`)
 > are always removed.
 >
-> Furthermore, `mix uniform.eject` runs `mix format` on the ejected codebase at the
-> end. So you always end up with "clean" looking code.
+> Furthermore, `mix uniform.eject` runs `mix format` on the ejected codebase at
+> the end. So you always end up with "clean" looking code.
 
 ### Code Fences for other languages
 
@@ -170,8 +172,9 @@ single-line comments.
 // /uniform:lib:my_lib
 ```
 
-If you would like to support Code Fences for other languages or file types,
-you can do so using `Uniform.Blueprint.modify/2` and `Uniform.Modifiers.code_fences/3`.
+If you would like to support Code Fences for other languages or file types, you
+can do so using `Uniform.Blueprint.modify/2` and
+`Uniform.Modifiers.code_fences/3`.
 
 ```elixir
 # code fences for SQL files

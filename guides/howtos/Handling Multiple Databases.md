@@ -11,9 +11,9 @@ some of your apps.
 In this scenario, we recommend creating separate [Lib
 Dependencies](dependencies.html#lib-dependencies) (each in its own
 `lib/some_data_source` directory) which each encapsulate all of the code for
-interacting with a single database. This implies that each Lib Dependency
-would house all of the [Ecto Schemas](https://hexdocs.pm/ecto/Ecto.Schema.html)
-and [Context](https://hexdocs.pm/phoenix/contexts.html) modules related to its
+interacting with a single database. This implies that each Lib Dependency would
+house all of the [Ecto Schemas](https://hexdocs.pm/ecto/Ecto.Schema.html) and
+[Context](https://hexdocs.pm/phoenix/contexts.html) modules related to its
 database.
 
 Structuring the code this way allows you to easily include or exclude the code
@@ -44,15 +44,18 @@ For example, given apps with these `uniform.exs` manifests
 ]
 ```
 
-- `SomeApp` would be ejected with all of the code related to interacting with `my_data_source`
-- `AnotherApp` would be ejected with the code for both `my_data_source` and `other_data_source`
+- `SomeApp` would be ejected with all of the code related to interacting with
+  `my_data_source`
+- `AnotherApp` would be ejected with the code for both `my_data_source` and
+  `other_data_source`
 - `ThirdApp` would only be ejected with the code for `other_data_source`
 
 ## Configuring Lib Dependencies
 
-If you take this approach, make sure to configure your [Blueprint](`Uniform.Blueprint`) module
-to include any Lib or Mix Dependencies of each data source's library. Also, be sure
-to include migrations and seeds related to the library.
+If you take this approach, make sure to configure your
+[Blueprint](`Uniform.Blueprint`) module to include any Lib or Mix Dependencies
+of each data source's library. Also, be sure to include migrations and seeds
+related to the library.
 
 ```elixir
 lib :ucbi_data do
