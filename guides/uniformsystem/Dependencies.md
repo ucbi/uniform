@@ -3,8 +3,9 @@
 ## Lib Dependencies
 
 A Lib Dependency is a directory in the [Base
-Project](#what-is-a-base-project)'s `lib/` directory that contains a code
-library used by [Ejectable Apps](#what-is-an-ejectable-app).
+Project](how-it-works.html#what-is-a-base-project)'s `lib/` directory that
+contains a code library used by [Ejectable
+Apps](how-it-works.html#what-is-an-ejectable-app).
 
 Lib Dependencies are used to share non-public code between Ejectable Apps with
 less ceremony than other mechanisms like private Hex packages.
@@ -17,7 +18,7 @@ in the [Blueprint](Uniform.Blueprint.html) module as `:utilities`.
 
 ## Mix Dependencies
 
-`Uniform` is aware of the deps in your `mix.exs`. Whenever an app is ejected, it
+Uniform is aware of the deps in your `mix.exs`. Whenever an app is ejected, it
 removes all mix dependencies that aren't explicitly needed by the app.
 
 ## Adding Dependencies to an App
@@ -26,7 +27,7 @@ There are three methods to specify which Lib and Mix dependencies are required
 by an App:
 
 1. Include the dependency for **a single Ejectable App** by saying so in
-   [uniform.exs](#uniform-exs-options).
+   [uniform.exs](how-it-works.html#uniform-exs-options).
 
 ```elixir
 # lib/my_app/uniform.exs
