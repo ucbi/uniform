@@ -1,8 +1,26 @@
 defmodule Mix.Tasks.Eject.Init do
+  @moduledoc """
+  Initializes a [Base Project](how-it-works.html#what-is-a-base-project)
+  repository with the bare minimum setup required for using `Eject`.
+
+  1. Adds a [Blueprint](Eject.Blueprint.html) module
+  2. Adds required configuration to `config/config.exs`
+
+  The remainder of installation steps are listed in the [Getting
+  Started](getting-started.html) guide.
+
+  ## Usage
+
+  ```bash
+  mix eject.init
+  ```
+  """
+
   use Mix.Task
 
   require Logger
 
+  @doc false
   def run(_) do
     otp_app = Keyword.fetch!(Mix.Project.config(), :app)
 

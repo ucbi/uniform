@@ -17,7 +17,19 @@ defp deps do
 end
 ```
 
-## Create a Blueprint module
+## Run `mix eject.init`
+
+After adding `:eject` to `mix.exs` and running `mix deps.get`, run
+
+```bash
+mix eject.init
+```
+
+This will [Create a Blueprint module](#create-a-blueprint-module) and add
+[Configuration](#configuration), which you can do manually if you'd rather by
+following the steps below.
+
+### Create a Blueprint module
 
 Next, create a [Blueprint](Eject.Blueprint.html) module. It will contain all of
 the details for how `mix eject` should behave whenever you tell it to eject a
@@ -33,7 +45,7 @@ You can name the module whatever you like, but we suggest putting it in
 `lib/my_app/eject/blueprint.ex` and specifying the templates directory alongside it
 in `lib/my_app/eject/templates`.
 
-## Configuration
+### Configuration
 
 In `config/config.exs` put the following line. (Changing the `blueprint` value to
 match the name of your Blueprint module name above.)
