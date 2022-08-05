@@ -2,7 +2,7 @@
 
 > This guide assumes that you're familiar with [The Uniform
 > System](how-it-works.html) and have gone through the [Getting
-> Started](#getting-started.html) guide.
+> Started](getting-started.html) guide.
 
 If you're using The Uniform System it's likely that you have multiple Repos for
 multiple databases, but you only want to give access for a given database to

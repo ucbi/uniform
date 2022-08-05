@@ -87,7 +87,7 @@ file inside the directory.**
 > `mix uniform.eject` does not by change its behavior based on the data in `extra`, but
 > it is placed in `app.extra` so that you can use it to make decisions in
 > [templates](building-files-from-eex-templates.html) or in the
-> [base_files](Uniform.Blueprint.html#base_files/1) or [modify](Uniform.Blueprint.html#modify/4) sections
+> [base_files](Uniform.Blueprint.html#base_files/1) or [modify](Uniform.Blueprint.html#modify/2) sections
 > in your [Blueprint](Uniform.Blueprint.html) module.
 >
 > For 'global' values available to _all_ ejectable apps, use the

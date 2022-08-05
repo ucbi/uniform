@@ -7,7 +7,7 @@
 Imagine creating an entire new application simply by adding a Route and a
 single LiveView to an existing Elixir project.
 
-This is in fact the vision that drove the creation of `Uniform`. The overhead of
+This is in fact the vision that drove the creation of Uniform. The overhead of
 experimenting with new apps becomes extremely low, incentivizing the team to
 try out ideas without being inhibited by initial setup time.
 
