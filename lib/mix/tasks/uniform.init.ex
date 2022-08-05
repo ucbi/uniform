@@ -1,9 +1,9 @@
-defmodule Mix.Tasks.Eject.Init do
+defmodule Mix.Tasks.Uniform.Init do
   @moduledoc """
   Initializes a [Base Project](how-it-works.html#what-is-a-base-project)
-  repository with the bare minimum setup required for using `Eject`.
+  repository with the bare minimum setup required for using `Uniform`.
 
-  1. Adds a [Blueprint](Eject.Blueprint.html) module
+  1. Adds a [Blueprint](Uniform.Blueprint.html) module
   2. Adds required configuration to `config/config.exs`
 
   The remainder of installation steps are listed in the [Getting
@@ -12,7 +12,9 @@ defmodule Mix.Tasks.Eject.Init do
   ## Usage
 
   ```bash
-  mix eject.init
+  $ mix uniform.init
+  Created lib/base_app/uniform/blueprint.ex
+  Added configuration in config/config.exs
   ```
   """
 
@@ -24,7 +26,7 @@ defmodule Mix.Tasks.Eject.Init do
   def run(_) do
     otp_app = Keyword.fetch!(Mix.Project.config(), :app)
 
-    File.mkdir_p!("lib/#{otp_app}/eject")
+    File.mkdir_p!("lib/#{otp_app}/uniform")
     create_blueprint(otp_app)
     add_config(otp_app)
   end
@@ -44,7 +46,7 @@ defmodule Mix.Tasks.Eject.Init do
         ]
       )
 
-    write_unless_exists("lib/#{otp_app}/eject/blueprint.ex", blueprint)
+    write_unless_exists("lib/#{otp_app}/uniform/blueprint.ex", blueprint)
   end
 
   defp add_config(otp_app) do
@@ -63,13 +65,13 @@ defmodule Mix.Tasks.Eject.Init do
         blueprint_config = """
         import Config
 
-        # eject:remove
-        config :#{otp_app}, Eject, blueprint: #{app_module(otp_app)}.Eject.Blueprint
-        # /eject:remove\
+        # uniform:remove
+        config :#{otp_app}, Uniform, blueprint: #{app_module(otp_app)}.Uniform.Blueprint
+        # /uniform:remove\
         """
 
-        Logger.info("Adding configuration in config/config.exs")
         File.write!("config/config.exs", before_import <> blueprint_config <> after_import)
+        IO.puts("Added configuration in config/config.exs")
 
       _ ->
         Logger.warning(
@@ -82,8 +84,8 @@ defmodule Mix.Tasks.Eject.Init do
     if File.exists?(path) do
       Logger.warning("Did not create #{path} because it already exists")
     else
-      Logger.info("Creating #{path}")
       File.write!(path, contents)
+      IO.puts("Created #{path}")
     end
   end
 

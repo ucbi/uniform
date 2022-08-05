@@ -1,13 +1,13 @@
-defmodule Eject.ConfigTest do
-  use Eject.TestProjectCase
+defmodule Uniform.ConfigTest do
+  use Uniform.TestProjectCase
 
-  alias Eject.{LibDep, MixDep, Config}
+  alias Uniform.{LibDep, MixDep, Config}
 
   setup do
     config = %Config{
       mix_project_app: :test_project,
       mix_project: TestProject.MixProject,
-      blueprint: TestProject.Eject.Blueprint
+      blueprint: TestProject.Uniform.Blueprint
     }
 
     %{config: config}

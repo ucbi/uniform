@@ -1,5 +1,5 @@
-defmodule TestProject.Eject.Blueprint do
-  use Eject.Blueprint, templates: "templates"
+defmodule TestProject.Uniform.Blueprint do
+  use Uniform.Blueprint, templates: "templates"
 
   @preserve [".gitignore"]
 

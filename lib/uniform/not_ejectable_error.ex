@@ -1,4 +1,4 @@
-defmodule Eject.NotEjectableError do
+defmodule Uniform.NotEjectableError do
   @moduledoc false
 
   defexception [:app_name, :manifest_path]
@@ -9,7 +9,7 @@ defmodule Eject.NotEjectableError do
 
     If the name is correct, run this task:
 
-        mix eject.gen.app #{error.app_name}
+        mix uniform.gen.app #{error.app_name}
     """
   end
 end

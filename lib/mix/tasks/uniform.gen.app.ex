@@ -1,16 +1,17 @@
-defmodule Mix.Tasks.Eject.Gen.App do
+defmodule Mix.Tasks.Uniform.Gen.App do
   @moduledoc """
-  Generates an `eject.exs` file so that the given app can be ejected with `mix
-  eject`.
+  Generates an `uniform.exs` file so that the given app can be ejected with `mix
+  uniform.eject`.
 
   ## Usage
 
   ```bash
-  mix eject.gen.app some_app_name
+  $ mix uniform.gen.app some_app_name
+  Created lib/some_app_name/uniform.exs
   ```
 
-  Running that command will create `lib/some_app_name/eject.exs`. This will
-  enable `mix eject some_app_name` to work without failing.
+  Running that command will create `lib/some_app_name/uniform.exs`. This will
+  enable `mix uniform.eject SomeAppName` to work without failing.
   """
 
   use Mix.Task
@@ -24,13 +25,11 @@ defmodule Mix.Tasks.Eject.Gen.App do
     end
 
     File.mkdir_p!("lib/#{lib}")
-    path = "lib/#{lib}/eject.exs"
+    path = "lib/#{lib}/uniform.exs"
 
     if File.exists?(path) do
       Logger.warning("Did not create #{path} because it already exists")
     else
-      Logger.info("Creating #{path}")
-
       File.write!(path, """
       [
         # add lib deps required by this app, unless they're already in `always`
@@ -50,12 +49,14 @@ defmodule Mix.Tasks.Eject.Gen.App do
         # Add keyword pairs needed by `modify`, `base_files`, or templates
         # to make decisions about this app.
         #
-        # eject: [
+        # extra: [
         #   crons: [...],
         #   fly_io_options: [...]
         # ]
       ]
       """)
+
+      IO.puts("Created #{path}")
     end
   end
 
@@ -68,7 +69,7 @@ defmodule Mix.Tasks.Eject.Gen.App do
       message: """
       Expected usage:
 
-          mix eject.gen.app some_lib_directory
+          mix uniform.gen.app some_lib_directory
       """
   end
 end

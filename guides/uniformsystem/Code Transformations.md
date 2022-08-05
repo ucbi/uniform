@@ -1,6 +1,6 @@
 # Code Transformations
 
-During `mix eject`, there are 4 code transformations applied to file contents.
+During `mix uniform.eject`, there are 4 code transformations applied to file contents.
 These transformations happen to every file, except those ejected with `cp` and `cp_r`.
 
 They occur **in this order**.
@@ -13,11 +13,11 @@ They occur **in this order**.
 > #### Disabling Code Transformations for a file {: .tip}
 >
 > If you have a file that should not have Code Transformations applied upon
-> ejection, use [`cp`](Eject.Blueprint.html#cp/2) instead of
-> [`file`](Eject.Blueprint.html#file/2).
+> ejection, use [`cp`](Uniform.Blueprint.html#cp/2) instead of
+> [`file`](Uniform.Blueprint.html#file/2).
 >
 > If there is an entire directory of contents that should not be modified, use
-> [`cp_r`](Eject.Blueprint.html#cp_r/2), which will be much faster.
+> [`cp_r`](Uniform.Blueprint.html#cp_r/2), which will be much faster.
 
 ## mix.exs Dependency Removal
 
@@ -27,7 +27,7 @@ Any Mix Dependency that is not directly or indirectly required by the app via
 ## Modifiers from the Ejection Blueprint
 
 Users can specify arbitrary modifications that should be applied to various
-files using the `modify` macro in the [Blueprint](`Eject.Blueprint`) module:
+files using the `modify` macro in the [Blueprint](`Uniform.Blueprint`) module:
 
 ```elixir
 modify ~r/.+_worker.ex/, fn file, app ->
@@ -36,7 +36,7 @@ modify ~r/.+_worker.ex/, fn file, app ->
   #
   # `file` is a string containing the full file contents.
   #
-  # `app` is the `Eject.App` struct of the given app being ejected.
+  # `app` is the `Uniform.App` struct of the given app being ejected.
   #
   # This is essentially a function body, must return a string with
   # the modified file contents to eject.
@@ -67,7 +67,7 @@ def project do
 end
 ```
 
-Given the above `mix.exs`, if you were to run `mix eject MyEjectableApp`:
+Given the above `mix.exs`, if you were to run `mix uniform.eject MyEjectableApp`:
 
 - `my_base_app` would be replaced with `my_ejectable_app`
 - `my-base-app` would be replaced with `my-ejectable-app`
@@ -118,45 +118,45 @@ To remove code unless the ejected app depends on a Lib Dependency called
 `my_lib`, wrap it in these comments:
 
 ```elixir
-# eject:lib:my_lib
+# uniform:lib:my_lib
 # ... code
-# /eject:lib:my_lib
+# /uniform:lib:my_lib
 ```
 
 To remove code unless the ejected app depends on a Mix Dependency called
 `absinthe`, wrap it in these comments:
 
 ```elixir
-# eject:mix:absinthe
+# uniform:mix:absinthe
 # ... code
-# /eject:mix:absinthe
+# /uniform:mix:absinthe
 ```
 
 To remove code unless the ejected app is called `MyApp`, wrap it in these
 comments:
 
 ```elixir
-# eject:app:my_app
+# uniform:app:my_app
 # ... code
-# /eject:app:my_app
+# /uniform:app:my_app
 ```
 
 Finally, to **always** remove a chunk of code whenever ejection happens, wrap
 it in these comments:
 
 ```elixir
-# eject:remove
+# uniform:remove
 # ... code
-# /eject:remove
+# /uniform:remove
 ```
 
 > #### Code Fence comments are removed on ejection {: .info}
 >
-> Note that regardless of whether `mix eject` keeps or deletes the code in a
-> code fence, the code fence comments themselves (like `# eject:app:my_app`)
+> Note that regardless of whether `mix uniform.eject` keeps or deletes the code in a
+> code fence, the code fence comments themselves (like `# uniform:app:my_app`)
 > are always removed.
 >
-> Furthermore, `mix eject` runs `mix format` on the ejected codebase at the
+> Furthermore, `mix uniform.eject` runs `mix format` on the ejected codebase at the
 > end. So you always end up with "clean" looking code.
 
 ### Code Fences for other languages
@@ -165,22 +165,22 @@ Code Fences are also processed for `.js`/`.ts`/`.jsx`/`.tsx` files using JS
 single-line comments.
 
 ```js
-// eject:lib:my_lib
+// uniform:lib:my_lib
 // ...
-// /eject:lib:my_lib
+// /uniform:lib:my_lib
 ```
 
 If you would like to support Code Fences for other languages or file types,
-you can do so using `Eject.Blueprint.modify/2` and `Eject.Modifiers.code_fences/3`.
+you can do so using `Uniform.Blueprint.modify/2` and `Uniform.Modifiers.code_fences/3`.
 
 ```elixir
 # code fences for SQL files
 modify ~r/\.sql$/, fn file, app ->
-  Eject.Modifiers.code_fences(file, app, "--")
+  Uniform.Modifiers.code_fences(file, app, "--")
 end
 
 # code fences for Rust files
 modify ~r/\.rs$/, fn file, app ->
-  Eject.Modifiers.code_fences(file, app, "//")
+  Uniform.Modifiers.code_fences(file, app, "//")
 end
 ```

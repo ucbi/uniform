@@ -1,13 +1,13 @@
-defmodule Eject.ModifiersTest do
-  use Eject.TestProjectCase
+defmodule Uniform.ModifiersTest do
+  use Uniform.TestProjectCase
 
-  alias Eject.{App, Modifiers, Manifest, Config}
+  alias Uniform.{App, Modifiers, Manifest, Config}
 
   setup do
     config = %Config{
       mix_project_app: :test,
       mix_project: TestProject.MixProject,
-      blueprint: TestProject.Eject.Blueprint
+      blueprint: TestProject.Uniform.Blueprint
     }
 
     manifest =
@@ -21,17 +21,17 @@ defmodule Eject.ModifiersTest do
     %{app: App.new!(config, manifest, CodeFenceApp)}
   end
 
-  test "eject:lib", %{app: app} do
+  test "uniform:lib", %{app: app} do
     output =
       Modifiers.elixir_code_fences(
         """
         defmodule Testing do
-          # eject:lib:included_lib
+          # uniform:lib:included_lib
           # Keep
-          # /eject:lib:included_lib
-          # eject:lib:excluded_lib
+          # /uniform:lib:included_lib
+          # uniform:lib:excluded_lib
           # Remove
-          # /eject:lib:excluded_lib
+          # /uniform:lib:excluded_lib
         end
         """,
         app
@@ -43,17 +43,17 @@ defmodule Eject.ModifiersTest do
     refute output =~ "eject"
   end
 
-  test "eject:mix", %{app: app} do
+  test "uniform:mix", %{app: app} do
     output =
       Modifiers.elixir_code_fences(
         """
         defmodule Testing do
-          # eject:mix:included_mix
+          # uniform:mix:included_mix
           # Keep
-          # /eject:mix:included_mix
-          # eject:mix:excluded_mix
+          # /uniform:mix:included_mix
+          # uniform:mix:excluded_mix
           # Remove
-          # /eject:mix:excluded_mix
+          # /uniform:mix:excluded_mix
         end
         """,
         app
@@ -65,7 +65,7 @@ defmodule Eject.ModifiersTest do
     refute output =~ "eject"
   end
 
-  test "eject:app", %{app: app} do
+  test "uniform:app", %{app: app} do
     # prime String.to_existing_atom
     :code_fence_app
     :another_app
@@ -74,12 +74,12 @@ defmodule Eject.ModifiersTest do
       Modifiers.elixir_code_fences(
         """
         defmodule Testing do
-          # eject:app:code_fence_app
+          # uniform:app:code_fence_app
           # Keep
-          # /eject:app:code_fence_app
-          # eject:app:another_app
+          # /uniform:app:code_fence_app
+          # uniform:app:another_app
           # Remove
-          # /eject:app:another_app
+          # /uniform:app:another_app
         end
         """,
         app
@@ -91,15 +91,15 @@ defmodule Eject.ModifiersTest do
     refute output =~ "eject"
   end
 
-  test "eject:remove", %{app: app} do
+  test "uniform:remove", %{app: app} do
     output =
       Modifiers.elixir_code_fences(
         """
         defmodule Testing do
           # Keep
-          # eject:remove
+          # uniform:remove
           # Remove
-          # /eject:remove
+          # /uniform:remove
         end
         """,
         app

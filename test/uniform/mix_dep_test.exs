@@ -1,4 +1,4 @@
-defmodule Eject.MixDepTest do
-  use Eject.TestProjectCase
-  doctest Eject.MixDep, import: true
+defmodule Uniform.MixDepTest do
+  use Uniform.TestProjectCase
+  doctest Uniform.MixDep, import: true
 end

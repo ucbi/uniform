@@ -1,23 +1,23 @@
-defmodule Eject.Config do
+defmodule Uniform.Config do
   @moduledoc false
 
   defstruct [:mix_project_app, :mix_project, :blueprint, :destination]
 
-  alias Eject.{LibDep, MixDep}
+  alias Uniform.{LibDep, MixDep}
 
   @typedoc """
   `mix_project_app` is the `:app` key of the keyword list returned by the `project`
   callback in `mix.exs`.
 
   `destination` is the default destination where ejectable apps will be
-  ejected, unless a destination is given to `mix eject`.
+  ejected, unless a destination is given to `mix uniform.eject`.
 
   ### Example
 
       %Config{
         mix_project_app: :my_app,
         mix_project: MyBaseApp.MixProject,
-        blueprint: MyBaseApp.Eject.Project,
+        blueprint: MyBaseApp.Uniform.Project,
         destination: "/Users/me/code"
       }
 
@@ -30,18 +30,18 @@ defmodule Eject.Config do
         }
 
   @doc """
-  Builds a `t:Eject.Config.t` struct from the current Mix project.
+  Builds a `t:Uniform.Config.t` struct from the current Mix project.
 
   To derive the `blueprint` and `destination` fields, looks for the following in config:
 
-        config :my_app, Eject, blueprint: SomeModule, destination: "..."
+        config :my_app, Uniform, blueprint: SomeModule, destination: "..."
 
   where `:my_app` is the value of the `:app` key in your Mix project specification in `mix.exs`.
   """
   @spec build :: t
   def build do
     mix_project_app = Keyword.fetch!(Mix.Project.config(), :app)
-    config = Application.get_env(mix_project_app, Eject)
+    config = Application.get_env(mix_project_app, Uniform)
 
     if is_nil(config[:blueprint]) do
       camelized =
@@ -50,15 +50,15 @@ defmodule Eject.Config do
         |> Macro.camelize()
 
       raise """
-      Eject configuration is missing. Run:
+      Uniform configuration is missing. Run:
 
-          mix eject.init
+          mix uniform.init
 
       Or add the following to config/config.exs.
 
-          config :#{mix_project_app}, Eject, blueprint: #{camelized}.Eject.Blueprint
+          config :#{mix_project_app}, Uniform, blueprint: #{camelized}.Uniform.Blueprint
 
-      (Change `#{camelized}.Eject.Blueprint` to the name of your Blueprint module.)
+      (Change `#{camelized}.Uniform.Blueprint` to the name of your Blueprint module.)
       """
     end
 
@@ -83,9 +83,9 @@ defmodule Eject.Config do
 
       Add the following to #{inspect(config[:blueprint])}.
 
-          use Eject.Blueprint, templates: "..."
+          use Uniform.Blueprint, templates: "..."
 
-      (Change `...` to your Eject templates directory.)
+      (Change `...` to your Uniform templates directory.)
 
       """
     end

@@ -1,4 +1,4 @@
-defmodule Eject.App do
+defmodule Uniform.App do
   @moduledoc """
   An App struct, representing an application to be ejected. See the [type
   definition](`t:t/0`) for more details.
@@ -7,10 +7,10 @@ defmodule Eject.App do
 
   This struct is available in the Blueprint module in these locations:
 
-  - `c:Eject.Blueprint.extra/1` callback
-  - `c:Eject.Blueprint.target_path/2` callback
-  - `Eject.Blueprint.base_files/1` macro
-  - `Eject.Blueprint.modify/2` macros
+  - `c:Uniform.Blueprint.extra/1` callback
+  - `c:Uniform.Blueprint.target_path/2` callback
+  - `Uniform.Blueprint.base_files/1` macro
+  - `Uniform.Blueprint.modify/2` macros
 
   In these callbacks and macros, you can make decisions about what to eject or
   how files should be modified using the `app`.
@@ -27,7 +27,7 @@ defmodule Eject.App do
   """
 
   alias __MODULE__
-  alias Eject.{Manifest, Config, LibDep, MixDep}
+  alias Uniform.{Manifest, Config, LibDep, MixDep}
 
   @derive {Inspect, except: [:internal]}
   defstruct [:internal, :name, :destination, :extra]
@@ -36,7 +36,7 @@ defmodule Eject.App do
     @moduledoc """
                A struct containing all dependencies associated with an ejectable app.
 
-               Intended to be attached to the `deps` field of `t:Eject.App.t/0`.
+               Intended to be attached to the `deps` field of `t:Uniform.App.t/0`.
 
                  - `:lib` – all included `%LibDeps{}`
                  - `:mix` – all included `%MixDeps{}`
@@ -48,7 +48,7 @@ defmodule Eject.App do
 
     defstruct [:lib, :mix, :included, :all]
 
-    alias Eject.{LibDep, MixDep, Manifest, Config}
+    alias Uniform.{LibDep, MixDep, Manifest, Config}
 
     @type t :: %__MODULE__{
             lib: %{LibDep.name() => LibDep.t()},
@@ -71,12 +71,12 @@ defmodule Eject.App do
   ## Example
 
   Note that the `extra` key contains everything you put in `extra` in
-  `eject.exs` for the given app. It also contains anything returned by
-  `c:Eject.Blueprint.extra/1`.
+  `uniform.exs` for the given app. It also contains anything returned by
+  `c:Uniform.Blueprint.extra/1`.
 
-      #Eject.App<
+      #Uniform.App<
         destination: "/Users/me/code/tweeter",
-        extra: [company: :fake_co, logo_file: "pixel", some_data: "from eject.exs"],
+        extra: [company: :fake_co, logo_file: "pixel", some_data: "from uniform.exs"],
         name: %{
           camel: "Tweeter",
           hyphen: "tweeter",
@@ -107,7 +107,7 @@ defmodule Eject.App do
 
            new!(config, manifest, Tweeter)
 
-           %Eject.App{
+           %Uniform.App{
              config: %Config{...},
              name: %{
                module: Tweeter,

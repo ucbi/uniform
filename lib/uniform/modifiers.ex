@@ -1,7 +1,7 @@
-defmodule Eject.Modifiers do
+defmodule Uniform.Modifiers do
   @moduledoc """
   Utilities for building code transformations with `modify` in your
-  `Eject.Blueprint` module.
+  `Uniform.Blueprint` module.
   """
 
   #
@@ -12,17 +12,17 @@ defmodule Eject.Modifiers do
        Given the contents of a mix.exs file and an `%App{}`,
        look for the following code fence that should be wrapping the mix deps:
 
-           # eject:deps
+           # uniform:deps
 
            ...
 
-           # /eject:deps
+           # /uniform:deps
 
        ...and filter out the deps that should not be included in this app.
        """ && false
   def remove_unused_mix_deps(file_contents, app) do
     file_contents
-    |> String.replace(~r/\n *# eject:deps(.+?)# \/eject:deps/s, fn deps ->
+    |> String.replace(~r/\n *# uniform:deps(.+?)# \/uniform:deps/s, fn deps ->
       deps
       |> Code.string_to_quoted!()
       |> Enum.filter(&(dep_name(&1) in app.internal.deps.included.mix))
@@ -45,35 +45,35 @@ defmodule Eject.Modifiers do
 
            some_code()
 
-           # eject:lib:foo_bar
+           # uniform:lib:foo_bar
            #
            # ... code that will be removed if the lib called foo_bar isn't included
            #
-           # /eject:lib:foo_bar
+           # /uniform:lib:foo_bar
 
            more_code()
 
-           # eject:mix:foo_bar
+           # uniform:mix:foo_bar
            #
            # ... code that will be removed if the mix dep called foo_bar isn't included
            #
-           # /eject:mix:foo_bar
+           # /uniform:mix:foo_bar
 
            more_code()
 
-           # eject:app:foo_bar
+           # uniform:app:foo_bar
            #
            # ... code that will be removed if the current app isn't called foo_bar
            #
-           # /eject:app:foo_bar
+           # /uniform:app:foo_bar
 
            more_code()
 
-           # eject:remove
+           # uniform:remove
            #
            # ... code that will always be removed upon ejection
            #
-           # /eject:remove
+           # /uniform:remove
 
        """ && false
   def elixir_code_fences(file_contents, app) do
@@ -96,25 +96,25 @@ defmodule Eject.Modifiers do
 
       # code fences for SQL files
       modify ~r/\.sql$/, fn file, app ->
-        Eject.Modifiers.code_fences(file, app, "--")
+        Uniform.Modifiers.code_fences(file, app, "--")
       end
 
       # code fences for Rust files
       modify ~r/\.rs$/, fn file, app ->
-        Eject.Modifiers.code_fences(file, app, "//")
+        Uniform.Modifiers.code_fences(file, app, "//")
       end
 
   """
-  @spec code_fences(String.t(), Eject.App.t(), String.t()) :: String.t()
+  @spec code_fences(String.t(), Uniform.App.t(), String.t()) :: String.t()
   def code_fences(file_contents, app, comment_prefix) do
     remove_regex =
       Regex.compile!(
-        "\n *#{comment_prefix} eject:remove.+?#{comment_prefix} \/eject:remove",
+        "\n *#{comment_prefix} uniform:remove.+?#{comment_prefix} \/uniform:remove",
         "s"
       )
 
     # A regex that detects code fences
-    "\n *#{comment_prefix} eject:(lib|mix|app):([a-z0-9_]+)(.+?)#{comment_prefix} \/eject:\\1:\\2"
+    "\n *#{comment_prefix} uniform:(lib|mix|app):([a-z0-9_]+)(.+?)#{comment_prefix} \/uniform:\\1:\\2"
     |> Regex.compile!("s")
     |> Regex.replace(
       file_contents,
@@ -146,7 +146,7 @@ defmodule Eject.Modifiers do
         ""
       end
     else
-      raise "Code fence '# eject:lib:#{dep_name} references a lib dependency that isn't a directory in lib/"
+      raise "Code fence '# uniform:lib:#{dep_name} references a lib dependency that isn't a directory in lib/"
     end
   end
 
@@ -158,7 +158,7 @@ defmodule Eject.Modifiers do
         ""
       end
     else
-      raise "Code fence '# eject:mix:#{dep_name} references a mix dependency that isn't in `deps` in mix.exs"
+      raise "Code fence '# uniform:mix:#{dep_name} references a mix dependency that isn't in `deps` in mix.exs"
     end
   end
 
