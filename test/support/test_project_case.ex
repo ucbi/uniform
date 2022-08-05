@@ -1,4 +1,4 @@
-defmodule Eject.TestProjectCase do
+defmodule Uniform.TestProjectCase do
   use ExUnit.CaseTemplate
 
   setup do

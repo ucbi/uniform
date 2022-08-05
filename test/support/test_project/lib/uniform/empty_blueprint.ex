@@ -1,3 +1,3 @@
-defmodule TestProject.Eject.EmptyBlueprint do
-  use Eject.Blueprint, templates: "templates"
+defmodule TestProject.Uniform.EmptyBlueprint do
+  use Uniform.Blueprint, templates: "templates"
 end

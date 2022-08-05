@@ -1,6 +1,6 @@
 # Alternative Models
 
-TODO: Compare and contrast the Eject System with
+TODO: Compare and contrast the Uniform System with
 
 - Umbrellas
 - Ponchos

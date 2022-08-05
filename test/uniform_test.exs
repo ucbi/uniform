@@ -1,7 +1,7 @@
-defmodule EjectTest do
-  use Eject.TestProjectCase
+defmodule UniformTest do
+  use Uniform.TestProjectCase
 
-  alias Eject.{Config, Manifest, App}
+  alias Uniform.{Config, Manifest, App}
 
   defp read!(path) do
     File.read!("../../ejected/tweeter/" <> path)
@@ -21,14 +21,14 @@ defmodule EjectTest do
     config = %Config{
       mix_project_app: :test_project,
       mix_project: TestProject.MixProject,
-      blueprint: TestProject.Eject.Blueprint,
+      blueprint: TestProject.Uniform.Blueprint,
       destination: "../../ejected"
     }
 
     manifest = %Manifest{lib_deps: [:included_lib]}
     app = App.new!(config, manifest, Tweeter)
 
-    Eject.eject(app)
+    Uniform.eject(app)
 
     # check for files that are always ejected (read! will crash if missing)
     read!("mix.lock")
@@ -78,12 +78,11 @@ defmodule EjectTest do
     assert file_exists?("priv/associated.txt")
 
     # when `only` option given, only ejects files matching an `only` entry
-    # (supported by both lib_deps() and options()[:ejected_app])
     assert file_exists?("lib/with_only/included.txt")
     refute file_exists?("lib/with_only/excluded.txt")
 
     # when `except` option given, does not eject files matching `except` entry
-    # (supported by both lib_deps() and options()[:ejected_app])
+    # (supported by both deps and app_lib_except/1)
     refute file_exists?("lib/included_lib/excluded.txt")
     refute file_exists?("lib/always_included_lib/excluded.txt")
     assert file_exists?("lib/tweeter/included.txt")
@@ -94,8 +93,8 @@ defmodule EjectTest do
     assert file_exists?("lib/tweeter_changed/lib_dir_changed.txt")
 
     # `preserve`d files are never cleared
-    # (note: TestProject.Eject.Blueprint specifies to preserve .gitignore)
-    Eject.clear_destination(app)
+    # (note: TestProject.Uniform.Blueprint specifies to preserve .gitignore)
+    Uniform.clear_destination(app)
     assert file_exists?(".gitignore")
   end
 
@@ -104,13 +103,13 @@ defmodule EjectTest do
     config = %Config{
       mix_project_app: :test_project,
       mix_project: TestProject.MixProject,
-      blueprint: TestProject.Eject.EmptyBlueprint,
+      blueprint: TestProject.Uniform.EmptyBlueprint,
       destination: "../../ejected"
     }
 
     manifest = %Manifest{}
     app = App.new!(config, manifest, Tweeter)
 
-    Eject.eject(app)
+    Uniform.eject(app)
   end
 end

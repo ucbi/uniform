@@ -1,16 +1,16 @@
-defmodule Eject.Manifest do
+defmodule Uniform.Manifest do
   @moduledoc """
-             A struct containing the `Eject` manifest for an app, parsed from `lib/<my_ejectable_app>/eject.exs`.
+             A struct containing the `Uniform` manifest for an app, parsed from `lib/<my_ejectable_app>/uniform.exs`.
 
-             The `eject.exs` manifest specifies required dependencies and configuration values:
+             The `uniform.exs` manifest specifies required dependencies and configuration values:
                - `mix_deps` - mix dependencies; each must exist in `mix.exs`.
                - `lib_deps` - lib dependencies; each must exist as a folder in `lib/`.
                - `extra` - additional key value pairs specific to the ejectable app. For 'global' values available
-                 to _all_ ejectable apps, use the `c:Eject.extra/1` callback implementation.
+                 to _all_ ejectable apps, use the `c:Uniform.extra/1` callback implementation.
 
              Required for each ejectable app.
 
-                 # Example `eject.exs`
+                 # Example `uniform.exs`
                  [
                    mix_deps: [:ex_aws_s3],
                    lib_deps: [:my_utilities],
@@ -30,9 +30,9 @@ defmodule Eject.Manifest do
 
   defstruct mix_deps: [], lib_deps: [], extra: []
 
-  alias Eject.{Config, LibDep, MixDep}
+  alias Uniform.{Config, LibDep, MixDep}
 
-  @typedoc "A struct containing the `Eject` manifest for an app."
+  @typedoc "A struct containing the `Uniform` manifest for an app."
   @type t :: %__MODULE__{
           mix_deps: [MixDep.name()],
           lib_deps: [LibDep.name()],
@@ -58,12 +58,12 @@ defmodule Eject.Manifest do
     if Enum.any?(missing_mix_deps) or Enum.any?(missing_lib_deps) do
       mix_dep_message =
         if Enum.any?(missing_mix_deps) do
-          "The following mix deps were specified in eject.exs but were not defined in the Project mix_deps function: #{Enum.join(missing_mix_deps, ", ")}\n"
+          "The following mix deps were specified in uniform.exs but were not defined in the Project mix_deps function: #{Enum.join(missing_mix_deps, ", ")}\n"
         end
 
       lib_dep_message =
         if Enum.any?(missing_lib_deps) do
-          "The following lib deps were specified in eject.exs but were not defined in the Project lib_deps function: #{Enum.join(missing_lib_deps, ", ")}"
+          "The following lib deps were specified in uniform.exs but were not defined in the Project lib_deps function: #{Enum.join(missing_lib_deps, ", ")}"
         end
 
       raise ArgumentError, message: "#{mix_dep_message}#{lib_dep_message}"
@@ -73,7 +73,7 @@ defmodule Eject.Manifest do
   end
 
   def new!(_config, _) do
-    raise "eject.exs should contain a keyword list"
+    raise "uniform.exs should contain a keyword list"
   end
 
   defp eval(app_name_underscore_case) do
@@ -83,7 +83,7 @@ defmodule Eject.Manifest do
       {manifest, _bindings} = Code.eval_file(manifest_path)
       manifest
     else
-      raise Eject.NotEjectableError, app_name: app_name_underscore_case
+      raise Uniform.NotEjectableError, app_name: app_name_underscore_case
     end
   end
 
@@ -93,11 +93,11 @@ defmodule Eject.Manifest do
   ### Example
 
       iex> manifest_path("my_app")
-      "lib/my_app/eject.exs"
+      "lib/my_app/uniform.exs"
 
   """
   @spec manifest_path(String.t() | atom) :: String.t()
   def manifest_path(app_name_underscore_case) do
-    "lib/#{app_name_underscore_case}/eject.exs"
+    "lib/#{app_name_underscore_case}/uniform.exs"
   end
 end

@@ -1,8 +1,8 @@
-defmodule Eject.ManifestTest do
-  use Eject.TestProjectCase
-  doctest Eject.Manifest, import: true
+defmodule Uniform.ManifestTest do
+  use Uniform.TestProjectCase
+  doctest Uniform.Manifest, import: true
 
-  alias Eject.{Manifest, Config}
+  alias Uniform.{Manifest, Config}
 
   test "new!/2 creates a new Manifest struct" do
     result =
@@ -10,14 +10,14 @@ defmodule Eject.ManifestTest do
         %Config{
           mix_project_app: :test,
           mix_project: TestProject.MixProject,
-          blueprint: TestProject.Eject.Blueprint
+          blueprint: TestProject.Uniform.Blueprint
         },
         mix_deps: [:included_mix],
         lib_deps: [:included_lib],
         extra: [foo: [bar: [baz: :qux]]]
       )
 
-    assert %Eject.Manifest{
+    assert %Uniform.Manifest{
              extra: [foo: [bar: [baz: :qux]]],
              lib_deps: [:included_lib],
              mix_deps: [:included_mix]
@@ -28,7 +28,7 @@ defmodule Eject.ManifestTest do
     config = %Config{
       mix_project_app: :test,
       mix_project: TestProject.MixProject,
-      blueprint: TestProject.Eject.Blueprint
+      blueprint: TestProject.Uniform.Blueprint
     }
 
     assert_raise ArgumentError, fn ->

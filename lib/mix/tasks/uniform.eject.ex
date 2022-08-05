@@ -1,4 +1,4 @@
-defmodule Mix.Tasks.Eject do
+defmodule Mix.Tasks.Uniform.Eject do
   @moduledoc """
   Ejects an [Ejectable App](how-it-works.html#what-is-an-ejectable-app) to a
   standalone code repository.
@@ -6,9 +6,9 @@ defmodule Mix.Tasks.Eject do
   ## Examples
 
   ```bash
-  $ mix eject Trillo
-  $ mix eject Tweeter --confirm
-  $ mix eject Hatmail --confirm --destination ../../new/dir
+  $ mix uniform.eject Trillo
+  $ mix uniform.eject Tweeter --confirm
+  $ mix uniform.eject Hatmail --confirm --destination ../../new/dir
   ```
 
   ## Command line options
@@ -21,14 +21,14 @@ defmodule Mix.Tasks.Eject do
 
   ## Ejection Step By Step
 
-  When you eject an app by running `mix eject MyApp`, the following happens:
+  When you eject an app by running `mix uniform.eject MyApp`, the following happens:
 
   1. The destination directory is created if it doesn't exist.
   2. All files and directories in the destination are deleted, except for `.git`,
     `_build`, and `deps`.
   3. All files in `lib/my_app` and `test/my_app` are copied to the destination.
-  4. All files specified in the [base_files](Eject.Blueprint.html#base_files/1) section of the
-     [Blueprint](`Eject.Blueprint`) are copied to the destination.
+  4. All files specified in the [base_files](Uniform.Blueprint.html#base_files/1) section of the
+     [Blueprint](`Uniform.Blueprint`) are copied to the destination.
   5. All [Lib Dependencies](dependencies.html#lib-dependencies) of the app are
     copied to the destination. This includes all of `lib/dep_name` and
     `test/dep_name` automatically.
@@ -44,7 +44,7 @@ defmodule Mix.Tasks.Eject do
   In step 7, running `mix format` tidies up things like chains of newlines that
   may appear from applying [Code Fences](code-transformations.html#code-fences).
   It also prevents you from having to think about code formatting in
-  [modify](Eject.Blueprint.html#modify/4).
+  [modify](Uniform.Blueprint.html#modify/2).
 
   """
 
@@ -52,7 +52,7 @@ defmodule Mix.Tasks.Eject do
 
   @doc false
   def run(args) do
-    sample_syntax = "   Syntax is:   mix eject AppName [--destination path] [--confirm]"
+    sample_syntax = "   Syntax is:   mix uniform.eject AppName [--destination path] [--confirm]"
 
     args
     |> OptionParser.parse!(strict: [destination: :string, confirm: :boolean])
@@ -66,7 +66,7 @@ defmodule Mix.Tasks.Eject do
         IO.puts(IO.ANSI.yellow())
         IO.puts("  Available apps:")
 
-        Eject.ejectables() |> Enum.each(&IO.puts("      #{&1}"))
+        Uniform.ejectables() |> Enum.each(&IO.puts("      #{&1}"))
 
       _unknown_options ->
         IO.puts("")
@@ -78,7 +78,7 @@ defmodule Mix.Tasks.Eject do
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   defp eject_app(app_name, opts) do
     app =
-      Eject.prepare(%{
+      Uniform.prepare(%{
         # credo:disable-for-next-line Credo.Check.Warning.UnsafeToAtom
         name: "Elixir" |> Module.concat(app_name),
         opts: opts
@@ -144,12 +144,12 @@ defmodule Mix.Tasks.Eject do
 
     if eject do
       IO.puts("")
-      Eject.eject(app)
+      Uniform.eject(app)
       IO.puts("✅ #{app.name.camel} ejected to #{app.destination}")
     end
   rescue
-    e in Eject.NotEjectableError ->
-      message = Eject.NotEjectableError.message(e)
+    e in Uniform.NotEjectableError ->
+      message = Uniform.NotEjectableError.message(e)
       IO.puts(IO.ANSI.yellow() <> message <> IO.ANSI.reset())
   end
 end

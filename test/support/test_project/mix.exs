@@ -11,7 +11,7 @@ defmodule TestProject.MixProject do
   end
 
   defp deps do
-    # eject:deps
+    # uniform:deps
     [
       {:included_mix, ">= 0.1.0"},
       {:excluded_mix, ">= 0.1.0"},
@@ -19,6 +19,6 @@ defmodule TestProject.MixProject do
       {:always_included_mix, ">= 0.1.0"}
     ]
 
-    # /eject:deps
+    # /uniform:deps
   end
 end

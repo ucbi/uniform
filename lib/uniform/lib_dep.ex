@@ -1,4 +1,4 @@
-defmodule Eject.LibDep do
+defmodule Uniform.LibDep do
   @moduledoc """
              A struct for a dependency within a sub folder in the `lib/` directory.
              """ && false
@@ -9,20 +9,10 @@ defmodule Eject.LibDep do
   @typedoc "The name of a `lib/` dependency."
   @type name :: atom
 
-  @typedoc """
-  Optional rules defining how to eject files from a `lib/` library.
-
-  ### Options
-
-  Each field in the `t:Eject.Rules.t/0` struct can be passed in this keyword list, which
-  are then used to build the struct itself. See `Eject.Rules` for more information.
-  """
-  @type file_rule :: keyword
-
   @type t :: %__MODULE__{
           name: name,
           always: boolean,
-          mix_deps: [Eject.MixDep.name()],
+          mix_deps: [Uniform.MixDep.name()],
           lib_deps: [name],
           only: nil | [String.t() | Regex.t()],
           except: nil | [String.t() | Regex.t()],
@@ -43,7 +33,7 @@ defmodule Eject.LibDep do
       ...>   except: [~r/regex-of-files-not-to-eject/],
       ...>   associated_files: ["priv/path/to/associated/file"],
       ...> })
-      %Eject.LibDep{
+      %Uniform.LibDep{
         always: true,
         associated_files: ["priv/path/to/associated/file"],
         except: [~r/regex-of-files-not-to-eject/],

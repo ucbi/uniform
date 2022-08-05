@@ -1,4 +1,4 @@
-defmodule Eject.Blueprint.BeforeCompile do
+defmodule Uniform.Blueprint.BeforeCompile do
   @moduledoc false
   defmacro __before_compile__(_env) do
     quote do
@@ -8,26 +8,26 @@ defmodule Eject.Blueprint.BeforeCompile do
   end
 end
 
-defmodule Eject.Blueprint do
+defmodule Uniform.Blueprint do
   @moduledoc ~S"""
   Defines the ejection blueprint for your project.
 
   When used, the blueprint expects the `:templates` option. For example, the blueprint:
 
       defmodule Blueprint do
-        use Eject.Blueprint, templates: "priv/eject-templates"
+        use Uniform.Blueprint, templates: "priv/uniform-templates"
       end
 
-  Would search for templates in the `priv/eject-templates` directory. See
+  Would search for templates in the `priv/uniform-templates` directory. See
   `template/2` for more information.
 
   ## The `base_files` Section
 
   The `base_files` section specifies files that should be ejected which aren't
-  in `lib/my_app`. (When running `mix eject MyApp`.)
+  in `lib/my_app`. (When running `mix uniform.eject MyApp`.)
 
       defmodule Blueprint do
-        use Eject.Blueprint, templates: "..."
+        use Uniform.Blueprint, templates: "..."
 
         base_files do
           file "my_main_app/application.ex"
@@ -36,12 +36,12 @@ defmodule Eject.Blueprint do
         end
       end
 
-  See `eject/2` for more information.
+  See `base_files/1` for more information.
 
   ## Files that are always ejected
 
   There are a handful of files that are automatically ejected. You do not need
-  to specify these in the `eject` section.
+  to specify these in the `base_files` section.
 
   ```bash
   mix.exs
@@ -53,11 +53,11 @@ defmodule Eject.Blueprint do
 
   ## The `deps` Section
 
-  Besides the `eject` section, the blueprint can also contain a `deps` section to
+  Besides the `base_files` section, the blueprint can also contain a `deps` section to
   configure dependencies.
 
       defmodule Blueprint do
-        use Eject.Blueprint, templates: "..."
+        use Uniform.Blueprint, templates: "..."
 
         deps do
           always do
@@ -80,7 +80,7 @@ defmodule Eject.Blueprint do
   or use a regex to match multiple files.
 
       defmodule Blueprint do
-        use Eject.Blueprint, templates: "..."
+        use Uniform.Blueprint, templates: "..."
 
         modify "assets/js/app.js", fn file, app ->
           String.replace(file, "SOME_VALUE_PER_APP", app.extra[:some_value])
@@ -92,7 +92,7 @@ defmodule Eject.Blueprint do
 
   ## Preserving files
 
-  Whenever running `mix eject`, the contents in the destination directory will
+  Whenever running `mix uniform.eject`, the contents in the destination directory will
   be deleted except for the `.git`, `deps`, and `_build` directories.
 
   If there are any other files or directories *in the project's root folder*
@@ -108,13 +108,13 @@ defmodule Eject.Blueprint do
 
   Below is an example `Blueprint` module that shows off a majority of the features that can be used.
 
-      defmodule MyApp.Eject.Blueprint do
-        use Eject.Blueprint, templates: "lib/eject/templates"
+      defmodule MyApp.Uniform.Blueprint do
+        use Uniform.Blueprint, templates: "lib/uniform/templates"
 
         # do not delete this root file when clearing the destination
         @preserve [".env"]
 
-        @impl Eject.Blueprint
+        @impl Uniform.Blueprint
         def extra(app) do
           theme =
             case app.name.underscore do
@@ -126,7 +126,7 @@ defmodule Eject.Blueprint do
           [theme: theme]
         end
 
-        @impl Eject.Blueprint
+        @impl Uniform.Blueprint
         def target_path(path, app) do
           if is_web_file?(path) do
             # modify the path to put it in `lib/some_app_web`
@@ -147,7 +147,7 @@ defmodule Eject.Blueprint do
           file "priv/static/#{app.extra[:theme]}-favicon.ico"
           file "lib/my_app_web.ex"
 
-          # eject a file from an EEx template at "lib/eject/templates/config/runtime.exs.eex"
+          # eject a file from an EEx template at "lib/uniform/templates/config/runtime.exs.eex"
           # configure the templates directory on line 2
           template "config/runtime.exs"
 
@@ -172,7 +172,7 @@ defmodule Eject.Blueprint do
         # configure dependencies from mix.exs and `lib/`
         deps do
           # always eject the dependencies in the `always` section;
-          # don't require adding them to eject.exs
+          # don't require adding them to uniform.exs
           always do
             lib :my_app do
               # only eject the following files in `lib/my_app`
@@ -219,8 +219,8 @@ defmodule Eject.Blueprint do
   """
 
   @doc """
-  A hook to add more data to `app.extra`, beyond what's in the [Eject Manifest
-  file](./Eject.html#module-the-eject-manifest-eject-exs).
+  A hook to add more data to `app.extra`, beyond what's in the [Uniform Manifest
+  file](./getting-started.html#add-uniform-manifests).
 
   ## Example
 
@@ -240,7 +240,7 @@ defmodule Eject.Blueprint do
       end
 
   """
-  @callback extra(app :: Eject.App.t()) :: keyword
+  @callback extra(app :: Uniform.App.t()) :: keyword
 
   @doc ~S"""
   Use this callback to modify the path of ejected files. It will be called for
@@ -269,13 +269,13 @@ defmodule Eject.Blueprint do
       end
 
   """
-  @callback target_path(path :: Path.t(), app :: Eject.App.t()) :: Path.t()
+  @callback target_path(path :: Path.t(), app :: Uniform.App.t()) :: Path.t()
 
   @doc ~S"""
   This callback works like the `except/1` instruction for Lib Dependencies,
   except that it applies to the `lib` folder of the ejected app itself.
 
-  When running `mix eject MyApp`, any files in `lib/my_app` or `test/my_app`
+  When running `mix uniform.eject MyApp`, any files in `lib/my_app` or `test/my_app`
   which match the paths or regexes returned by `app_lib_except` will **not** be
   ejected.
 
@@ -284,33 +284,33 @@ defmodule Eject.Blueprint do
       end
 
   """
-  @callback app_lib_except(app :: Eject.App.t()) :: [Path.t() | Regex.t()]
+  @callback app_lib_except(app :: Uniform.App.t()) :: [Path.t() | Regex.t()]
 
   @optional_callbacks extra: 1, target_path: 2, app_lib_except: 1
 
   @doc """
        A macro for defining an ejection blueprint.
 
-       The required `templates` path points to the EEx templates used by `Eject`.
+       The required `templates` path points to the EEx templates used by `Uniform`.
 
        ### Examples
 
-           defmodule MyBaseApp.Eject.Project do
-             use Eject.Blueprint, templates: "lib/my_base_app/eject/templates"
+           defmodule MyBaseApp.Uniform.Project do
+             use Uniform.Blueprint, templates: "lib/my_base_app/uniform/templates"
 
        """ && false
   defmacro __using__(opts) do
     templates = opts[:templates]
 
     quote do
-      @behaviour Eject.Blueprint
-      @before_compile Eject.Blueprint.BeforeCompile
+      @behaviour Uniform.Blueprint
+      @before_compile Uniform.Blueprint.BeforeCompile
 
       # default value of @preserve
       @preserve []
 
-      import Eject.Blueprint, only: [modify: 2, deps: 1, base_files: 1]
-      import Eject.App, only: [depends_on?: 3]
+      import Uniform.Blueprint, only: [modify: 2, deps: 1, base_files: 1]
+      import Uniform.App, only: [depends_on?: 3]
 
       def __template_dir__, do: unquote(templates)
 
@@ -353,7 +353,7 @@ defmodule Eject.Blueprint do
       end
 
   If the function is 1-arity, it will receive the file contents. If it's
-  2-arity, it will receive the file contents and the `Eject.App` struct.
+  2-arity, it will receive the file contents and the `Uniform.App` struct.
 
   ## Examples
 
@@ -374,7 +374,8 @@ defmodule Eject.Blueprint do
   @spec modify(
           pattern :: Path.t() | Regex.t(),
           fun ::
-            (file :: String.t(), Eject.App.t() -> String.t()) | (file :: String.t() -> String.t())
+            (file :: String.t(), Uniform.App.t() -> String.t())
+            | (file :: String.t() -> String.t())
         ) :: term
   defmacro modify(path_or_regex, {:fn, _, _} = fun) do
     # anonymous functions cannot be saved into module attributes, so create a
@@ -382,7 +383,7 @@ defmodule Eject.Blueprint do
     fn_name = String.to_atom("__modify_line_#{__CALLER__.line}__")
 
     quote do
-      Eject.Blueprint.validate_path_or_regex!(unquote(path_or_regex))
+      Uniform.Blueprint.validate_path_or_regex!(unquote(path_or_regex))
 
       Module.put_attribute(
         __MODULE__,
@@ -403,7 +404,7 @@ defmodule Eject.Blueprint do
 
   defmacro modify(path_or_regex, {:&, _, _} = fun) do
     quote do
-      Eject.Blueprint.validate_path_or_regex!(unquote(path_or_regex))
+      Uniform.Blueprint.validate_path_or_regex!(unquote(path_or_regex))
       Module.put_attribute(__MODULE__, :modifiers, {unquote(path_or_regex), unquote(fun)})
     end
   end
@@ -463,7 +464,7 @@ defmodule Eject.Blueprint do
   app's `lib/my_app` and `test/my_app` directories which should always be
   ejected.
 
-  This section has access to an [`app`](`t:Eject.App.t/0`) variable which can
+  This section has access to an [`app`](`t:Uniform.App.t/0`) variable which can
   be used to build the instructions or conditionally include certain files with
   `if`.
 
@@ -513,7 +514,7 @@ defmodule Eject.Blueprint do
         file "lib/my_lib/some_file.ex"
       end
 
-      # ✅ Instead, do this (lib/my_app/eject.exs)
+      # ✅ Instead, do this (lib/my_app/uniform.exs)
       [
         lib_deps: [:my_lib]
       ]
@@ -556,9 +557,9 @@ defmodule Eject.Blueprint do
 
     quote do
       try do
-        import Eject.Blueprint, except: [eject: 1, only: 1]
+        import Uniform.Blueprint, except: [base_files: 1, only: 1]
 
-        def __eject__(unquote(app)),
+        def __base_files__(unquote(app)),
           do: unquote(items) |> List.flatten() |> Enum.reject(&is_nil/1)
       after
         :ok
@@ -571,7 +572,7 @@ defmodule Eject.Blueprint do
   #
 
   @doc """
-  Eject automatically catalogs all Mix deps by looking into `mix.exs` to discover all Mix deps.
+  Uniform automatically catalogs all Mix deps by looking into `mix.exs` to discover all Mix deps.
   It also catalogs all Lib deps by scanning the `lib/` directory.
 
   If you need to configure anything about a Mix or Lib dep, such as other dependencies
@@ -606,7 +607,7 @@ defmodule Eject.Blueprint do
     prelude =
       quote do
         try do
-          import Eject.Blueprint, only: [lib: 1, lib: 2, mix: 1, mix: 2, always: 1]
+          import Uniform.Blueprint, only: [lib: 1, lib: 2, mix: 1, mix: 2, always: 1]
           @deps_always_block false
           unquote(block)
         after
@@ -656,16 +657,16 @@ defmodule Eject.Blueprint do
   end
 
   @doc """
-  Eject considers all directories in the project root's `lib/` directory
+  Uniform considers all directories in the project root's `lib/` directory
   to be "lib dependencies".
 
-  Since Eject is aware of all lib dependencies in `lib/`, you don't need to
+  Since Uniform is aware of all lib dependencies in `lib/`, you don't need to
   tell it about them.
 
   However, there are a few scenarios where you do need to list them in your `Blueprint` module:
 
   1. Specifying which lib dependencies should _always_ be ejected. (See
-  `Eject.Blueprint.always/1`.)
+  `Uniform.Blueprint.always/1`.)
   2. To specify that a lib dependency has other mix or lib dependencies. (I.e.
   Other mix packages or lib directories should always be ejected along with
   it.)
@@ -676,7 +677,7 @@ defmodule Eject.Blueprint do
   >
   > To eject a lib dependency with a specific app (but not all), make sure to
   > put it in the app's
-  > [Eject Manifest file](./Eject.html#module-the-eject-manifest-eject-exs),
+  > [Uniform Manifest file](./getting-started.html#add-uniform-manifests),
   > or make it a `lib_dependency` of another dependency in the Manifest.
 
   ## Examples
@@ -692,7 +693,7 @@ defmodule Eject.Blueprint do
           end
         end
 
-        # If eject.exs says to include sso_auth, then `lib/sso_auth` will be copied
+        # If uniform.exs says to include sso_auth, then `lib/sso_auth` will be copied
         # along with `lib/other_utilities`. However, `some_file.ex` will never be
         # included. Also, the tesla mix dep will be included.
         lib :sso_auth do
@@ -712,7 +713,7 @@ defmodule Eject.Blueprint do
   Sometimes, when a Lib Dependency is ejected with an app, there are other
   files outside of `lib/that_library` which should also be ejected.
 
-  In this scenario, you can use these instructions used in `eject/2` to denote
+  In this scenario, you can use these instructions used in `base_files/1` to denote
   them.
 
   - `file/2`
@@ -738,8 +739,8 @@ defmodule Eject.Blueprint do
 
     quote do
       try do
-        import Eject.Blueprint
-        Eject.Blueprint.__lib__(__MODULE__, unquote(name), unquote(opts), @deps_always_block)
+        import Uniform.Blueprint
+        Uniform.Blueprint.__lib__(__MODULE__, unquote(name), unquote(opts), @deps_always_block)
       after
         :ok
       end
@@ -749,7 +750,7 @@ defmodule Eject.Blueprint do
   @doc false
   defmacro lib(name) do
     quote do
-      Eject.Blueprint.__lib__(__MODULE__, unquote(name), [], @deps_always_block)
+      Uniform.Blueprint.__lib__(__MODULE__, unquote(name), [], @deps_always_block)
     end
   end
 
@@ -769,7 +770,7 @@ defmodule Eject.Blueprint do
       end)
 
     lib_dep =
-      Eject.LibDep.new!(%{
+      Uniform.LibDep.new!(%{
         name: name,
         lib_deps: opts |> Keyword.get(:lib_deps, []) |> List.wrap(),
         mix_deps: opts |> Keyword.get(:mix_deps, []) |> List.wrap(),
@@ -783,13 +784,13 @@ defmodule Eject.Blueprint do
   end
 
   @doc """
-  Since Eject is aware of all mix dependencies in `mix.exs`, you don't need to
+  Since Uniform is aware of all mix dependencies in `mix.exs`, you don't need to
   tell it about them.
 
   However, there are two scenarios where you do need to list out mix dependencies:
 
   1. Specifying which mix dependencies should _always_ be ejected. (See
-  `Eject.Blueprint.always/1`.)
+  `Uniform.Blueprint.always/1`.)
   2. Whenever a mix dependency has other mix dependencies. (I.e. Other mix
   packages should always be ejected with it.)
 
@@ -797,8 +798,8 @@ defmodule Eject.Blueprint do
   >
   > To eject a mix dependency with a specific app (but not all), make sure to
   > include it as a dependency of lib dependencies (see `lib/2`) or put it in the
-  > app's [Eject Manifest
-  > file](./Eject.html#module-the-eject-manifest-eject-exs).
+  > app's [Uniform Manifest
+  > file](./getting-started.html#add-uniform-manifests).
 
   ### Examples
 
@@ -825,8 +826,8 @@ defmodule Eject.Blueprint do
 
     quote do
       try do
-        import Eject.Blueprint, only: [mix_deps: 1]
-        Eject.Blueprint.__mix__(__MODULE__, unquote(name), unquote(opts), @deps_always_block)
+        import Uniform.Blueprint, only: [mix_deps: 1]
+        Uniform.Blueprint.__mix__(__MODULE__, unquote(name), unquote(opts), @deps_always_block)
       after
         :ok
       end
@@ -836,14 +837,14 @@ defmodule Eject.Blueprint do
   @doc false
   defmacro mix(name) do
     quote do
-      Eject.Blueprint.__mix__(__MODULE__, unquote(name), [], @deps_always_block)
+      Uniform.Blueprint.__mix__(__MODULE__, unquote(name), [], @deps_always_block)
     end
   end
 
   @doc false
   def __mix__(mod, name, opts, always) when is_atom(name) and is_list(opts) do
     mix_dep =
-      Eject.MixDep.new!(%{
+      Uniform.MixDep.new!(%{
         name: name,
         always: always,
         mix_deps: opts |> Keyword.get(:mix_deps, []) |> List.wrap()
@@ -859,7 +860,7 @@ defmodule Eject.Blueprint do
   defmacro lib_deps(deps), do: {:lib_deps, List.wrap(deps)}
 
   @doc """
-  In `eject` and `lib` blocks, `file` is used to specify **files that are not
+  In `base_files` and `lib` blocks, `file` is used to specify **files that are not
   in a `lib/` directory** which should be ejected in the app or along with the
   lib.
 
@@ -896,18 +897,18 @@ defmodule Eject.Blueprint do
   def file(path, opts \\ []), do: {:text, {path, opts}}
 
   @doc """
-  In `eject` and `lib` blocks, `template` is used to specify EEx templates that
+  In `base_files` and `lib` blocks, `template` is used to specify EEx templates that
   should be rendered and then ejected.
 
   ## Template Directory and Destination Path
 
-  Eject templates use a "convention over configuration" model
+  Uniform templates use a "convention over configuration" model
   that works like this:
 
   1. At the top of your `Blueprint` module, you specify a template directory
   like this:
 
-      `use Eject, templates: "lib/eject/templates"`
+      `use Uniform, templates: "lib/uniform/templates"`
 
   2. Templates must be placed in this directory at the relative path
   that they should be placed in, in the ejected directory.
@@ -927,10 +928,10 @@ defmodule Eject.Blueprint do
 
   ## Examples
 
-      use Eject, templates: "priv/eject-templates"
+      use Uniform, templates: "priv/uniform-templates"
 
       base_files do
-        # priv/eject-templates/config/runtime.exs.eex will be rendered, and the
+        # priv/uniform-templates/config/runtime.exs.eex will be rendered, and the
         # result will be placed in `config/runtime.exs` in every ejected app
         template "config/runtime.exs"
       end
@@ -938,7 +939,7 @@ defmodule Eject.Blueprint do
       deps do
         lib :datadog do
           # for every app that includes `lib/datadog`,
-          # priv/eject-templates/datadog/prerun.sh.eex will be rendered, and
+          # priv/uniform-templates/datadog/prerun.sh.eex will be rendered, and
           # the result will be placed in `datadog/prerun.sh`
           template "datadog/prerun.sh", chmod: 0o555
         end

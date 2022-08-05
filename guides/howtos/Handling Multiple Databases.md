@@ -1,10 +1,10 @@
 # Handling Multiple Databases
 
-> This guide assumes that you're familiar with [The Eject
+> This guide assumes that you're familiar with [The Uniform
 > System](how-it-works.html) and have gone through the [Getting
 > Started](#getting-started.html) guide.
 
-If you're using The Eject System it's likely that you have multiple Repos for
+If you're using The Uniform System it's likely that you have multiple Repos for
 multiple databases, but you only want to give access for a given database to
 some of your apps.
 
@@ -17,28 +17,28 @@ and [Context](https://hexdocs.pm/phoenix/contexts.html) modules related to its
 database.
 
 Structuring the code this way allows you to easily include or exclude the code
-for a data source in [eject.exs](how-it-works.html#eject-exs-options).
+for a data source in [uniform.exs](how-it-works.html#uniform-exs-options).
 
 ## An Example
 
-For example, given apps with these `eject.exs` manifests
+For example, given apps with these `uniform.exs` manifests
 
 ```elixir
-# lib/some_app/eject.exs
+# lib/some_app/uniform.exs
 [
   lib_deps: [:my_data_source]
 ]
 ```
 
 ```elixir
-# lib/another_app/eject.exs
+# lib/another_app/uniform.exs
 [
   lib_deps: [:my_data_source, :other_data_source]
 ]
 ```
 
 ```elixir
-# lib/third_app/eject.exs
+# lib/third_app/uniform.exs
 [
   lib_deps: [:other_data_source]
 ]
@@ -50,7 +50,7 @@ For example, given apps with these `eject.exs` manifests
 
 ## Configuring Lib Dependencies
 
-If you take this approach, make sure to configure your [Blueprint](`Eject.Blueprint`) module
+If you take this approach, make sure to configure your [Blueprint](`Uniform.Blueprint`) module
 to include any Lib or Mix Dependencies of each data source's library. Also, be sure
 to include migrations and seeds related to the library.
 
