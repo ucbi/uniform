@@ -127,11 +127,10 @@ defmodule Mix.Tasks.Eject do
 
     unless Keyword.get(opts, :confirm) == true do
       IO.puts("")
-      IO.puts("")
 
       IO.puts(
         IO.ANSI.yellow() <>
-          "    ⚠️  Warning: the destination directory and all contents will be deleted" <>
+          "    ⚠️  Warning: contents of the destination directory will be deleted" <>
           IO.ANSI.reset()
       )
     end
@@ -148,5 +147,9 @@ defmodule Mix.Tasks.Eject do
       Eject.eject(app)
       IO.puts("✅ #{app.name.camel} ejected to #{app.destination}")
     end
+  rescue
+    e in Eject.NotEjectableError ->
+      message = Eject.NotEjectableError.message(e)
+      IO.puts(IO.ANSI.yellow() <> message <> IO.ANSI.reset())
   end
 end
