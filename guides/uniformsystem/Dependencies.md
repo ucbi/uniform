@@ -21,6 +21,19 @@ in the [Blueprint](Uniform.Blueprint.html) module as `:utilities`.
 Uniform is aware of the deps in your `mix.exs`. Whenever an app is ejected, it
 removes all mix dependencies that aren't explicitly needed by the app.
 
+This is accomplished by wrapping your list of dependencies in the following
+comments:
+
+```elixir
+defp deps do
+  # uniform:deps
+  [
+    ...
+  ]
+  # /uniform:deps
+end
+```
+
 ## Adding Dependencies to an App
 
 There are three methods to specify which Lib and Mix dependencies are required
