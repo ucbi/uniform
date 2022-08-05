@@ -71,8 +71,17 @@ precedence and overrides both of these behaviors.
 
 Designate all `lib` directories that represent an [Ejectable
 App](how-it-works.html#what-is-an-ejectable-app) by placing an `eject.exs`
-manifest file into each directory. You can start with a barebones manifest that
-contains an empty list.
+manifest file into each directory.
+
+You can do so with `mix eject.gen.app`, which creates an empty manifest
+containing code comments to help you start.
+
+```bash
+mix eject.gen.app my_application_name
+```
+
+Or, if you want to do this manually, you can start with a barebones manifest
+that contains an empty list.
 
 ```elixir
 # lib/my_application_name/eject.exs
@@ -93,7 +102,7 @@ Once you start structuring your project for the Eject System, you'll add
 > #### More on eject.exs {: .info}
 >
 > See [eject.exs Options](./how-it-works.html#eject-exs-options)
-> for an exblueprintation of supported options.
+> for an explanation of supported options.
 
 ## Ejecting an Application
 
