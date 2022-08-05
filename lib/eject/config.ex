@@ -50,14 +50,15 @@ defmodule Eject.Config do
         |> Macro.camelize()
 
       raise """
-      Eject configuration is missing.
+      Eject configuration is missing. Run:
 
-      Add the following to config/config.exs.
+          mix eject.init
+
+      Or add the following to config/config.exs.
 
           config :#{mix_project_app}, Eject, blueprint: #{camelized}.Eject.Blueprint
 
       (Change `#{camelized}.Eject.Blueprint` to the name of your Blueprint module.)
-
       """
     end
 
