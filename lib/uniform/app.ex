@@ -34,16 +34,19 @@ defmodule Uniform.App do
 
   defmodule Deps do
     @moduledoc """
-               A struct containing all dependencies associated with an ejectable app.
+                          A struct containing all dependencies associated with an ejectable app.
 
-               Intended to be attached to the `deps` field of `t:Uniform.App.t/0`.
+                          Intended to be attached to the `deps` field of
+                          `t:Uniform.App.t/0`.
 
-                 - `:lib` – all included `%LibDeps{}`
-                 - `:mix` – all included `%MixDeps{}`
-                 - `:included` – all included lib and mix deps as atom names (same as pulling keys from above structs)
-                 - `:all` – *all* mix and lib dep names that _could_ be included in an
-                   app. The `all` field helps identify and warn on references to mix or
-                   lib deps that are not in `mix.exs` or `lib/`.
+                            - `:lib` – all included `%LibDeps{}`
+                            - `:mix` – all included `%MixDeps{}`
+                            - `:included` – all included lib and mix deps as atom names
+                              (same as pulling keys from above structs)
+                            - `:all` – *all* mix and lib dep names that _could_ be
+                              included in an app. The `all` field helps identify and warn on
+                              references to mix or lib deps that are not in `mix.exs` or
+                              `lib/`.
                """ && false
 
     defstruct [:lib, :mix, :included, :all]

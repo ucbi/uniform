@@ -38,16 +38,17 @@ of applications that have many similarities or could share many capabilities.
   control of an ejected application to another entity such as a different
   development agency, the ejected codebase is already ready as a standalone
   project.
-- **Self-healing properties.** - Since `mix uniform.eject` starts by deleting the
-  contents of the destination codebase, it's possible to modify an ejected
+- **Self-healing properties.** - Since `mix uniform.eject` starts by deleting
+  the contents of the destination codebase, it's possible to modify an ejected
   codebase temporarily, and then "bring it back in sync" with your Base Project
-  by running `mix uniform.eject` again. Ejecting an app with `mix uniform.eject` is meant to be
-  something that can be done over and over without preparation or ceremony.
+  by running `mix uniform.eject` again. Ejecting an app with `mix
+  uniform.eject` is meant to be something that can be done over and over
+  without preparation or ceremony.
 
 ## Disadvantages
 
-- **Novelty.** When new developers join the team, contributors have to learn
-  a new way of working.
+- **Novelty.** When new developers join the team, contributors have to learn a
+  new way of working.
 - **No contributing to ejected codebases.** Changes made directly to an ejected
   codebase cannot be automatically integrated back into the Base Project, so
   contributors must have access to the entire portfolio.

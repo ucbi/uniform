@@ -2,8 +2,8 @@
 
 ## Add Uniform to mix.exs
 
-Add `:uniform` as a dependency in `mix.exs` and wrap your entire dependency list in
-`# uniform:deps` and `# /uniform:deps` comments, like this.
+Add `:uniform` as a dependency in `mix.exs` and wrap your entire dependency
+list in `# uniform:deps` and `# /uniform:deps` comments, like this.
 
 
 ```elixir
@@ -31,9 +31,9 @@ following the steps below.
 
 ### Create a Blueprint module
 
-Next, create a [Blueprint](Uniform.Blueprint.html) module. It will contain all of
-the details for how `mix uniform.eject` should behave whenever you tell it to eject a
-specific application.
+Next, create a [Blueprint](Uniform.Blueprint.html) module. It will contain all
+of the details for how `mix uniform.eject` should behave whenever you tell it
+to eject a specific application.
 
 ```elixir
 defmodule MyApp.Uniform.Blueprint do
@@ -42,13 +42,13 @@ end
 ```
 
 You can name the module whatever you like, but we suggest putting it in
-`lib/my_app/uniform/blueprint.ex` and specifying the templates directory alongside it
-in `lib/my_app/uniform/templates`.
+`lib/my_app/uniform/blueprint.ex` and specifying the templates directory
+alongside it in `lib/my_app/uniform/templates`.
 
 ### Configuration
 
-In `config/config.exs` put the following line. (Changing the `blueprint` value to
-match the name of your Blueprint module name above.)
+In `config/config.exs` put the following line. (Changing the `blueprint` value
+to match the name of your Blueprint module name above.)
 
 ```elixir
 config :my_app, Uniform, blueprint: MyApp.Uniform.Blueprint
@@ -101,8 +101,8 @@ Once you start structuring your project for the Uniform System, you'll add
 
 > #### More on uniform.exs {: .info}
 >
-> See [uniform.exs Options](./how-it-works.html#uniform-exs-options)
-> for an explanation of supported options.
+> See [uniform.exs Options](./how-it-works.html#uniform-exs-options) for an
+> explanation of supported options.
 
 ## Ejecting an Application
 
@@ -119,10 +119,12 @@ This leads us to the final step of **Building a Blueprint**.
 
 ## Build the Blueprint
 
-> Read the documentation for [Uniform.Blueprint](Uniform.Blueprint.html) for the full range
-> of features to build out your Blueprint module.
+> Read the documentation for [Uniform.Blueprint](Uniform.Blueprint.html) for
+> the full range of features to build out your Blueprint module.
 
-Since each Elixir application is different, **it is up to you to determine which files need to be ejected** to make `mix uniform.eject` emit a working application.
+Since each Elixir application is different, **it is up to you to determine
+which files need to be ejected** to make `mix uniform.eject` emit a working
+application.
 
 > #### Using Phoenix? {: .tip}
 >

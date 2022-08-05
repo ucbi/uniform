@@ -80,11 +80,11 @@ base_files do
 end
 ```
 
-In the [base_files](Uniform.Blueprint.html#base_files/1) section, we specify files that should _always_
-be ejected in every app. Phoenix apps will typically have CSS and JS assets in
-the `assets` directory. They'll also have static files to be served as-is in
-`priv/static`. Some of these files are binary (non-text) files, and we assume
-none of them need to pass through the [Code
+In the [base_files](Uniform.Blueprint.html#base_files/1) section, we specify
+files that should _always_ be ejected in every app. Phoenix apps will typically
+have CSS and JS assets in the `assets` directory. They'll also have static
+files to be served as-is in `priv/static`. Some of these files are binary
+(non-text) files, and we assume none of them need to pass through the [Code
 Transformation](code-transformations.html) phase. That's why the first two
 lines are included.
 
@@ -93,20 +93,20 @@ cp_r "assets"
 cp_r "priv/static"
 ```
 
-Note that `cp_r` instructs `mix uniform.eject` to copy all the directory contents
-(using `File.cp_r!/3`).
+Note that `cp_r` instructs `mix uniform.eject` to copy all the directory
+contents (using `File.cp_r!/3`).
 
 Phoenix apps typically have an `Web` module which is used to construct
-Controllers, Views, Routers, and LiveViews. Since this file is typically
-in `lib/` directly (and not in a sub-directory of `lib/`), we include it
-here in the `base_files` section.
+Controllers, Views, Routers, and LiveViews. Since this file is typically in
+`lib/` directly (and not in a sub-directory of `lib/`), we include it here in
+the `base_files` section.
 
 ```elixir
 file "lib/my_base_app_web.ex"
 ```
 
-We also proceed with the assumption that the ejected app will need the
-Base Project's configuration files.
+We also proceed with the assumption that the ejected app will need the Base
+Project's configuration files.
 
 ```elixir
 file Path.wildcard("config/**/*.exs")
@@ -115,9 +115,9 @@ file Path.wildcard("config/**/*.exs")
 ## The `deps` section
 
 In the `deps` section, we put both `lib :my_base_app` and `lib
-:my_base_app_web` inside `always do` so that their contents are
-always ejected without having to specify `lib_deps: [:my_base_app,
-:my_base_app_web]` in the `uniform.exs` manifest of every app.
+:my_base_app_web` inside `always do` so that their contents are always ejected
+without having to specify `lib_deps: [:my_base_app, :my_base_app_web]` in the
+`uniform.exs` manifest of every app.
 
 ```elixir
 deps do
@@ -179,7 +179,8 @@ end
 ## The Phoenix Router
 
 A simple way to set up your `Phoenix.Router` is to use [Code
-Fences](code-transformations.html#code-fences) and `Uniform.Blueprint.modify/2`.
+Fences](code-transformations.html#code-fences) and
+`Uniform.Blueprint.modify/2`.
 
 Routes for all of your apps are all placed in the router, with two caveats:
 
@@ -293,7 +294,8 @@ Your `Application` file at `lib/my_base_app/application.ex` is a critical piece
 of Elixir applications since it's used to start processes and supervisors at
 the start of the application.
 
-Here's what an example `Application` file would look like with Code Fences applied.
+Here's what an example `Application` file would look like with Code Fences
+applied.
 
 ```elixir
 defmodule MyBaseApp.Application do

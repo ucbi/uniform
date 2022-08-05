@@ -1,8 +1,8 @@
 defmodule Uniform do
   @moduledoc """
-  The Uniform System is an architecture for maintaining multiple Elixir apps from
-  a single Elixir project in a way that minimizes duplicate work and maximizes
-  sharing capabilities.
+  The Uniform System is an architecture for maintaining multiple Elixir apps
+  from a single Elixir project in a way that minimizes duplicate work and
+  maximizes sharing capabilities.
 
   It's like a monolith. But unlike a monolith, the apps can be "ejected" into
   separate codebases that only contain the code needed by each app.
