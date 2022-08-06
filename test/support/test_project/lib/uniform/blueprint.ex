@@ -39,6 +39,8 @@ defmodule TestProject.Uniform.Blueprint do
     )
   end
 
+  modify ~r/\.dotfile/, &(&1 <> "Added to #{&2.name.camel} in anonymous function capture")
+
   defmodule Modify do
     def append_hello_world(file) do
       file <> "hello world"
