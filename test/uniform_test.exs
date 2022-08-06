@@ -73,6 +73,7 @@ defmodule UniformTest do
     # test passing function captures (arity 1 and 2) to modify
     assert modified_file =~ "hello world"
     assert modified_file =~ "app name is tweeter"
+    assert modified_file =~ "Added to Tweeter in anonymous function capture"
 
     # associated_files are included
     assert file_exists?("priv/associated.txt")

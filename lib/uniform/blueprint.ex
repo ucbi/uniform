@@ -382,7 +382,14 @@ defmodule Uniform.Blueprint do
             (file :: String.t(), Uniform.App.t() -> String.t())
             | (file :: String.t() -> String.t())
         ) :: term
-  defmacro modify(path_or_regex, {:fn, _, _} = fun) do
+  defmacro modify(path_or_regex, {:&, _, [{:/, _, _}]} = fun) do
+    quote do
+      Uniform.Blueprint.validate_path_or_regex!(unquote(path_or_regex))
+      Module.put_attribute(__MODULE__, :modifiers, {unquote(path_or_regex), unquote(fun)})
+    end
+  end
+
+  defmacro modify(path_or_regex, {call, _, _} = fun) when call in [:fn, :&] do
     # anonymous functions cannot be saved into module attributes, so create a
     # named function
     fn_name = String.to_atom("__modify_line_#{__CALLER__.line}__")
@@ -404,30 +411,6 @@ defmodule Uniform.Blueprint do
           f when is_function(f, 2) -> f.(file, app)
         end
       end
-    end
-  end
-
-  defmacro modify(path_or_regex, {:&, _, _} = fun) do
-    quote do
-      Uniform.Blueprint.validate_path_or_regex!(unquote(path_or_regex))
-      Module.put_attribute(__MODULE__, :modifiers, {unquote(path_or_regex), unquote(fun)})
-    end
-  end
-
-  @doc false
-  def validate_path_or_regex!(path_or_regex) do
-    case path_or_regex do
-      path when is_binary(path) ->
-        :ok
-
-      %Regex{} ->
-        :ok
-
-      _ ->
-        raise ArgumentError,
-          message: """
-          modify/2 expects a (string) path or a regex (~r/.../) as the first argument. Received #{inspect(path_or_regex)}
-          """
     end
   end
 
@@ -455,8 +438,26 @@ defmodule Uniform.Blueprint do
 
             modify #{inspect(unquote(path_or_regex))}, &modify_tests/1
             modify #{inspect(unquote(path_or_regex))}, &Modifiers.modify_other_file/2
+            modify #{inspect(unquote(path_or_regex))}, & ... &1 ... &2
 
         """
+    end
+  end
+
+  @doc false
+  def validate_path_or_regex!(path_or_regex) do
+    case path_or_regex do
+      path when is_binary(path) ->
+        :ok
+
+      %Regex{} ->
+        :ok
+
+      _ ->
+        raise ArgumentError,
+          message: """
+          modify/2 expects a (string) path or a regex (~r/.../) as the first argument. Received #{inspect(path_or_regex)}
+          """
     end
   end
 
