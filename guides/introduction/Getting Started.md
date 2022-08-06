@@ -10,7 +10,7 @@ list in `# uniform:deps` and `# /uniform:deps` comments, like this.
 defp deps do
   # uniform:deps
   [
-    {:uniform, "~> 0.1.0"},
+    {:uniform, "~> 0.1.1"},
     ...
   ]
   # /uniform:deps

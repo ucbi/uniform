@@ -1,7 +1,7 @@
 defmodule Uniform.MixProject do
   use Mix.Project
 
-  @version "0.1.0"
+  @version "0.1.1"
   @source_url "https://github.com/ucbi/uniform"
 
   def project do
@@ -14,7 +14,7 @@ defmodule Uniform.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
 
       # Hex
-      description: "A simple alternative to Umbrella and Poncho apps",
+      description: "Write less boilerplate and reuse more code in your portfolio of Elixir apps",
       package: package(),
 
       # Docs
@@ -35,6 +35,7 @@ defmodule Uniform.MixProject do
 
   defp package do
     %{
+      maintainers: ["Paul Statezny"],
       licenses: ["Apache-2.0"],
       links: %{
         GitHub: @source_url
@@ -57,7 +58,8 @@ defmodule Uniform.MixProject do
         "guides/howtos/Handling Multiple Databases.md",
         "guides/howtos/Building files from EEx templates.md",
         "guides/assessment/Use Cases.md",
-        "guides/assessment/Benefits and Disadvantages.md"
+        "guides/assessment/Benefits and Disadvantages.md",
+        "CHANGELOG.md"
       ],
       groups_for_extras: [
         Introduction: ~r/guides\/introduction\/.?/,
