@@ -6,9 +6,9 @@ defmodule Mix.Tasks.Uniform.Eject do
   ## Examples
 
   ```bash
-  $ mix uniform.eject Trillo
-  $ mix uniform.eject Tweeter --confirm
-  $ mix uniform.eject Hatmail --confirm --destination ../../new/dir
+  $ mix uniform.eject trillo
+  $ mix uniform.eject tweeter --confirm
+  $ mix uniform.eject hatmail --confirm --destination ../../new/dir
   ```
 
   ## Command line options
@@ -21,7 +21,7 @@ defmodule Mix.Tasks.Uniform.Eject do
 
   ## Ejection Step By Step
 
-  When you eject an app by running `mix uniform.eject MyApp`, the following happens:
+  When you eject an app by running `mix uniform.eject my_app`, the following happens:
 
   1. The destination directory is created if it doesn't exist.
   2. All files and directories in the destination are deleted, except for `.git`,
@@ -52,7 +52,7 @@ defmodule Mix.Tasks.Uniform.Eject do
 
   @doc false
   def run(args) do
-    sample_syntax = "   Syntax is:   mix uniform.eject AppName [--destination path] [--confirm]"
+    sample_syntax = "   Syntax is:   mix uniform.eject app_name [--destination path] [--confirm]"
 
     args
     |> OptionParser.parse!(strict: [destination: :string, confirm: :boolean])
@@ -76,11 +76,7 @@ defmodule Mix.Tasks.Uniform.Eject do
   end
 
   defp eject_app(app_name, opts) do
-    app =
-      Uniform.prepare(%{
-        name: "Elixir" |> Module.concat(app_name),
-        opts: opts
-      })
+    app = Uniform.prepare(%{name: app_name, opts: opts})
 
     IO.puts("")
     IO.puts("🗺  Ejecting [#{app.name.camel}] to [#{app.destination}]")

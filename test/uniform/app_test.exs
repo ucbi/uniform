@@ -17,7 +17,7 @@ defmodule Uniform.AppTest do
       extra: [some_data: "from uniform.exs"]
     }
 
-    %App{} = app = App.new!(config, manifest, Tweeter)
+    %App{} = app = App.new!(config, manifest, "tweeter")
 
     assert app.name == %{
              module: Tweeter,

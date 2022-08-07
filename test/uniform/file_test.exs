@@ -22,7 +22,7 @@ defmodule Uniform.FileTest do
     }
 
     manifest = %Manifest{lib_deps: [:included_lib], mix_deps: [:included_mix]}
-    app = App.new!(config, manifest, Tweeter)
+    app = App.new!(config, manifest, "tweeter")
     %{app: app}
   end
 

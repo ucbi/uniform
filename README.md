@@ -28,7 +28,7 @@ recommended if you're building Phoenix apps.
 ## Usage
 
 ```bash
-mix uniform.eject Tweeter
+mix uniform.eject tweeter
 ```
 
 ## Installation
