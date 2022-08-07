@@ -1,4 +1,4 @@
-# Handling Multiple Databases
+# Handling multiple databases
 
 > This guide assumes that you've gone through with [How It
 > Works](how-it-works.html) and [Getting Started](getting-started.html) guides.
