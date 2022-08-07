@@ -1,2 +1,5 @@
 example dotfile
-[REPLACE THIS LINE VIA modify/0]
+[REPLACE THIS LINE VIA modify]
+--- uniform:remove
+removed via code fences
+--- /uniform:remove

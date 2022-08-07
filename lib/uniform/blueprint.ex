@@ -316,6 +316,7 @@ defmodule Uniform.Blueprint do
 
       import Uniform.Blueprint, only: [modify: 2, deps: 1, base_files: 1]
       import Uniform.App, only: [depends_on?: 3]
+      import Uniform.Modifiers, only: [code_fences: 3]
 
       def __template_dir__, do: unquote(templates)
 
@@ -438,7 +439,7 @@ defmodule Uniform.Blueprint do
 
             modify #{inspect(unquote(path_or_regex))}, &modify_tests/1
             modify #{inspect(unquote(path_or_regex))}, &Modifiers.modify_other_file/2
-            modify #{inspect(unquote(path_or_regex))}, & ... &1 ... &2
+            modify #{inspect(unquote(path_or_regex))}, & foo(&1, &2)
 
         """
     end
