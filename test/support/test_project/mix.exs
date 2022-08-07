@@ -13,6 +13,7 @@ defmodule TestProject.MixProject do
   defp deps do
     # uniform:deps
     [
+      {:uniform, path: "../../../"},
       {:included_mix, ">= 0.1.0"},
       {:excluded_mix, ">= 0.1.0"},
       {:indirectly_included_mix, ">= 0.1.0"},
