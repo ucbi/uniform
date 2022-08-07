@@ -48,35 +48,67 @@ defmodule Uniform do
   @typep prepare_opt :: {:destination, String.t()}
 
   @doc """
-       Returns a list of ejectable application names.
+  Returns a list of all [Ejectable App](how-it-works.html#ejectable-apps) names
+  in your Base Project.
 
-       Identified by the existence of a `lib/<my_app>/uniform.exs` file.
+  ### Examples
 
-       ### Examples
+  ```bash
+  $ fd uniform.exs
+  lib/tweeter/uniform.exs
+  lib/trillo/uniform.exs
+  lib/hatmail/uniform.exs
+  ```
 
-           $ fd uniform.exs
-           lib/tweeter/uniform.exs
-           lib/trillo/uniform.exs
-           lib/hatmail/uniform.exs
+      iex> ejectable_app_names()
+      ["tweeter", "trillo", "hatmail"]
 
-           iex> ejectables()
-           ["Tweeter", "Trillo", "Hatmail"]
-
-       """ && false
-  @spec ejectables :: [String.t()]
-  def ejectables do
+  """
+  @spec ejectable_app_names :: [String.t()]
+  def ejectable_app_names do
     "lib/*/uniform.exs"
     |> Path.wildcard()
-    |> Enum.map(&(&1 |> Path.dirname() |> Path.basename() |> Macro.camelize()))
+    |> Enum.map(&(&1 |> Path.dirname() |> Path.basename()))
     |> Enum.sort()
   end
 
-  @doc "Return a list of all ejectable `%App{}`s" && false
+  @doc """
+  Return a list of all [Ejectable Apps](how-it-works.html#ejectable-apps) in
+  your Base Project as `Uniform.App` structs.
+
+  ### Example
+
+  ```bash
+  $ fd uniform.exs
+  lib/tweeter/uniform.exs
+  lib/trillo/uniform.exs
+  lib/hatmail/uniform.exs
+  ```
+
+      iex> ejectable_apps()
+      [
+        #Uniform.App<
+          extra: [...],
+          name: %{camel: "Tweeter", hyphen: "tweeter", module: Tweeter, underscore: "tweeter"},
+          ...
+        >,
+        #Uniform.App<
+          extra: [...],
+          name: %{camel: "Trillo", hyphen: "trillo", module: Trillo, underscore: "trillo"},
+          ...
+        >,
+        #Uniform.App<
+          extra: [...],
+          name: %{camel: "Hatmail", hyphen: "hatmail", module: Hatmail, underscore: "hatmail"},
+          ...
+        >
+      ]
+
+  """
   @spec ejectable_apps :: [Uniform.App.t()]
   def ejectable_apps do
-    for name <- ejectables() do
-      # credo:disable-for-next-line Credo.Check.Warning.UnsafeToAtom
-      name = Module.concat("Elixir", name)
+    for name <- ejectable_app_names() do
+      name = Module.concat("Elixir", Macro.camelize(name))
       prepare(%{name: name, opts: []})
     end
   end

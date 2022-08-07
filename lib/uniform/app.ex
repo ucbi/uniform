@@ -29,7 +29,7 @@ defmodule Uniform.App do
   alias __MODULE__
   alias Uniform.{Manifest, Config, LibDep, MixDep}
 
-  @derive {Inspect, except: [:internal]}
+  @derive {Inspect, except: [:internal, :destination]}
   defstruct [:internal, :name, :destination, :extra]
 
   defmodule Deps do
