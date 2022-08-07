@@ -70,7 +70,8 @@ defmodule Uniform.AppTest do
              :always_included_mix,
              :excluded_mix,
              :included_mix,
-             :indirectly_included_mix
+             :indirectly_included_mix,
+             :uniform
            ]
   end
 
