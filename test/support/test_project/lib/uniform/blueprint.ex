@@ -34,12 +34,15 @@ defmodule TestProject.Uniform.Blueprint do
   modify ~r/\.dotfile/, fn file, app ->
     String.replace(
       file,
-      "[REPLACE THIS LINE VIA modify/0]",
+      "[REPLACE THIS LINE VIA modify]",
       "[REPLACED LINE WHILE EJECTING #{app.name.camel}]"
     )
   end
 
   modify ~r/\.dotfile/, &(&1 <> "Added to #{&2.name.camel} in anonymous function capture")
+
+  # test code_fences/1
+  modify ~r/\.dotfile/, &code_fences(&1, &2, "---")
 
   defmodule Modify do
     def append_hello_world(file) do
