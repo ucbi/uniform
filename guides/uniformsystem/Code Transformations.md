@@ -179,11 +179,9 @@ can do so using `Uniform.Blueprint.modify/2` and
 ```elixir
 # code fences for SQL files
 modify ~r/\.sql$/, fn file, app ->
-  Uniform.Modifiers.code_fences(file, app, "--")
+  code_fences(file, app, "--")
 end
 
 # code fences for Rust files
-modify ~r/\.rs$/, fn file, app ->
-  Uniform.Modifiers.code_fences(file, app, "//")
-end
+modify ~r/\.rs$/, &code_fences(&1, &2, "//")
 ```

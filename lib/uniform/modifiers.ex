@@ -15,16 +15,16 @@ defmodule Uniform.Modifiers do
   Note that code fences are already applied automatically to `.ex/.exs` files
   as well as `.js/.jsx/.ts/.tsx` files.
 
+  This function is automatically imported in your Blueprint.
+
   ## Examples
 
       # code fences for SQL files
-      modify ~r/\.sql$/, fn file, app ->
-        Uniform.Modifiers.code_fences(file, app, "--")
-      end
+      modify ~r/\.sql$/, &code_fences(&1, &2, "--")
 
       # code fences for Rust files
       modify ~r/\.rs$/, fn file, app ->
-        Uniform.Modifiers.code_fences(file, app, "//")
+        code_fences(file, app, "//")
       end
 
   """
