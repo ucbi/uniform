@@ -1,18 +1,20 @@
 defmodule Uniform do
   @moduledoc """
-  The Uniform System is an architecture for maintaining multiple Elixir apps
-  from a single Elixir project in a way that minimizes duplicate work and
-  maximizes sharing capabilities.
+  > Write less boilerplate and reuse more code in your portfolio of Elixir apps
 
-  It's like a monolith. But unlike a monolith, the apps can be "ejected" into
-  separate codebases that only contain the code needed by each app.
+  With Uniform, developers maintain multiple Elixir apps inside a Base Project:
+  a "monolith" containing every app. Before deployment, the apps are "ejected"
+  into separate codebases containing only the code needed by each app.
+
+  The entire process is automated, so there's much less work required to start
+  a new app or share capabilities between apps.
 
   ## Recommended Guides
 
   In order to understand and use this library, we heavily recommend reading the
   following guides:
 
-  - [The Uniform System: How It Works](how-it-works.html)
+  - [How It Works](how-it-works.html)
   - [Dependencies](dependencies.html)
   - [Code Transformations](code-transformations.html)
 
@@ -25,12 +27,9 @@ defmodule Uniform do
   mix uniform.eject Tweeter
   ```
 
-  Read about [the Uniform System](how-it-works.html) for details about how it
-  works.
-
   ## Installation
 
-  Consult the [Getting Started](getting-started.html) guide to add `Uniform` to
+  Consult the [Getting Started](getting-started.html) guide to add Uniform to
   an Elixir application.
 
   In summary, you'll need to:

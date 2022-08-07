@@ -70,7 +70,7 @@ precedence and overrides both of these behaviors.
 ## Add Uniform Manifests
 
 Designate all `lib` directories that represent an [Ejectable
-App](how-it-works.html#what-is-an-ejectable-app) by placing an `uniform.exs`
+App](how-it-works.html#ejectable-apps) by placing an `uniform.exs`
 manifest file into each directory.
 
 You can do so with `mix uniform.gen.app`, which creates an empty manifest
@@ -88,7 +88,7 @@ that contains an empty list.
 []
 ```
 
-Once you start structuring your project for the Uniform System, you'll add
+Once you start structuring your project for Uniform, you'll add
 [Lib](dependencies.html#lib-dependencies) and
 [Mix](dependencies.html#mix-dependencies) Dependencies in this file.
 
@@ -126,11 +126,11 @@ Since each Elixir application is different, **it is up to you to determine
 which files need to be ejected** to make `mix uniform.eject` emit a working
 application.
 
-> #### Using Phoenix? {: .tip}
+> #### Are you building Phoenix apps? {: .tip}
 >
-> We recommend developers building Phoenix projects read about [the Uniform
-> System](how-it-works.html), then consult the how-to guide for [Setting up a
-> Phoenix Project](./setting-up-a-phoenix-project.html).
+> We recommend developers building Phoenix applications read the [How It
+> Works](how-it-works.html) guide, then consult the how-to guide for [Setting
+> up a Phoenix Project](./setting-up-a-phoenix-project.html).
 
 An example barebones Blueprint might look like this.
 

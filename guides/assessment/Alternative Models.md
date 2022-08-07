@@ -1,6 +1,6 @@
 # Alternative Models
 
-TODO: Compare and contrast the Uniform System with
+TODO: Compare and contrast Uniform with
 
 - Umbrellas
 - Ponchos
