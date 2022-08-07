@@ -14,6 +14,30 @@ defmodule UniformTest do
     end
   end
 
+  test "ejectable_app_names/0" do
+    assert ["tweeter"] = Uniform.ejectable_app_names()
+  end
+
+  test "ejectable_apps/0" do
+    Application.put_env(
+      :test_project,
+      Uniform,
+      blueprint: TestProject.Uniform.Blueprint
+    )
+
+    assert [
+             %Uniform.App{
+               extra: [company: :fake_co, logo_file: "pixel"],
+               name: %{
+                 camel: "Tweeter",
+                 hyphen: "tweeter",
+                 module: Tweeter,
+                 underscore: "tweeter"
+               }
+             }
+           ] = Uniform.ejectable_apps()
+  end
+
   test "full ejection" do
     # the destination is gitignored; we can eject to it without adding to the git index
 

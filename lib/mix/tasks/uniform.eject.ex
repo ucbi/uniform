@@ -66,7 +66,7 @@ defmodule Mix.Tasks.Uniform.Eject do
         IO.puts(IO.ANSI.yellow())
         IO.puts("  Available apps:")
 
-        Uniform.ejectables() |> Enum.each(&IO.puts("      #{&1}"))
+        Uniform.ejectable_app_names() |> Enum.each(&IO.puts("      #{&1}"))
 
       _unknown_options ->
         IO.puts("")
@@ -75,11 +75,9 @@ defmodule Mix.Tasks.Uniform.Eject do
     end
   end
 
-  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   defp eject_app(app_name, opts) do
     app =
       Uniform.prepare(%{
-        # credo:disable-for-next-line Credo.Check.Warning.UnsafeToAtom
         name: "Elixir" |> Module.concat(app_name),
         opts: opts
       })
