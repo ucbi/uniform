@@ -38,7 +38,7 @@ Ejecting an app means:
 Ejecting is done like this:
 
 ```bash
-mix uniform.eject MyAppName
+mix uniform.eject my_app_name
 ```
 
 See `mix uniform.eject` for more details. This task essentially makes code
@@ -108,7 +108,7 @@ mix uniform.gen.app my_app
 
 ## How files are included/excluded by `mix uniform.eject`
 
-Whenever you run `mix uniform.eject MyApp`, there are 4 simple rules that the
+Whenever you run `mix uniform.eject my_app`, there are 4 simple rules that the
 library uses to decide which files to include or exclude from the ejected
 codebase.
 

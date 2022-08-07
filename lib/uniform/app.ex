@@ -108,7 +108,7 @@ defmodule Uniform.App do
 
        ### Example
 
-           new!(config, manifest, Tweeter)
+           new!(config, manifest, "tweeter")
 
            %Uniform.App{
              config: %Config{...},
@@ -141,11 +141,11 @@ defmodule Uniform.App do
            }
 
        """ && false
-  @spec new!(Config.t(), Manifest.t(), atom) :: t
-  @spec new!(Config.t(), Manifest.t(), atom, [new_opt]) :: t
-  def new!(%Config{} = config, %Manifest{} = manifest, name, opts \\ []) when is_atom(name) do
-    "Elixir." <> app_name_camel_case = to_string(name)
-    app_name_underscore_case = Macro.underscore(name)
+  @spec new!(Config.t(), Manifest.t(), String.t()) :: t
+  @spec new!(Config.t(), Manifest.t(), String.t(), [new_opt]) :: t
+  def new!(%Config{} = config, %Manifest{} = manifest, app_name_underscore_case, opts \\ [])
+      when is_binary(app_name_underscore_case) do
+    app_name_camel_case = Macro.camelize(app_name_underscore_case)
 
     app = %App{
       internal: %{
@@ -153,7 +153,7 @@ defmodule Uniform.App do
         deps: deps(config, manifest)
       },
       name: %{
-        module: name,
+        module: Module.concat("Elixir", app_name_camel_case),
         camel: app_name_camel_case,
         underscore: app_name_underscore_case,
         hyphen: String.replace(app_name_underscore_case, "_", "-")

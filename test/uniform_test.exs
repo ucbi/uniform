@@ -50,7 +50,7 @@ defmodule UniformTest do
     }
 
     manifest = %Manifest{lib_deps: [:included_lib]}
-    app = App.new!(config, manifest, Tweeter)
+    app = App.new!(config, manifest, "tweeter")
 
     Uniform.eject(app)
 
@@ -134,7 +134,7 @@ defmodule UniformTest do
     }
 
     manifest = %Manifest{}
-    app = App.new!(config, manifest, Tweeter)
+    app = App.new!(config, manifest, "tweeter")
 
     Uniform.eject(app)
   end

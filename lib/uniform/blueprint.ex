@@ -25,7 +25,7 @@ defmodule Uniform.Blueprint do
   ## The `base_files` Section
 
   The `base_files` section specifies files that should be ejected which aren't
-  in `lib/my_app`. (When running `mix uniform.eject MyApp`.)
+  in `lib/my_app`. (When running `mix uniform.eject my_app`.)
 
       defmodule Blueprint do
         use Uniform.Blueprint, templates: "..."
@@ -279,7 +279,7 @@ defmodule Uniform.Blueprint do
   This callback works like the `except/1` instruction for Lib Dependencies,
   except that it applies to the `lib` folder of the ejected app itself.
 
-  When running `mix uniform.eject MyApp`, any files in `lib/my_app` or
+  When running `mix uniform.eject my_app`, any files in `lib/my_app` or
   `test/my_app` which match the paths or regexes returned by `app_lib_except`
   will **not** be ejected.
 

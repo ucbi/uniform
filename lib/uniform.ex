@@ -24,7 +24,7 @@ defmodule Uniform do
   ## Usage
 
   ```bash
-  mix uniform.eject Tweeter
+  mix uniform.eject tweeter
   ```
 
   ## Installation
@@ -108,7 +108,6 @@ defmodule Uniform do
   @spec ejectable_apps :: [Uniform.App.t()]
   def ejectable_apps do
     for name <- ejectable_app_names() do
-      name = Module.concat("Elixir", Macro.camelize(name))
       prepare(%{name: name, opts: []})
     end
   end
@@ -124,21 +123,15 @@ defmodule Uniform do
        """ && false
   @spec prepare(init :: %{name: atom, opts: [prepare_opt]}) :: Uniform.App.t()
   def prepare(%{name: name, opts: opts}) do
-    if not is_atom(name) do
-      raise ArgumentError,
-        message:
-          "🤖 Please pass in a module name corresponding to a directory in lib/ containing an `uniform.exs` file. E.g. Tweeter (received #{inspect(name)})"
-    end
-
-    # ensure the name was passed in CamelCase format; otherwise subtle bugs happen
-    unless inspect(name) =~ ~r/^[A-Z][a-zA-Z0-9]*$/ do
+    # ensure the name was passed in under_score format; otherwise subtle bugs happen
+    unless name in Uniform.ejectable_app_names() do
       raise ArgumentError,
         message: """
-        The name must correspond to a directory in lib/, in CamelCase format.
+        The name must correspond to a directory in lib, in under_score format.
 
         For example, to eject `lib/my_app`, do:
 
-            mix uniform.eject MyApp
+            mix uniform.eject my_app
 
         """
     end

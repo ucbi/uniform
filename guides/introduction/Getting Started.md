@@ -109,7 +109,7 @@ Once you start structuring your project for Uniform, you'll add
 At this point, you should be able to run
 
 ```bash
-mix uniform.eject MyApplicationName
+mix uniform.eject my_application_name
 ```
 
 And be able to successfully create an ejected codebase. However, it will
