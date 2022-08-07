@@ -1,6 +1,6 @@
 defmodule Mix.Tasks.Uniform.Eject do
   @moduledoc """
-  Ejects an [Ejectable App](how-it-works.html#what-is-an-ejectable-app) to a
+  Ejects an [Ejectable App](how-it-works.html#ejectable-apps) to a
   standalone code repository.
 
   ## Examples

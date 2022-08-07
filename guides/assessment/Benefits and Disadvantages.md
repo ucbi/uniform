@@ -1,8 +1,8 @@
 # Benefits and Disadvantages
 
-The Uniform System is not for everyone, but it can be very powerful in
-environments where a team or developer is tasked with developing a large base
-of applications that have many similarities or could share many capabilities.
+Uniform is not for everyone, but it can be very powerful in environments where
+a team or developer is tasked with developing a large portfolio of applications
+that have many similarities or could share many capabilities.
 
 ## Benefits
 
@@ -25,9 +25,9 @@ of applications that have many similarities or could share many capabilities.
   moment we start adding a feature. Many advocate for the WET principle (Write
   Everything Twice) by contrast, since making abstractions too early can often
   result in an abstraction that "leaks" or is otherwise ill-suited to the
-  specific use case. Since the Uniform System lowers the amount of overhead for
-  shared internal libraries, there are no distinct packages to create up front
-  which makes it much easier to refactor as the API evolves.
+  specific use case. Since Uniform lowers the amount of overhead for shared
+  internal libraries, there are no distinct packages to create up front which
+  makes it much easier to refactor as the API evolves.
 - **Global Refactors with peace of mind.** When the entire portfolio of
   applications is managed together, we're free to refactor any interal API and
   know that we've addressed all invocations across the enterprise. With Elixir

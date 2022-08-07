@@ -1,25 +1,23 @@
-# The Uniform System: How It Works
+# How It Works
 
-With the Uniform System, multiple apps are maintained together in a single
-Elixir codebase. When you're ready to deploy an app, it's "ejected" out into
-separate codebases that only contains the code needed by the app.
+With Uniform, multiple apps are maintained together in a single Elixir
+codebase. When you're ready to deploy an app, it's "ejected" out into separate
+codebases that only contains the code needed by the app.
 
-## What is a Base Project?
+## The Base Project
 
-A Base Project is the single Elixir application that houses all of the
-applications. When you run the Base Project in your development environment,
-you are running your entire portfolio of applications simultaneously.
+The Base Project is the single Elixir application that houses all of your
+applications. Applications are developed and tested in the Base Project.
 
-Since Uniform projects are just an Elixir application, the `lib` directory is
-central. It contains directories for:
+The Base Project's `lib` directory is central. It contains directories for:
 
-1. [Ejectable Apps](how-it-works.html#what-is-an-ejectable-app)
+1. [Ejectable Apps](how-it-works.html#ejectable-apps)
 2. [Lib Dependencies](dependencies.html#lib-dependencies) (shared libraries)
 
 It also contrains a [Blueprint](Uniform.Blueprint.html) module configuring
 which files are copied to ejected repositories.
 
-A Base Project directory structure might look like this.
+The directory structure of a Base Project might look like this.
 
 ```bash
 + my_base_app
@@ -32,7 +30,7 @@ A Base Project directory structure might look like this.
 
 ## What is "Ejecting"?
 
-For the purposes of this documentation, ejecting an app means
+Ejecting an app means:
 
 > Copying the code used by the application to a separate, standalone code
 > repository, without including code that the application doesn't need.
@@ -52,15 +50,21 @@ automate the process of committing code to ejected repos and deploying to live
 environments. A single merged code change can result in dozens of apps being
 safely deployed without any human involvement.
 
-## What is an Ejectable App?
+## Ejectable Apps
 
-An Ejectable App is simply an application that can be ejected from the Base
-Project.
+An Ejectable App is an app that can be [ejected](#what-is-ejecting) from the
+Base Project.
 
-Each Ejectable App is stored in a sub-directory of `lib`.
+To create an Ejectable App:
 
-To identify a directory inside `lib` as an Ejectable App, **create an
-`uniform.exs` file inside the directory.**
+1. Make a directory inside `lib` for your app (E.g. `lib/my_app`)
+2. Add `uniform.exs` inside it
+
+`mix uniform.gen.app` does both in one step.
+
+```bash
+mix uniform.gen.app my_app
+```
 
 ### uniform.exs Options
 
@@ -80,7 +84,7 @@ To identify a directory inside `lib` as an Ejectable App, **create an
 - `mix_deps` - [Mix Dependencies](dependencies.html#mix-dependencies) of the
   app; each must exist in `mix.exs`.
 - `lib_deps` - [Lib Dependencies](dependencies.html#lib-dependencies) of the
-  app; each must exist as a directory in `lib/`.
+  app; each must exist as a directory in `lib`.
 - `extra` - additional user-defined data to configure the app.
 
 > #### The purpose of the :extra key {: .tip}
@@ -119,9 +123,8 @@ codebase.
 
 > There are some caveats to these rules.
 >
-> The files in rule 2 are subject to the
-> [lib_app_except](Uniform.Blueprint.html#c:app_lib_except/1) callback.
->
-> The files in rule 3 are subject to [only](Uniform.Blueprint.html#only/1) and
-> [except](Uniform.Blueprint.html#except/1) instructions.
+>   - The files in rule 2 are subject to the
+>     [lib_app_except](Uniform.Blueprint.html#c:app_lib_except/1) callback.
+>   - The files in rule 3 are subject to [only](Uniform.Blueprint.html#only/1)
+>     and [except](Uniform.Blueprint.html#except/1) instructions.
 

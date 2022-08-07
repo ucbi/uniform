@@ -1,8 +1,8 @@
 # Code Transformations
 
 During `mix uniform.eject`, there are 4 code transformations applied to file
-contents.  These transformations happen to every file, except those ejected
-with `cp` and `cp_r`.
+contents. These transformations happen to every file except those ejected with
+`cp` and `cp_r`.
 
 They occur **in this order**.
 
@@ -10,15 +10,6 @@ They occur **in this order**.
 2. [Blueprint Modifiers](#modifiers-from-the-ejection-blueprint) are ran
 3. [The Base Project Name is replaced](#replacing-the-base-project-name) with the ejected app's name
 4. [Code Fences](#code-fences) are processed
-
-> #### Disabling Code Transformations for a file {: .tip}
->
-> If you have a file that should not have Code Transformations applied upon
-> ejection, use [`cp`](Uniform.Blueprint.html#cp/2) instead of
-> [`file`](Uniform.Blueprint.html#file/2).
->
-> If there is an entire directory of contents that should not be modified, use
-> [`cp_r`](Uniform.Blueprint.html#cp_r/2), which will be much faster.
 
 ## mix.exs Dependency Removal
 
@@ -185,3 +176,13 @@ end
 # code fences for Rust files
 modify ~r/\.rs$/, &code_fences(&1, &2, "//")
 ```
+
+## Disabling Code Transformations for a file
+
+If you have a file that should not have Code Transformations applied upon
+ejection, use [`cp`](Uniform.Blueprint.html#cp/2) instead of
+[`file`](Uniform.Blueprint.html#file/2).
+
+If there is an entire directory of contents that should not be modified, use
+[`cp_r`](Uniform.Blueprint.html#cp_r/2), which will be much faster.
+
