@@ -51,9 +51,9 @@ defmodule Uniform.MixProject do
       extra_section: "GUIDES",
       extras: [
         "guides/introduction/Getting Started.md",
-        "guides/uniformsystem/How It Works.md",
-        "guides/uniformsystem/Dependencies.md",
-        "guides/uniformsystem/Code Transformations.md",
+        "guides/introduction/How It Works.md",
+        "guides/introduction/Dependencies.md",
+        "guides/introduction/Code Transformations.md",
         "guides/howtos/Setting up a Phoenix project.md",
         "guides/howtos/Handling Multiple Databases.md",
         "guides/howtos/Building files from EEx templates.md",
@@ -63,7 +63,6 @@ defmodule Uniform.MixProject do
       ],
       groups_for_extras: [
         Introduction: ~r/guides\/introduction\/.?/,
-        "The Uniform System": ~r/guides\/uniformsystem\/.?/,
         "How-To's": ~r/guides\/howtos\/.?/,
         "Assessing the Model": ~r/guides\/assessment\/.?/
       ]

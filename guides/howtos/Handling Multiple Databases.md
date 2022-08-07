@@ -1,18 +1,17 @@
 # Handling Multiple Databases
 
-> This guide assumes that you're familiar with [The Uniform
-> System](how-it-works.html) and have gone through the [Getting
-> Started](getting-started.html) guide.
+> This guide assumes that you've gone through with [How It
+> Works](how-it-works.html) and [Getting Started](getting-started.html) guides.
 
-If you're using The Uniform System it's likely that you have multiple Repos for
-multiple databases, but you only want to give access for a given database to
-some of your apps.
+If you're using Uniform it's likely that you have multiple databases, but you
+don't want to give every app access to every database.
 
 In this scenario, we recommend creating separate [Lib
 Dependencies](dependencies.html#lib-dependencies) (each in its own
 `lib/some_data_source` directory) which each encapsulate all of the code for
 interacting with a single database. This implies that each Lib Dependency would
-house all of the [Ecto Schemas](https://hexdocs.pm/ecto/Ecto.Schema.html) and
+house the [Ecto Repo](https://hexdocs.pm/ecto/Ecto.Repo.html) as well as all
+[Ecto Schemas](https://hexdocs.pm/ecto/Ecto.Schema.html) and
 [Context](https://hexdocs.pm/phoenix/contexts.html) modules related to its
 database.
 

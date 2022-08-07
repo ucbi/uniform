@@ -1,7 +1,7 @@
 defmodule Mix.Tasks.Uniform.Init do
   @moduledoc """
-  Initializes a [Base Project](how-it-works.html#what-is-a-base-project)
-  repository with the bare minimum setup required for using `Uniform`.
+  Initializes a [Base Project](how-it-works.html#the-base-project) repository
+  with the bare minimum setup required for using Uniform.
 
   1. Adds a [Blueprint](Uniform.Blueprint.html) module
   2. Adds required configuration to `config/config.exs`

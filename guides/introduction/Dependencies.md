@@ -2,19 +2,15 @@
 
 ## Lib Dependencies
 
-A Lib Dependency is a directory in the [Base
-Project](how-it-works.html#what-is-a-base-project)'s `lib/` directory that
-contains a code library used by [Ejectable
-Apps](how-it-works.html#what-is-an-ejectable-app).
-
-Lib Dependencies are used to share non-public code between Ejectable Apps with
+Lib Dependencies exist to share non-public code between Ejectable Apps with
 less ceremony than other mechanisms like private Hex packages.
 
-A Lib Dependency is referenced by an atom that matches the name of the
-directory in `lib/`.
+A Lib Dependency is a directory in the [Base
+Project](how-it-works.html#the-base-project)'s `lib` directory that contains a
+code library used by [Ejectable Apps](how-it-works.html#ejectable-apps).
 
-For example, a library in `lib/utilities` would be referenced in `uniform.exs`
-or in the [Blueprint](Uniform.Blueprint.html) module as `:utilities`.
+A Lib Dependency is referenced by an atom that matches the name of the
+directory in `lib`. (`lib/utilities` is referenced as `:utilities`.)
 
 ## Mix Dependencies
 
@@ -79,15 +75,16 @@ deps do
 end
 ```
 
-> #### Chained Dependencies {: .info}
->
-> `mix uniform.eject` will follow chains of sub-dependencies completely.
->
-> If these are true:
->
-> - The app's `uniform.exs` manifest includes `lib_deps: [:foo]`
-> - The `deps` section of your Blueprint says that `foo` has `lib_deps: [:bar]`
-> - The `deps` section of your Blueprint says that `bar` has `lib_deps: [:baz]`
->
-> Then the ejected codebase will include `lib/foo`, `lib/bar`, and `lib/baz`.
+### Chained Dependencies
+
+`mix uniform.eject` will follow chains of sub-dependencies completely.
+
+Imagine this scenario.
+
+- `uniform.exs` has `lib_deps: [:foo]`
+- The Blueprint's `deps` says `foo` has `lib_deps: [:bar]`
+- The Blueprint's `deps` says `bar` has `lib_deps: [:baz]`
+
+As a result, the ejected codebase will include `lib/foo`, `lib/bar`, and
+`lib/baz`.
 

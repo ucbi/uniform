@@ -1,20 +1,23 @@
 # Uniform
 
-The Uniform System is an architecture for maintaining multiple Elixir apps from a
-single Elixir project in a way that minimizes duplicate work and maximizes
-sharing capabilities.
+> Write less boilerplate and reuse more code in your portfolio of Elixir apps
 
-It's like a monolith. But unlike a monolith, the apps can be "ejected" into
-separate codebases that only contain the code needed by each app.
+With Uniform, developers maintain multiple Elixir apps inside a Base Project: a
+"monolith" containing every app. Before deployment, the apps are "ejected" into
+separate codebases containing only the code needed by each app.
 
-The complete documentation for Uniform is located [here](https://hexdocs.pm/uniform/).
+The entire process is automated, so there's much less work required to start a
+new app or share capabilities between apps.
+
+The complete documentation for Uniform is located
+[here](https://hexdocs.pm/uniform/).
 
 ## Recommended Guides
 
 In order to understand and use this library, we heavily recommend reading the
 following guides:
 
-- [The Uniform System: How It Works](https://hexdocs.pm/uniform/how-it-works.html)
+- [How It Works](https://hexdocs.pm/uniform/how-it-works.html)
 - [Dependencies](https://hexdocs.pm/uniform/dependencies.html)
 - [Code Transformations](https://hexdocs.pm/uniform/code-transformations.html)
 
