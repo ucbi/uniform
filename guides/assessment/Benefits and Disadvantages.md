@@ -1,8 +1,8 @@
 # Benefits and Disadvantages
 
 Uniform is not for everyone, but it can be very powerful in environments where
-a team or developer is tasked with developing a large base of applications that
-have many similarities or could share many capabilities.
+a team or developer is tasked with developing a large portfolio of applications
+that have many similarities or could share many capabilities.
 
 ## Benefits
 
