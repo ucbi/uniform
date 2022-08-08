@@ -41,6 +41,14 @@ defmodule Uniform do
   5. Add to the Blueprint module all the files necessary to eject a working
      application
 
+  > #### Uniform ❤️ Automation {: .tip}
+  >
+  > Uniform is about powering up developers by automating repetitive work.
+  >
+  > With that in mind, we recommend using Continuous Integration (CI) tools to
+  > [automate the process of committing code to ejected
+  > repos](auto-updating-ejected-codebases.html).
+
   """
 
   require Logger

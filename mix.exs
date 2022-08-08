@@ -52,6 +52,7 @@ defmodule Uniform.MixProject do
       extras: [
         "guides/introduction/Getting Started.md",
         "guides/introduction/How It Works.md",
+        "guides/introduction/Uniform Manifests (uniform.exs).md",
         "guides/introduction/Dependencies.md",
         "guides/introduction/Code Transformations.md",
         "guides/howtos/Setting up a Phoenix project.md",

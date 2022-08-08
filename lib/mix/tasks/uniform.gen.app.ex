@@ -10,8 +10,12 @@ defmodule Mix.Tasks.Uniform.Gen.App do
   Created lib/some_app_name/uniform.exs
   ```
 
-  Running that command will create `lib/some_app_name/uniform.exs`. This will
-  enable `mix uniform.eject some_app_name` to work without failing.
+  Running that command will create `lib/some_app_name/uniform.exs`, which will
+  allow you to run
+
+  ```bash
+  $ mix uniform.eject some_app_name
+  ```
   """
 
   use Mix.Task

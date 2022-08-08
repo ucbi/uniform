@@ -36,7 +36,7 @@ There are three methods to specify which Lib and Mix dependencies are required
 by an App:
 
 1. Include the dependency for **a single Ejectable App** by saying so in
-   [uniform.exs](how-it-works.html#uniform-exs-options).
+   [uniform.exs](uniform-manifests-uniform-exs.html).
 
 ```elixir
 # lib/my_app/uniform.exs

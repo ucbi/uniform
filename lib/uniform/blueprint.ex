@@ -222,46 +222,71 @@ defmodule Uniform.Blueprint do
   """
 
   @doc """
-  A hook to add more data to `app.extra`, beyond what's in the [Uniform
-  Manifest file](./getting-started.html#add-uniform-manifests).
+  A callback to add data to `app.extra`.
+
+  This callback exists for scenarios when you want to add an `extra` key to
+  many or all apps, and it can be programmatically determined from the
+  information in the `app`.
+
+  `extra` data that only applies to a single app usually belongs in the
+  [Uniform Manifest](uniform-manifests-uniform-exs.html).
 
   ## Example
 
-  You may want to set the theme based on the name of the ejectable app.  In
-  this case, add an 'extra' entry called 'theme', which will then be available
-  through the app struct:
+  You may want to set the theme based on the name of the ejectable app. Return
+  a keyword list with a `theme` key. It will be available via
+  `app.extra[:theme]` in `modify/2`, `base_files/1`, and
+  [templates](building-files-from-eex-templates.html).
 
       def extra(app) do
         theme =
           case app.name.underscore do
-            "work_" <> _ -> :work
-            "personal_" <> _ -> :personal
-            _ -> raise "App name must start with Work or Personal to derive theme."
+            "rebel_" <> _ -> :rebel
+            "empire_" <> _ -> :empire
+            _ -> raise "App name must start with rebel_ or empire_ to derive theme."
           end
 
         [theme: theme]
       end
 
+  This prevents you from having to redundantly set
+
+      [
+        extra: [theme: :rebel]
+      ]
+
+  In every `uniform.exs` manifest.
+
+  > #### uniform.exs has precedence {: .info}
+  >
+  > If `uniform.exs` is `[extra: [key: :manifest]]`, `app.extra[:key]`
+  > will (unsurprisingly) be `:manifest` in the `c:extra/1` callback.
+  >
+  > However, if `c:extra/1` returns `[key: :callback]`, `app.extra[:key]`
+  > will still be `:manifest` in `modify/2`, `base_files/1`, and
+  > [templates](building-files-from-eex-templates.html).
+  >
+  > In other words, `uniform.exs` "has precedence over" the `c:extra/1`
+  > callback.
+
   """
   @callback extra(app :: Uniform.App.t()) :: keyword
 
   @doc ~S"""
-  Use this callback to modify the path of ejected files. It will be called for
-  every file in a lib directory, along with every file specified via `file`,
-  `template`, `cp`, and `cp_r`.
+  Use this optional callback to change the path of files in the ejected
+  codebase.
+
+  It will be called for every ejected file, with the exception that `cp_r/2`
+  will only call it once for the entire directory.
 
   If you don't want to modify the `path`, just return it.
-
-  If not defined, the default implementation is:
-
-      def target_path(path, _app), do: path
 
   ## Example
 
   You may want to place certain files in `lib/ejected_app_web` instead of
   `lib/ejected_app`.  Let's say you have an `is_web_file?` function that
   identifies whether the file belongs in the `_web` directory. `target_path`
-  might be something like this:
+  might look like this:
 
       def target_path(path, app) do
         if is_web_file?(path) do
@@ -489,14 +514,12 @@ defmodule Uniform.Blueprint do
 
   ## API Reference
 
-  The following instructions can be given in the `base_files` section:
-
   - `file/2` ejects a single file or list of files
   - `template/2` creates a new file on ejection from an EEx template
-  - `cp/1` copies a file (like `file/2`) without running it through [Code
+  - `cp/2` copies a file (like `file/2`) without running it through [Code
     Transformations](code-transformations.html). This is useful for binary
     files such as images or executable.
-  - `cp_r/1` copies an entire **directory** of files without [Code
+  - `cp_r/2` copies an entire **directory** of files without [Code
     Transformations](code-transformations.html).
 
   ## Example
@@ -505,9 +528,8 @@ defmodule Uniform.Blueprint do
         file ".credo.exs"
         file Path.wildcard("config/**/*.exs")
         template "config/runtime.exs"
-        cp "bin/some-executable"
+        cp "bin/some-executable", chmod: 0o555
         cp_r "assets"
-        except ["lib/#{app.name.underscore}/hidden_file.ex"]
       end
 
   ## Files in `lib`
@@ -529,8 +551,9 @@ defmodule Uniform.Blueprint do
   ## Files outside `lib` but tied to Lib Dependencies
 
   If a file or template should only be ejected in the case that a certain Lib
-  Dependency is included, we recommend placing that in `lib/2` inside the
-  `deps/1` section instead of in `base_files`.
+  Dependency is included, we recommend placing that inside the `deps` section
+  instead of in `base_files`. (See [Associated
+  files](#lib/2-associated-files).)
 
       # ❌ Don't do this
       base_files do
@@ -716,13 +739,10 @@ defmodule Uniform.Blueprint do
         end
       end
 
-  ## Associated Files
+  ## Associated files
 
-  Sometimes, when a Lib Dependency is ejected with an app, there are other
-  files outside of `lib/that_library` which should also be ejected.
-
-  In this scenario, you can use these instructions used in `base_files/1` to
-  denote them.
+  Some Lib Dependencies require other files outside of `lib/that_library`. Use
+  the following to include those files whenever the Lib Dependency is ejected.
 
   - `file/2`
   - `template/2`
@@ -730,10 +750,18 @@ defmodule Uniform.Blueprint do
   - `cp_r/1`
 
   ```
-  lib :my_data_source do
-    file Path.wildcard("priv/my_data_source_repo/**", match_dot: true)
-    file Path.wildcard("test/support/fixtures/my_data_source/**/*.ex")
-    template "some/template/for/my_data_source"
+  deps do
+    # if my_data_source is required...
+    lib :my_data_source do
+      # everything in priv/my_data_source_repo will be ejected
+      file Path.wildcard("priv/my_data_source_repo/**", match_dot: true)
+
+      # every .ex file in test/support/fixtures/my_data_source will be ejected
+      file Path.wildcard("test/support/fixtures/my_data_source/**/*.ex")
+
+      # the `some/template/for/my_data_source` file will be ejected via a template
+      template "some/template/for/my_data_source"
+    end
   end
   ```
 
@@ -795,13 +823,12 @@ defmodule Uniform.Blueprint do
   Since Uniform is aware of all mix dependencies in `mix.exs`, you don't need
   to tell it about them.
 
-  However, there are two scenarios where you do need to list out mix
-  dependencies:
+  However, there are two scenarios where you do need to list mix dependencies:
 
-  1. Specifying which mix dependencies should _always_ be ejected. (See
+  1. Specifying mix dependencies that should _always_ be ejected. (See
      `Uniform.Blueprint.always/1`.)
-  2. Whenever a mix dependency has other mix dependencies. (I.e. Other mix
-     packages should always be ejected with it.)
+  2. When a Mix Dependency has other Mix Dependencies. (I.e. Other mix packages
+     should always be included when it is included.)
 
   > #### Including Mix Dependencies in an App {: .info}
   >
@@ -809,6 +836,10 @@ defmodule Uniform.Blueprint do
   > include it as a dependency of lib dependencies (see `lib/2`) or put it in
   > the app's [Uniform Manifest
   > file](./getting-started.html#add-uniform-manifests).
+  >
+  > As explained in the How It Works guide (see [What is
+  > "Ejecting"?](how-it-works.html#what-is-ejecting), `mix uniform.eject`
+  > removes Mix Dependencies that aren't explicitly required from `mix.exs`.
 
   ### Examples
 

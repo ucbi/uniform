@@ -1,8 +1,8 @@
 # How It Works
 
 With Uniform, multiple apps are maintained together in a single Elixir
-codebase. When you're ready to deploy an app, it's "ejected" out into separate
-codebases that only contains the code needed by the app.
+codebase. When you're ready to deploy an app, it's "ejected" to a separate
+codebase that only contains the code needed by the app.
 
 ## The Base Project
 
@@ -14,10 +14,7 @@ The Base Project's `lib` directory is central. It contains directories for:
 1. [Ejectable Apps](how-it-works.html#ejectable-apps)
 2. [Lib Dependencies](dependencies.html#lib-dependencies) (shared libraries)
 
-It also contrains a [Blueprint](Uniform.Blueprint.html) module configuring
-which files are copied to ejected repositories.
-
-The directory structure of a Base Project might look like this.
+So the directory structure of a Base Project might look like this.
 
 ```bash
 + my_base_app
@@ -28,103 +25,58 @@ The directory structure of a Base Project might look like this.
     + ui_components
 ```
 
+Each Base Project needs a [Blueprint](Uniform.Blueprint.html) module
+configuring which files are copied to ejected repositories.
+
 ## What is "Ejecting"?
 
-Ejecting an app means:
+"Ejecting" an app means copying the code used by the application to a separate,
+standalone code repository, without including code that the application doesn't
+need. Specifically,
 
-> Copying the code used by the application to a separate, standalone code
-> repository, without including code that the application doesn't need.
+- **Unused Lib Dependencies are excluded from `lib`**
+- **Unused Mix Dependencies are removed from `mix.exs`**
 
-Ejecting is done like this:
+Ejecting is done with `mix uniform.eject`.
 
 ```bash
 mix uniform.eject my_app_name
 ```
 
-See `mix uniform.eject` for more details. This task essentially makes code
-repositories "out of thin air" by taking only the relevent code from your Base
-Project.
-
-We use Continuous Integration (CI) and Continuous Deployment (CD) tools to
-automate the process of committing code to ejected repos and deploying to live
-environments. A single merged code change can result in dozens of apps being
-safely deployed without any human involvement.
-
 ## Ejectable Apps
 
-An Ejectable App is an app that can be [ejected](#what-is-ejecting) from the
-Base Project.
-
-To create an Ejectable App:
-
-1. Make a directory inside `lib` for your app (E.g. `lib/my_app`)
-2. Add `uniform.exs` inside it
-
-`mix uniform.gen.app` does both in one step.
+Ejectable Apps are apps that can be [ejected](#what-is-ejecting) from the Base
+Project. Create them with `mix uniform.gen.app`.
 
 ```bash
-mix uniform.gen.app my_app
+mix uniform.gen.app my_new_app
 ```
 
-### uniform.exs Options
+To set up an Ejectable App manually:
 
-`uniform.exs` files must contain a keyword list, in this structure:
+1. Make a directory inside `lib` for your app (E.g. `lib/my_new_app`)
+2. Add [uniform.exs](uniform-manifests-uniform-exs.html) inside it
 
-```elixir
-# lib/my_app/uniform.exs
-[
-  mix_deps: [:gql, :timex],
-  lib_deps: [:some_lib_directory],
-  extra: [
-    some_data: "just for this app"
-  ]
-]
-```
+## Exactly which files get ejected?
 
-- `mix_deps` - [Mix Dependencies](dependencies.html#mix-dependencies) of the
-  app; each must exist in `mix.exs`.
-- `lib_deps` - [Lib Dependencies](dependencies.html#lib-dependencies) of the
-  app; each must exist as a directory in `lib`.
-- `extra` - additional user-defined data to configure the app.
+When you run `mix uniform.eject my_app`, these four rules determine which files
+are copied.
 
-> #### The purpose of the :extra key {: .tip}
+1. [A few files](Uniform.Blueprint.html#module-files-that-are-always-ejected)
+   common to Elixir projects are copied.
+2. All files in the Blueprint's
+   [base_files](Uniform.Blueprint.html#base_files/1) section are copied.
+3. All files in `lib/my_app` and `test/my_app` are copied.
+4. For every [Lib Dependency](dependencies.html#lib-dependencies) of `my_app`:
+    - All files in `lib/dep_name` and `test/dep_name` are copied.
+    - All [associated files](Uniform.Blueprint.html#lib/2-associated-files)
+      tied to the Lib Dependency are copied.
+
+> If you need to apply exceptions to these rules, you can use these tools.
 >
-> `mix uniform.eject` does not by change its behavior based on the data in
-> `extra`, but it is placed in `app.extra` so that you can use it to make
-> decisions in [templates](building-files-from-eex-templates.html) or in the
-> [base_files](Uniform.Blueprint.html#base_files/1) or
-> [modify](Uniform.Blueprint.html#modify/2) sections in your
-> [Blueprint](Uniform.Blueprint.html) module.
->
-> For 'global' values available to _all_ ejectable apps, use the
-> `c:Uniform.Blueprint.extra/1` callback implementation.
-
-> #### No Keys in uniform.exs are required {: .info}
->
-> Note that `uniform.exs` does not need to include `mix_deps`, `lib_deps`, or
-> `extra`. They all default to an empty list.
->
-> By implication, `[]` is a valid `uniform.exs` file.
-
-## How files are included/excluded by `mix uniform.eject`
-
-Whenever you run `mix uniform.eject my_app`, there are 4 simple rules that the
-library uses to decide which files to include or exclude from the ejected
-codebase.
-
-1. All files specified by the [base_files](Uniform.Blueprint.html#base_files/2)
-   section of the Blueprint are included. These are files to include with every
-   app.
-2. All files in `lib/my_app` and `test/my_app` are included.
-3. For every [Lib Dependency](dependencies.html#lib-dependencies), all files in
-   `lib/dep_name` and `test/dep_name` are included.
-4. [A small handful of files](Uniform.Blueprint.html#module-files-that-are-always-ejected)
-   common to most Elixir projects are always included.
-
-> There are some caveats to these rules.
->
->   - The files in rule 2 are subject to the
+>   - Files in `(lib|test)/my_app` (rule 3) are subject to the
 >     [lib_app_except](Uniform.Blueprint.html#c:app_lib_except/1) callback.
->   - The files in rule 3 are subject to [only](Uniform.Blueprint.html#only/1)
->     and [except](Uniform.Blueprint.html#except/1) instructions.
+>   - Lib Dependency files (rule 4) are subject to
+>     [only](Uniform.Blueprint.html#only/1) and
+>     [except](Uniform.Blueprint.html#except/1) instructions.
 

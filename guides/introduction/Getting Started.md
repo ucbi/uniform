@@ -101,7 +101,7 @@ Once you start structuring your project for Uniform, you'll add
 
 > #### More on uniform.exs {: .info}
 >
-> See [uniform.exs Options](./how-it-works.html#uniform-exs-options) for an
+> See [uniform.exs Options](uniform-manifests-uniform-exs.html) for an
 > explanation of supported options.
 
 ## Ejecting an Application

@@ -16,7 +16,7 @@ house the [Ecto Repo](https://hexdocs.pm/ecto/Ecto.Repo.html) as well as all
 database.
 
 Structuring the code this way allows you to easily include or exclude the code
-for a data source in [uniform.exs](how-it-works.html#uniform-exs-options).
+for a data source in [uniform.exs](uniform-manifests-uniform-exs.html).
 
 ## An Example
 

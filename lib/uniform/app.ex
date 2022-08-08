@@ -75,11 +75,15 @@ defmodule Uniform.App do
 
   Note that the `extra` key contains everything you put in `extra` in
   `uniform.exs` for the given app. It also contains anything returned by
-  `c:Uniform.Blueprint.extra/1`.
+  `c:Uniform.Blueprint.extra/1`. (`uniform.exs` has precedence for conflicting
+  keys.)
 
       #Uniform.App<
-        destination: "/Users/me/code/tweeter",
-        extra: [company: :fake_co, logo_file: "pixel", some_data: "from uniform.exs"],
+        extra: [
+          company: :fake_co,
+          logo_file: "path/to/some_logo.png",
+          some_data: "from uniform.exs"
+        ],
         name: %{
           camel: "Tweeter",
           hyphen: "tweeter",
