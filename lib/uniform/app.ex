@@ -1,6 +1,6 @@
 defmodule Uniform.App do
   @moduledoc """
-  An App struct, representing an application to be ejected. See the [type
+  An App struct, representing an app to be ejected. See the [type
   definition](`t:t/0`) for more details.
 
   ## App Struct Availability
@@ -68,8 +68,7 @@ defmodule Uniform.App do
   end
 
   @typedoc """
-  An App struct, representing a discrete, self-contained application to be
-  ejected.
+  An App struct, representing a discrete, self-contained app to be ejected.
 
   ## Example
 

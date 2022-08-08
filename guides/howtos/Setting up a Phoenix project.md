@@ -269,10 +269,10 @@ in your Router.
 
 ### Internal Pages
 
-Since you're adopting a model that serves all of your applications from a
-single server in the development environment, it can be useful to add other
-pages that aren't intended to be ejected with any app. For example, a page that
-catalogs and links to your various apps.
+Since you're adopting a model that serves all of your apps from a single server
+in the development environment, it can be useful to add other pages that aren't
+intended to be ejected with any app. For example, a page that catalogs and
+links to your various apps.
 
 We recommend adding these as often as you like, and wrapping them all in
 `# uniform:remove` Code Fences as in the example above.
@@ -282,11 +282,10 @@ We recommend adding these as often as you like, and wrapping them all in
 There are other files crucial for Elixir apps, such as `application.ex`,
 `mix.exs`, and `config/*.exs` files.
 
-Similarly to the Phoenix Router, we recommend adding all of the code needed for
-every application and [Lib Dependency](dependencies.html#lib-dependencies) to
-each of these places and using [Code
-Fences](code-transformations.html#code-fences) to remove code that isn't needed
-for any given application.
+Similarly to the Phoenix Router, we recommend that you add the code required by
+each of your apps and [Lib Dependencies](dependencies.html#lib-dependencies) to
+all of these files. Then, use [Code Fences](code-transformations.html#code-fences)
+to selectively remove code during ejection.
 
 ### Application
 

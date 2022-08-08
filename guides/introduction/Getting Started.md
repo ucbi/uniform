@@ -33,7 +33,7 @@ following the steps below.
 
 Next, create a [Blueprint](Uniform.Blueprint.html) module. It will contain all
 of the details for how `mix uniform.eject` should behave whenever you tell it
-to eject a specific application.
+to eject a specific app.
 
 ```elixir
 defmodule MyApp.Uniform.Blueprint do
@@ -77,14 +77,14 @@ You can do so with `mix uniform.gen.app`, which creates an empty manifest
 containing code comments to help you start.
 
 ```bash
-mix uniform.gen.app my_application_name
+mix uniform.gen.app my_app_name
 ```
 
 Or, if you want to do this manually, you can start with a barebones manifest
 that contains an empty list.
 
 ```elixir
-# lib/my_application_name/uniform.exs
+# lib/my_app_name/uniform.exs
 []
 ```
 
@@ -104,12 +104,12 @@ Once you start structuring your project for Uniform, you'll add
 > See [uniform.exs Options](uniform-manifests-uniform-exs.html) for an
 > explanation of supported options.
 
-## Ejecting an Application
+## Ejecting an App
 
 At this point, you should be able to run
 
 ```bash
-mix uniform.eject my_application_name
+mix uniform.eject my_app_name
 ```
 
 And be able to successfully create an ejected codebase. However, it will
@@ -122,8 +122,8 @@ This leads us to the final step of **Building a Blueprint**.
 > Read the documentation for [Uniform.Blueprint](Uniform.Blueprint.html) for
 > the full range of features to build out your Blueprint module.
 
-Since each Elixir application is different, **it is up to you to determine
-which files need to be ejected** to make `mix uniform.eject` emit a working
+Since each Elixir project is different, **it is up to you to determine which
+files need to be ejected** to make `mix uniform.eject` emit a working
 application.
 
 > #### Are you building Phoenix apps? {: .tip}

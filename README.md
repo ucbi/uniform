@@ -46,7 +46,7 @@ In summary, you'll need to:
 1. Add the dep in `mix.exs`: `{:uniform, "~> 0.2.0"}`
 2. Add a [Blueprint](https://hexdocs.pm/uniform/Uniform.Blueprint.html) module to your project
 3. Configure your Elixir app to point to the Blueprint module
-4. Add `uniform.exs` manifests to each Ejectable Application
+4. Add `uniform.exs` manifests to each Ejectable App
 
 ## License
 

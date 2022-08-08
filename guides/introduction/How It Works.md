@@ -6,8 +6,8 @@ codebase that only contains the code needed by the app.
 
 ## The Base Project
 
-The Base Project is the single Elixir application that houses all of your
-applications. Applications are developed and tested in the Base Project.
+The Base Project is the single Elixir project that houses multiple separate
+apps. Apps are developed and tested together in the Base Project.
 
 The Base Project's `lib` directory is central. It contains directories for:
 
@@ -30,9 +30,8 @@ configuring which files are copied to ejected repositories.
 
 ## What is "Ejecting"?
 
-"Ejecting" an app means copying the code used by the application to a separate,
-standalone code repository, without including code that the application doesn't
-need. Specifically,
+"Ejecting" an app means copying the app's code to a separate, standalone
+codebase – without including code the app doesn't need.
 
 - **Unused Lib Dependencies are excluded from `lib`**
 - **Unused Mix Dependencies are removed from `mix.exs`**

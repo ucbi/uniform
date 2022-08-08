@@ -37,9 +37,9 @@ defmodule Uniform do
   1. Add the dep in `mix.exs`: `{:uniform, "~> 0.1.0"}`
   2. Add a [Blueprint](Uniform.Blueprint.html) module to your project
   3. Configure your Elixir app to point to the Blueprint module
-  4. Add `uniform.exs` manifests to each Ejectable Application
-  5. Add to the Blueprint module all the files necessary to eject a working
-     application
+  4. Add `uniform.exs` manifests to each Ejectable App
+  5. Set up the Blueprint module to eject all the files needed to eject a
+     working app
 
   > #### Uniform ❤️ Automation {: .tip}
   >

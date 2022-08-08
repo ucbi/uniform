@@ -7,8 +7,7 @@ the Base Project.
 
 Imagine you do not use [runtime
 configuration](https://hexdocs.pm/elixir/main/Config.html#module-config-runtime-exs)
-in your Base Project, but you want a `config/runtime.exs` in your ejected
-applications.
+in your Base Project, but you want a `config/runtime.exs` in your ejected apps.
 
 Furthermore, imagine the contents of `runtime.exs` need to be wildly different
 between apps based on the Lib and Mix Dependencies of the app.

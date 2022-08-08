@@ -1,25 +1,24 @@
 # Benefits and Disadvantages
 
 Uniform is not for everyone, but it can be very powerful in environments where
-a team or developer is tasked with developing a large portfolio of applications
-that have many similarities or could share many capabilities.
+a team or developer is tasked with developing a large portfolio of apps that
+have many similarities or could share many capabilities.
 
 ## Benefits
 
-- **Higher leverage to maintain a portfolio of applications.** There is a sense
-  of higher return on investment (ROI) as more and more applications are built.
-  When you add a new capability, refactor deprecations, or change an
-  implementation, the results are automatically incorporated into all of your
-  applications.
-- **Reduce dependency drift.** Ejected applications derive their Mix and NPM
+- **Higher leverage to maintain a portfolio of apps.** There is a sense of
+  higher return on investment (ROI) as more and more apps are built. When you
+  add a new capability, refactor deprecations, or change an implementation, the
+  results are automatically incorporated into all of your apps.
+- **Reduce dependency drift.** Ejected apps derive their Mix and NPM
   dependencies from the Base Project. This eliminates distractions that come
   from supporting multiple versions across a portfolio. No more grappling with
   missing features or incompatible APIs.
 - **Faster feedback.** When you change anything shared, your changes are
-  automatically made and tested into all applications that could be impacted.
+  automatically made and tested in all apps that could be impacted.
 - **Share capabilities with lower overhead.** Any capability that is developed
-  for a specific application can be moved into a Lib Dependency. At that point,
-  it's instantly available to all other applications in the portfolio.
+  for a specific app can be moved into a Lib Dependency. At that point, it's
+  instantly available to all other apps in the portfolio.
 - **Defer factoring decisions.** In the interest of the DRY (Don't Repeat
   Yourself) principle, there is a motivation to abstract and modularize the
   moment we start adding a feature. Many advocate for the WET principle (Write
@@ -29,13 +28,13 @@ that have many similarities or could share many capabilities.
   internal libraries, there are no distinct packages to create up front which
   makes it much easier to refactor as the API evolves.
 - **Global Refactors with peace of mind.** When the entire portfolio of
-  applications is managed together, we're free to refactor any interal API and
-  know that we've addressed all invocations across the enterprise. With Elixir
+  apps is managed together, we're free to refactor any interal API and know
+  that we've addressed all invocations across the enterprise. With Elixir
   compiler warnings and integration tests, CI builds reveal invocations we fail
   to update. In many cases, this eliminates the burden of maintaining backwards
   compatibility, leading to simpler internal libraries.
 - **"Release" an ejected app at any time.** If at any point you need to release
-  control of an ejected application to another entity such as a different
+  control of an ejected app to another entity such as a different
   development agency, the ejected codebase is already ready as a standalone
   project.
 - **Self-healing properties.** - Since `mix uniform.eject` starts by deleting
@@ -64,10 +63,10 @@ that have many similarities or could share many capabilities.
       Routes.users_path(...) %>">` the link will work in development but not
       production.
 - **Compilation time.** Full recompiles can take a long time for a large
-  portfolio of application. Elixir 1.13 has helped out tremendously in this
+  portfolio of apps. Elixir 1.13 has helped out tremendously in this
   regard. On the other hand, you'll often end up with a full recompile when
   changing something in `config/config.exs` which only has relevance to a
-  single application.
+  single app.
 - **CI burn rate.** We run Continuous Integration (CI) checks for every ejected
-  application whenever a commit is made to the Base Project. We suggest you do,
-  too. However, this can burn through an order of magnitude more CI minutes.
+  app whenever a commit is made to the Base Project. We suggest you do, too.
+  However, this can burn through an order of magnitude more CI minutes.
