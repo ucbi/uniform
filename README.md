@@ -1,5 +1,9 @@
 # Uniform
 
+[![Build Status](https://github.com/ucbi/uniform/workflows/CI/badge.svg)](https://github.com/ucbi/uniform/actions?query=workflow%3A%22CI%22)
+[![hex.pm](https://img.shields.io/hexpm/v/uniform.svg)](https://hex.pm/packages/uniform)
+[![hex.pm](https://img.shields.io/hexpm/l/uniform.svg)](https://hex.pm/packages/uniform)
+
 > Write less boilerplate and reuse more code in your portfolio of Elixir apps
 
 With Uniform, developers maintain multiple Elixir apps inside a Base Project: a
