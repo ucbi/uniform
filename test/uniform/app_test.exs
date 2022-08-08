@@ -17,7 +17,7 @@ defmodule Uniform.AppTest do
       extra: [some_data: "from uniform.exs"]
     }
 
-    %App{} = app = App.new!(config, manifest, Tweeter)
+    %App{} = app = App.new!(config, manifest, "tweeter")
 
     assert app.name == %{
              module: Tweeter,
@@ -70,7 +70,8 @@ defmodule Uniform.AppTest do
              :always_included_mix,
              :excluded_mix,
              :included_mix,
-             :indirectly_included_mix
+             :indirectly_included_mix,
+             :uniform
            ]
   end
 

@@ -59,7 +59,7 @@ def project do
 end
 ```
 
-Given the above `mix.exs`, if you were to run `mix uniform.eject MyEjectableApp`:
+Given the above `mix.exs`, if you were to run `mix uniform.eject my_ejectable_app`:
 
 - `my_base_app` would be replaced with `my_ejectable_app`
 - `my-base-app` would be replaced with `my-ejectable-app`

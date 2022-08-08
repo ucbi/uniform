@@ -11,7 +11,7 @@ defmodule Mix.Tasks.Uniform.Gen.App do
   ```
 
   Running that command will create `lib/some_app_name/uniform.exs`. This will
-  enable `mix uniform.eject SomeAppName` to work without failing.
+  enable `mix uniform.eject some_app_name` to work without failing.
   """
 
   use Mix.Task

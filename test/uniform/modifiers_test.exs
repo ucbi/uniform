@@ -18,7 +18,7 @@ defmodule Uniform.ModifiersTest do
         extra: []
       )
 
-    %{app: App.new!(config, manifest, CodeFenceApp)}
+    %{app: App.new!(config, manifest, "code_fence_app")}
   end
 
   test "uniform:lib", %{app: app} do
