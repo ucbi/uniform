@@ -14,8 +14,8 @@ directory in `lib`. (`lib/utilities` is referenced as `:utilities`.)
 
 ## Mix Dependencies
 
-Uniform is aware of the deps in your `mix.exs`. Whenever an app is ejected, it
-removes all mix dependencies that aren't explicitly needed by the app.
+Uniform is aware of the deps in your `mix.exs`. Whenever an app is ejected,
+Uniform removes all mix dependencies that aren't explicitly needed by the app.
 
 This is accomplished by wrapping your list of dependencies in the following
 comments:
@@ -46,7 +46,7 @@ by an App:
 ]
 ```
 
-2. Include the depencency in **all Ejectable Apps** by placing the dependency
+2. Include the dependency in **all Ejectable Apps** by placing the dependency
    in the [always](`Uniform.Blueprint.always/1`) section of your
    [Blueprint](Uniform.Blueprint.html) module.
 

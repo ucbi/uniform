@@ -2,8 +2,8 @@
 
 ## Add Uniform to mix.exs
 
-Add `:uniform` as a dependency in `mix.exs` and wrap your entire dependency
-list in `# uniform:deps` and `# /uniform:deps` comments, like this.
+Add `:uniform` as a dependency in `mix.exs` and wrap the deps list in `#
+uniform:deps` and `# /uniform:deps` comments, like this.
 
 
 ```elixir
@@ -31,9 +31,11 @@ following the steps below.
 
 ### Create a Blueprint module
 
-Next, create a [Blueprint](Uniform.Blueprint.html) module. It will contain all
-of the details for how `mix uniform.eject` should behave whenever you tell it
-to eject a specific app.
+If you opted out of running `mix uniform.init`, create a
+[Blueprint](Uniform.Blueprint.html) module. This is the central file you'll use
+to tell Uniform which files to copy when running `mix uniform.eject`.
+
+To start, you can create an empty Blueprint like this.
 
 ```elixir
 defmodule MyApp.Uniform.Blueprint do
@@ -47,8 +49,9 @@ alongside it in `lib/my_app/uniform/templates`.
 
 ### Configuration
 
-In `config/config.exs` put the following line. (Changing the `blueprint` value
-to match the name of your Blueprint module name above.)
+If you opted out of running `mix uniform.init`, add the following line to
+`config/config.exs`. (Changing the `blueprint` value to match the name of your
+Blueprint module name above.)
 
 ```elixir
 config :my_app, Uniform, blueprint: MyApp.Uniform.Blueprint
@@ -101,7 +104,7 @@ Once you start structuring your project for Uniform, you'll add
 
 > #### More on uniform.exs {: .info}
 >
-> See [uniform.exs Options](uniform-manifests-uniform-exs.html) for an
+> See the [Uniform Manifests](uniform-manifests-uniform-exs.html) guide for an
 > explanation of supported options.
 
 ## Ejecting an App
@@ -112,8 +115,8 @@ At this point, you should be able to run
 mix uniform.eject my_app_name
 ```
 
-And be able to successfully create an ejected codebase. However, it will
-probably lack critical code that is needed to run properly.
+And be able to successfully create an ejected codebase. However, it probably
+won't contain the files needed to run locally or be deployed.
 
 This leads us to the final step of **Building a Blueprint**.
 
@@ -128,9 +131,8 @@ application.
 
 > #### Are you building Phoenix apps? {: .tip}
 >
-> We recommend developers building Phoenix applications read the [How It
-> Works](how-it-works.html) guide, then consult the how-to guide for [Setting
-> up a Phoenix Project](./setting-up-a-phoenix-project.html).
+> We recommend developers building Phoenix applications read [Setting up a
+> Phoenix project](./setting-up-a-phoenix-project.html).
 
 An example barebones Blueprint might look like this.
 

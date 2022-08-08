@@ -58,24 +58,19 @@ To set up an Ejectable App manually:
 
 ## Exactly which files get ejected?
 
-When you run `mix uniform.eject my_app`, these four rules determine which files
-are copied.
+There are four rules that determine which files are copied during ejection.
+[Read about the four rules
+here.](Mix.Tasks.Uniform.Eject.html#module-which-files-get-ejected)
 
-1. [A few files](Uniform.Blueprint.html#module-files-that-are-always-ejected)
-   common to Elixir projects are copied.
-2. All files in the Blueprint's
-   [base_files](Uniform.Blueprint.html#base_files/1) section are copied.
-3. All files in `lib/my_app` and `test/my_app` are copied.
-4. For every [Lib Dependency](dependencies.html#lib-dependencies) of `my_app`:
-    - All files in `lib/dep_name` and `test/dep_name` are copied.
-    - All [associated files](Uniform.Blueprint.html#lib/2-associated-files)
-      tied to the Lib Dependency are copied.
+In summary, the files in the Blueprint's
+[`base_files`](Uniform.Blueprint.html#base_files/1) are ejected along with
+every directory in `lib/*` and `test/*` that correspond to the app being
+ejected and its [Lib Dependencies](dependencies.html#lib-dependencies).
 
-> If you need to apply exceptions to these rules, you can use these tools.
->
->   - Files in `(lib|test)/my_app` (rule 3) are subject to the
->     [lib_app_except](Uniform.Blueprint.html#c:app_lib_except/1) callback.
->   - Lib Dependency files (rule 4) are subject to
->     [only](Uniform.Blueprint.html#only/1) and
->     [except](Uniform.Blueprint.html#except/1) instructions.
+You have complete control to customize which files are ejected using your
+[Blueprint](Uniform.Blueprint.html) file and each app's [Uniform
+Manifest](uniform-manifests-uniform-exs.html).
 
+Make sure to build out your [Blueprint](Uniform.Blueprint.html)'s `base_files`
+and `deps` sections. If you're building Phoenix apps, you may want to consult
+the [Setting up a Phoenix project](./setting-up-a-phoenix-project.html) guide.

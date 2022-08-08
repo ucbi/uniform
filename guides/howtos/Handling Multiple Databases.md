@@ -1,7 +1,7 @@
 # Handling multiple databases
 
-> This guide assumes that you've gone through with [How It
-> Works](how-it-works.html) and [Getting Started](getting-started.html) guides.
+> This guide assumes that you've read the [How It Works](how-it-works.html) and
+> [Getting Started](getting-started.html) guides.
 
 If you're using Uniform it's likely that you have multiple databases, but you
 don't want to give every app access to every database.

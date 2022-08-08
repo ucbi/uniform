@@ -1,8 +1,8 @@
 # Setting up a Phoenix project
 
 > This guide walks through a typical process for setting up a Phoenix project.
-> It assumes that you've gone through with [How It Works](how-it-works.html)
-> and [Getting Started](getting-started.html) guides.
+> It assumes you've read the [How It Works](how-it-works.html) and [Getting
+> Started](getting-started.html) guides.
 
 Imagine creating an entire new application simply by adding a Route and a
 single LiveView to an existing Elixir project.

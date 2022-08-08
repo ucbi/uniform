@@ -749,6 +749,8 @@ defmodule Uniform.Blueprint do
   - `cp/1`
   - `cp_r/1`
 
+  For example:
+
   ```
   deps do
     # if my_data_source is required...

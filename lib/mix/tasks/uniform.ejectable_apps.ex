@@ -10,12 +10,16 @@ defmodule Mix.Tasks.Uniform.EjectableApps do
   ## Usage
 
   ```bash
-  mix uniform.ejectable_apps
+  $ mix uniform.ejectable_apps
+  tweeter
+  trillo
+  hatmail
   ```
   """
 
   use Mix.Task
 
+  @doc false
   def run(_) do
     for name <- Uniform.ejectable_app_names(), do: IO.puts(name)
   end

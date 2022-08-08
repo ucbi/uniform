@@ -1,9 +1,9 @@
 defmodule Uniform.App do
   @moduledoc """
-  An App struct, representing an app to be ejected. See the [type
+  A struct representing an app to be ejected. See the [type
   definition](`t:t/0`) for more details.
 
-  ## App Struct Availability
+  ## Where it's availabile
 
   This struct is available in the Blueprint module in these locations:
 
@@ -15,10 +15,10 @@ defmodule Uniform.App do
   In these callbacks and macros, you can make decisions about what to eject or
   how files should be modified using the `app`.
 
-  ## Checking App Dependencies
+  ## Checking for dependencies
 
-  The `depends_on?/3` utility can be used to determine whether a app depends on
-  a mix or lib dependency.
+  In the callbacks and macros above, you can use `depends_on?/3` determine
+  whether an app depends on a mix or lib dependency.
 
       depends_on?(app, :mix, :norm)
 

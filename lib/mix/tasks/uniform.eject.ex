@@ -3,7 +3,7 @@ defmodule Mix.Tasks.Uniform.Eject do
   Ejects an [Ejectable App](how-it-works.html#ejectable-apps) to a
   standalone code repository.
 
-  ## Examples
+  ## Usage
 
   ```bash
   $ mix uniform.eject trillo
@@ -19,29 +19,51 @@ defmodule Mix.Tasks.Uniform.Eject do
       destination is chosen if this option is omitted.
     * `--confirm` – affirm "yes" to the prompt asking you whether you want to eject.
 
-  ## Ejection Step By Step
+  ## Which files get ejected
+
+  When you run `mix uniform.eject my_app`, these four rules determine which files
+  are copied.
+
+  1. [A few files](Uniform.Blueprint.html#module-files-that-are-always-ejected)
+     common to Elixir projects are copied.
+  2. All files in the Blueprint's
+     [base_files](Uniform.Blueprint.html#base_files/1) section are copied.
+  3. All files in `lib/my_app` and `test/my_app` are copied.
+  4. For every [Lib Dependency](dependencies.html#lib-dependencies) of `my_app`:
+      - All files in `lib/my_lib_dep` and `test/my_lib_dep` are copied.
+      - All [associated files](Uniform.Blueprint.html#lib/2-associated-files)
+        tied to the Lib Dependency are copied.
+
+  > If you need to apply exceptions to these rules, you can use these tools.
+  >
+  >   - Files in `(lib|test)/my_app` (rule 3) are subject to the
+  >     [lib_app_except](Uniform.Blueprint.html#c:app_lib_except/1) callback.
+  >   - Lib Dependency files (rule 4) are subject to
+  >     [only](Uniform.Blueprint.html#only/1) and
+  >     [except](Uniform.Blueprint.html#except/1) instructions.
+
+  ## Ejection step by step
 
   When you eject an app by running `mix uniform.eject my_app`, the following happens:
 
   1. The destination directory is created if it doesn't exist.
-  2. All files and directories in the destination are deleted, except for `.git`,
-    `_build`, and `deps`.
-  3. All files in `lib/my_app` and `test/my_app` are copied to the destination.
-  4. All files specified in the [base_files](Uniform.Blueprint.html#base_files/1) section of the
-     [Blueprint](`Uniform.Blueprint`) are copied to the destination.
-  5. All [Lib Dependencies](dependencies.html#lib-dependencies) of the app are
-    copied to the destination. This includes all of `lib/dep_name` and
-    `test/dep_name` automatically.
-  6. For each file copied, [a set of
-    transformations](./code-transformations.html) are applied to the file
-    contents – except for files specified with `cp` and `cp_r`.
-  7. `mix format` is ran on the ejected codebase.
+  2. All files and directories in the destination are deleted, except for
+     `.git`, `_build`, `deps`, and anything in the Blueprint's
+     [`@preserve`](Uniform.Blueprint.html#module-preserving-files).
+  3. All files required by the app are copied to the destination. (See [Which
+     files get ejected](#module-which-files-get-ejected).)
+  4. For each file copied, [a set of
+     transformations](./code-transformations.html) are applied to the file
+     contents – except for files specified with `cp` and `cp_r`.
+  5. `mix deps.clean --unlock --unused` is ran so that unused Mix Dependencies
+     are removed `mix.lock`.
+  6. `mix format` is ran on the ejected codebase.
 
   In step 2, `.git` is kept to preserve the Git repository and history. `deps`
   is kept to avoid having to download all dependencies after ejection. `_build`
   is kept to avoid having to recompile the entire project after ejection.
 
-  In step 7, running `mix format` tidies up things like chains of newlines that
+  In step 6, running `mix format` tidies up things like chains of newlines that
   may appear from applying [Code Fences](code-transformations.html#code-fences).
   It also prevents you from having to think about code formatting in
   [modify](Uniform.Blueprint.html#modify/2).
