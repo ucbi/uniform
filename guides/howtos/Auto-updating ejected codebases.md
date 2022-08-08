@@ -38,8 +38,8 @@ host is different, you'll have to consult the documentation for yours.
 For step 2 above, Uniform ships with a few tools to help you get a full list of
 your Ejectable Apps.
 
-To output your Ejectable App names in stdout on the command line, use `mix
-uniform.ejectable_apps`.
+To output your Ejectable App names in stdout on the command line, use [`mix
+uniform.ejectable_apps`](Mix.Tasks.Uniform.EjectableApps.html).
 
 ```bash
 $ mix uniform.ejectable_apps
