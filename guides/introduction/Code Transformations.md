@@ -23,15 +23,9 @@ files using the `modify` macro in the [Blueprint](`Uniform.Blueprint`) module:
 
 ```elixir
 modify ~r/.+_worker.ex/, fn file, app ->
-  # This code will be ran for every file whose relative path in the base
-  # project matches the regex.
-  #
   # `file` is a string containing the full file contents.
-  #
-  # `app` is the `Uniform.App` struct of the given app being ejected.
-  #
-  # This is essentially a function body, must return a string with
-  # the modified file contents to eject.
+  # `app` is the `Uniform.App` struct. (The app being ejected.)
+  # The string this function returns will be the ejected file contents.
 end
 
 modify "lib/my_app_web/router.ex", fn file ->

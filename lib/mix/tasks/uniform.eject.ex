@@ -55,17 +55,21 @@ defmodule Mix.Tasks.Uniform.Eject do
   4. For each file copied, [a set of
      transformations](./code-transformations.html) are applied to the file
      contents – except for files specified with `cp` and `cp_r`.
-  5. `mix deps.clean --unlock --unused` is ran so that unused Mix Dependencies
-     are removed `mix.lock`.
+  5. `mix deps.clean --unlock --unused` is ran on the ejected codebase.
   6. `mix format` is ran on the ejected codebase.
 
   In step 2, `.git` is kept to preserve the Git repository and history. `deps`
   is kept to avoid having to download all dependencies after ejection. `_build`
   is kept to avoid having to recompile the entire project after ejection.
 
-  In step 6, running `mix format` tidies up things like chains of newlines that
-  may appear from applying [Code Fences](code-transformations.html#code-fences).
-  It also prevents you from having to think about code formatting in
+  `mix deps.clean --unlock --unused` removes unused Mix Dependencies from
+  `mix.lock` in the ejected codebase. This includes [deps removed from
+  `mix.exs`](dependencies.html#mix-dependencies) as well as transitive
+  dependencies of those deps.
+
+  `mix format` tidies up things like chains of newlines that may appear from
+  applying [Code Fences](code-transformations.html#code-fences). It also
+  prevents you from having to think about code formatting in
   [modify](Uniform.Blueprint.html#modify/2).
 
   """
