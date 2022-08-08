@@ -263,29 +263,31 @@ scope "/", SomeAppWeb do
 
 In the ejected codebase.
 
-This method is a great starting point. Once you reach dozens of apps, you may
-want to consider other methods that allow you to branch out to more separation
-in your Router.
+This method is a great starting point. Before you reach dozens of apps, you may
+want to consider other methods that allow you to define routes in a separate
+file per app.
 
 ### Internal Pages
 
-Since you're adopting a model that serves all of your apps from a single server
-in the development environment, it can be useful to add other pages that aren't
-intended to be ejected with any app. For example, a page that catalogs and
-links to your various apps.
+We encourage running all apps simultaneously via the Base Project as your
+development environment. In such a setup, it can be useful to add other pages
+to the Base Project that aren't intended to be ejected with any app.
 
-We recommend adding these as often as you like, and wrapping them all in
-`# uniform:remove` Code Fences as in the example above.
+For example, you might add a page that catalogs and links to your various apps.
+We recommend adding these routes and wrapping them all in `# uniform:remove`
+Code Fences as in the example above.
 
 ## Code Fences Everywhere!
 
-There are other files crucial for Elixir apps, such as `application.ex`,
-`mix.exs`, and `config/*.exs` files.
+There are other files which are central for running Elixir apps.
 
 Similarly to the Phoenix Router, we recommend that you add the code required by
 each of your apps and [Lib Dependencies](dependencies.html#lib-dependencies) to
 all of these files. Then, use [Code Fences](code-transformations.html#code-fences)
 to selectively remove code during ejection.
+
+Let's examine what this might look like for `application.ex`, `mix.exs`, and
+`config/*.exs` files.
 
 ### Application
 
@@ -372,14 +374,31 @@ you follow the [Getting Started](getting-started.html) instructions properly.
 
 So this would not be required.
 
-    # ❌ Do NOT wrap deps in code fences
-    defp deps do
-      [
-        # uniform:mix:jason
-        {:jason, "~> 1.0"}
-        # /uniform:mix:jason
-      ]
-    end
+```elixir
+# ❌ Do NOT wrap individual deps in code fences
+defp deps do
+  [
+    # uniform:mix:jason
+    {:jason, "~> 1.0"},
+    # /uniform:mix:jason
+    ...
+  ]
+end
+```
+
+Instead, wrap your entire deps list in `uniform:deps` fences.
+
+```elixir
+# ✅ Do use `uniform:deps` fences
+defp deps do
+  # uniform:deps
+  [
+    {:jason, "~> 1.0"},
+    ...
+  ]
+  # /uniform:deps
+end
+```
 
 ### Config Files
 
