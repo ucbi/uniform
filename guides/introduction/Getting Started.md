@@ -125,14 +125,16 @@ This leads us to the final step of **Building a Blueprint**.
 > Read the documentation for [Uniform.Blueprint](Uniform.Blueprint.html) for
 > the full range of features to build out your Blueprint module.
 
-Since each Elixir project is different, **it is up to you to determine which
-files need to be ejected** to make `mix uniform.eject` emit a working
-application.
+The [Blueprint module](#create-a-blueprint-module) is central for configuring
+which files are ejected during `mix uniform.eject`.
+
+Since each Elixir project is different, **it is up to you** to determine which
+files need to be ejected to emit a working application.
 
 > #### Are you building Phoenix apps? {: .tip}
 >
-> We recommend developers building Phoenix applications read [Setting up a
-> Phoenix project](./setting-up-a-phoenix-project.html).
+> The [Setting up a Phoenix project](./setting-up-a-phoenix-project.html) guide
+> contains details and examples for building your Blueprint.
 
 An example barebones Blueprint might look like this.
 

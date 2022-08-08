@@ -23,6 +23,7 @@ In order to understand and use this library, we heavily recommend reading the
 following guides:
 
 - [How It Works](https://hexdocs.pm/uniform/how-it-works.html)
+- [Uniform Manifests](uniform-manifests-uniform-exs.html)
 - [Dependencies](https://hexdocs.pm/uniform/dependencies.html)
 - [Code Transformations](https://hexdocs.pm/uniform/code-transformations.html)
 
@@ -45,8 +46,9 @@ In summary, you'll need to:
 
 1. Add the dep in `mix.exs`: `{:uniform, "~> 0.2.0"}`
 2. Add a [Blueprint](https://hexdocs.pm/uniform/Uniform.Blueprint.html) module to your project
-3. Configure your Elixir app to point to the Blueprint module
+3. Add configuration to identify the Blueprint module
 4. Add `uniform.exs` manifests to each Ejectable App
+5. Fill out the Blueprint so all the necessary files get ejected
 
 ## License
 
