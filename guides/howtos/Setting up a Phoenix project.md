@@ -96,7 +96,7 @@ cp_r "priv/static"
 Note that `cp_r` instructs `mix uniform.eject` to copy all the directory
 contents (using `File.cp_r!/3`).
 
-Phoenix apps typically have an `Web` module which is used to construct
+Phoenix apps typically have a `Web` module which is used to construct
 Controllers, Views, Routers, and LiveViews. Since this file is typically in
 `lib/` directly (and not in a sub-directory of `lib/`), we include it here in
 the `base_files` section.
