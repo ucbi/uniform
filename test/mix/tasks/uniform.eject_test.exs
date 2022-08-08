@@ -83,7 +83,7 @@ defmodule Mix.Tasks.Uniform.EjectTest do
     # demonstrate that `@preserve`d files are never cleared
     # (note: TestProject.Uniform.Blueprint specifies to preserve .gitignore)
     [app] = Uniform.ejectable_apps()
-    Uniform.clear_destination(app)
+    Mix.Tasks.Uniform.Eject.clear_destination(app)
     assert file_exists?(".gitignore")
   end
 

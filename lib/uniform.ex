@@ -51,8 +51,6 @@ defmodule Uniform do
 
   """
 
-  require Logger
-
   @typep prepare_opt :: {:destination, String.t()}
 
   @doc """
@@ -149,43 +147,5 @@ defmodule Uniform do
     config = Uniform.Config.build()
     manifest = Uniform.Manifest.eval_and_parse(config, Macro.underscore(name))
     Uniform.App.new!(config, manifest, name, opts)
-  end
-
-  @doc """
-       Ejects an app. That is, deletes the files in the destination and copies a fresh
-       set of files for that app.
-       """ && false
-  def eject(app) do
-    clear_destination(app)
-    Logger.info("📂 #{app.destination}")
-    File.mkdir_p!(app.destination)
-
-    for ejectable <- Uniform.File.all_for_app(app) do
-      Logger.info("💾 [#{ejectable.type}] #{ejectable.destination}")
-      Uniform.File.eject!(ejectable, app)
-    end
-
-    # remove mix deps that are not needed for this project from mix.lock
-    System.cmd("mix", ["deps.clean", "--unlock", "--unused"], cd: app.destination)
-    System.cmd("mix", ["format"], cd: app.destination)
-  end
-
-  @doc "Clear the destination folder where the app will be ejected." && false
-  def clear_destination(app) do
-    if File.exists?(app.destination) do
-      {:module, _} = Code.ensure_loaded(app.internal.config.blueprint)
-
-      preserve = app.internal.config.blueprint.__preserve__()
-      preserve = [".git", "deps", "_build" | preserve]
-
-      app.destination
-      |> File.ls!()
-      |> Enum.reject(&(&1 in preserve))
-      |> Enum.each(fn file_or_folder ->
-        path = Path.join(app.destination, file_or_folder)
-        Logger.info("💥 #{path}")
-        File.rm_rf(path)
-      end)
-    end
   end
 end

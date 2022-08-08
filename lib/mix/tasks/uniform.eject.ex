@@ -71,6 +71,7 @@ defmodule Mix.Tasks.Uniform.Eject do
   """
 
   use Mix.Task
+  require Logger
 
   @doc false
   def run(args) do
@@ -160,12 +161,49 @@ defmodule Mix.Tasks.Uniform.Eject do
 
     if eject do
       IO.puts("")
-      Uniform.eject(app)
+      eject(app)
       IO.puts("✅ #{app.name.camel} ejected to #{app.destination}")
     end
   rescue
     e in Uniform.NotEjectableError ->
       message = Uniform.NotEjectableError.message(e)
       IO.puts(IO.ANSI.yellow() <> message <> IO.ANSI.reset())
+  end
+
+  # Ejects an app. Deletes the files in the destination and copies a fresh set
+  # of files for the app.
+  defp eject(app) do
+    clear_destination(app)
+    Logger.info("📂 #{app.destination}")
+    File.mkdir_p!(app.destination)
+
+    for file <- Uniform.File.all_for_app(app) do
+      Logger.info("💾 [#{file.type}] #{file.destination}")
+      Uniform.File.eject!(file, app)
+    end
+
+    # remove mix deps that are not needed for this project from mix.lock
+    System.cmd("mix", ["deps.clean", "--unlock", "--unused"], cd: app.destination)
+    System.cmd("mix", ["format"], cd: app.destination)
+  end
+
+  # Clear the destination folder where the app will be ejected.
+  @doc false
+  def clear_destination(app) do
+    if File.exists?(app.destination) do
+      {:module, _} = Code.ensure_loaded(app.internal.config.blueprint)
+
+      preserve = app.internal.config.blueprint.__preserve__()
+      preserve = [".git", "deps", "_build" | preserve]
+
+      app.destination
+      |> File.ls!()
+      |> Enum.reject(&(&1 in preserve))
+      |> Enum.each(fn file_or_folder ->
+        path = Path.join(app.destination, file_or_folder)
+        Logger.info("💥 #{path}")
+        File.rm_rf(path)
+      end)
+    end
   end
 end
