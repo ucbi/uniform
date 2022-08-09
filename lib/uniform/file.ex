@@ -230,11 +230,6 @@ defmodule Uniform.File do
                   mix_project_app: app.internal.config.mix_project_app
               end
 
-              if !File.dir?(Path.expand(template_dir)) do
-                raise Uniform.InvalidTemplateDirError,
-                  directory: template_dir
-              end
-
               EEx.eval_file(
                 Path.join(template_dir, source <> ".eex"),
                 app: app,
