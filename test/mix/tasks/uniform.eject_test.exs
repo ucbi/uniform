@@ -12,6 +12,26 @@ defmodule Mix.Tasks.Uniform.EjectTest do
     end
   end
 
+  test "ejecting with an empty Blueprint" do
+    set_blueprint_in_config(TestProject.Uniform.EmptyBlueprint)
+    # We don't assert anything but simply test the happy path for crashes.
+    # Use rerun here because `Mix.Task` refuses to run it twice otherwise.
+    capture_io(fn -> Mix.Task.rerun("uniform.eject", ["tweeter", "--confirm"]) end)
+    # reset blueprint so we don't affect other tests
+    set_blueprint_in_config(TestProject.Uniform.Blueprint)
+  end
+
+  test "missing templates directory" do
+    set_blueprint_in_config(TestProject.Uniform.MissingTemplatesBlueprint)
+
+    assert_raise Uniform.MissingTemplatesDirectoryError, fn ->
+      capture_io(fn -> Mix.Task.rerun("uniform.eject", ["tweeter", "--confirm"]) end)
+    end
+
+    # reset blueprint so we don't affect other tests
+    set_blueprint_in_config(TestProject.Uniform.Blueprint)
+  end
+
   test "full ejection" do
     # Use rerun here because `Mix.Task` refuses to run it twice otherwise
     capture_io(fn -> Mix.Task.rerun("uniform.eject", ["tweeter", "--confirm"]) end)
@@ -85,14 +105,5 @@ defmodule Mix.Tasks.Uniform.EjectTest do
     [app] = Uniform.ejectable_apps()
     Mix.Tasks.Uniform.Eject.clear_destination(app)
     assert file_exists?(".gitignore")
-  end
-
-  test "ejecting with an empty Blueprint" do
-    set_blueprint_in_config(TestProject.Uniform.EmptyBlueprint)
-    # We don't assert anything but simply test the happy path for crashes.
-    # Use rerun here because `Mix.Task` refuses to run it twice otherwise.
-    capture_io(fn -> Mix.Task.rerun("uniform.eject", ["tweeter", "--confirm"]) end)
-    # reset blueprint so we don't affect other tests
-    set_blueprint_in_config(TestProject.Uniform.Blueprint)
   end
 end
