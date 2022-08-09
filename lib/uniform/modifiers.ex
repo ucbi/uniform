@@ -153,11 +153,8 @@ defmodule Uniform.Modifiers do
       |> Sourceror.parse_string()
       |> Sourceror.Zipper.zip()
       |> Sourceror.Zipper.find(:next, fn
-        {:defp, _, [{:deps, _, nil}, _]} ->
-          true
-
-        _ ->
-          false
+        {:defp, _, [{:deps, _, nil}, [_deps]]} -> true
+        _ -> false
       end)
 
     defp_deps = if zipper, do: Sourceror.Zipper.node(zipper)
@@ -196,40 +193,18 @@ defmodule Uniform.Modifiers do
     lines = String.split(file_contents, "\n")
     prelude = Enum.slice(lines, 0..(start_line - 2))
     postlude = Enum.slice(lines, end_line..-1)
-    all_deps = app.internal.config.mix_project.project()[:deps]
 
-    new_deps =
-      for dep <- all_deps, dep_name(dep) in app.internal.deps.included.mix do
-        {name, version, opts} =
-          case dep do
-            {name, ver} when is_binary(ver) ->
-              {name, ver, nil}
+    {:defp, _, [{:deps, _, nil}, [{{_, _, [:do]}, {:__block__, _, [deps_ast]}}]]} = defp_deps
 
-            {name, opts} ->
-              validate_opts!(name, opts) && {name, nil, opts}
-
-            {name, ver, opts} when is_binary(ver) ->
-              validate_opts!(name, opts) && {name, ver, opts}
-          end
-
-        tuple_contents =
-          [
-            name && inspect(name),
-            version && inspect(version),
-            opts && String.slice(inspect(opts), 1..-2)
-          ]
-          |> Enum.reject(&is_nil/1)
-          |> Enum.intersperse(", ")
-
-        ["      {", tuple_contents, "},\n"]
-      end
+    filtered_deps =
+      deps_ast
+      |> Enum.filter(&(ast_dep_name(&1) in app.internal.deps.included.mix))
+      |> Macro.to_string()
 
     new_defp_deps = [
       "\n",
       "  defp deps do\n",
-      "    [\n",
-      new_deps,
-      "    ]\n",
+      filtered_deps,
       "  end\n"
     ]
 
@@ -240,26 +215,12 @@ defmodule Uniform.Modifiers do
     ])
   end
 
-  defp validate_opts!(dep, opts) do
-    unless Keyword.keyword?(opts) do
-      raise """
-      Options given in mix.exs deps are not a keyword list.
-
-      Dependency: #{inspect(dep)}
-      Received: #{inspect(opts)}
-
-      See valid formats in the docs:
-
-          https://hexdocs.pm/mix/1.13/Mix.Tasks.Deps.html
-
-      """
+  defp ast_dep_name(quoted) do
+    case Code.eval_quoted(quoted) do
+      {{name, _}, _} -> name
+      {{name, _, _}, _} -> name
     end
-
-    :ok
   end
-
-  defp dep_name({dep, _version_or_opts}), do: dep
-  defp dep_name({dep, _version, _opts}), do: dep
 
   #
   # Base Project Name Replacement
