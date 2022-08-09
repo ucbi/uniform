@@ -162,7 +162,7 @@ defmodule Uniform.Modifiers do
       Enum.intersperse(prelude, "\n"),
       "\n",
       "  defp deps do\n",
-      Macro.to_string(filtered_deps),
+      Sourceror.to_string(filtered_deps),
       "  end\n",
       Enum.intersperse(postlude, "\n")
     ])
