@@ -24,7 +24,18 @@ defmodule Mix.Tasks.Uniform.EjectTest do
   test "missing templates directory" do
     set_blueprint_in_config(TestProject.Uniform.MissingTemplatesBlueprint)
 
-    assert_raise Uniform.MissingTemplatesDirectoryError, fn ->
+    assert_raise Uniform.MissingTemplateDirError, fn ->
+      capture_io(fn -> Mix.Task.rerun("uniform.eject", ["tweeter", "--confirm"]) end)
+    end
+
+    # reset blueprint so we don't affect other tests
+    set_blueprint_in_config(TestProject.Uniform.Blueprint)
+  end
+
+  test "invalid templates directory" do
+    set_blueprint_in_config(TestProject.Uniform.InvalidTemplatesBlueprint)
+
+    assert_raise Uniform.InvalidTemplateDirError, fn ->
       capture_io(fn -> Mix.Task.rerun("uniform.eject", ["tweeter", "--confirm"]) end)
     end
 

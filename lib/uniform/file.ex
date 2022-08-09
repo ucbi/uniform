@@ -224,14 +224,15 @@ defmodule Uniform.File do
               template_dir = app.internal.config.blueprint.__template_dir__()
 
               if !template_dir do
-                raise Uniform.MissingTemplatesDirectoryError,
+                raise Uniform.MissingTemplateDirError,
                   template: source,
                   blueprint: app.internal.config.blueprint,
                   mix_project_app: app.internal.config.mix_project_app
               end
 
               if !File.dir?(Path.expand(template_dir)) do
-                raise "String given to `use Uniform.Path, templates: \"...\"` is not a directory (Expands to #{Path.expand(template_dir)})"
+                raise Uniform.InvalidTemplateDirError,
+                  directory: template_dir
               end
 
               EEx.eval_file(
