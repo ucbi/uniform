@@ -13,6 +13,7 @@ defmodule TestProject.MixProject do
   defp deps do
     [
       {:uniform, path: "../../../"},
+      # comment to remove
       {:included_mix, ">= 0.1.0", runtime: Mix.env() == :dev},
       {:excluded_mix, ">= 0.1.0"},
       {:indirectly_included_mix, ">= 0.1.0", path: "path/to/place"},

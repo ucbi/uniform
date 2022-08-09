@@ -181,7 +181,10 @@ defmodule Uniform.Modifiers do
       end)
 
     if zipper do
-      Sourceror.Zipper.node(zipper)
+      zipper
+      |> Sourceror.Zipper.node()
+      |> Sourceror.Comments.extract_comments()
+      |> elem(0)
     else
       raise_invalid_deps_exception()
     end
