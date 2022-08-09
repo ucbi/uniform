@@ -77,15 +77,13 @@ defmodule Uniform.Config do
         """
     end
 
-    unless function_exported?(config[:blueprint], :__template_dir__, 0) do
+    unless function_exported?(config[:blueprint], :__preserve__, 0) do
       raise """
       #{inspect(config[:blueprint])} is not a Blueprint module.
 
       Add the following to #{inspect(config[:blueprint])}.
 
-          use Uniform.Blueprint, templates: "..."
-
-      (Change `...` to your Uniform templates directory.)
+          use Uniform.Blueprint
 
       """
     end

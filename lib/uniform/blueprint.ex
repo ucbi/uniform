@@ -12,8 +12,8 @@ defmodule Uniform.Blueprint do
   @moduledoc ~S"""
   Defines the ejection blueprint for your project.
 
-  When used, the blueprint expects the `:templates` option. For example, the
-  blueprint:
+  When used, the blueprint accepts the `:templates` option, which is not
+  required. For example, the blueprint:
 
       defmodule Blueprint do
         use Uniform.Blueprint, templates: "priv/uniform-templates"
@@ -28,7 +28,7 @@ defmodule Uniform.Blueprint do
   in `lib/my_app`. (When running `mix uniform.eject my_app`.)
 
       defmodule Blueprint do
-        use Uniform.Blueprint, templates: "..."
+        use Uniform.Blueprint
 
         base_files do
           file "my_main_app/application.ex"
@@ -58,7 +58,7 @@ defmodule Uniform.Blueprint do
   section to configure dependencies.
 
       defmodule Blueprint do
-        use Uniform.Blueprint, templates: "..."
+        use Uniform.Blueprint
 
         deps do
           always do
@@ -81,7 +81,7 @@ defmodule Uniform.Blueprint do
   multiple files.
 
       defmodule Blueprint do
-        use Uniform.Blueprint, templates: "..."
+        use Uniform.Blueprint
 
         modify "assets/js/app.js", fn file, app ->
           String.replace(file, "SOME_VALUE_PER_APP", app.extra[:some_value])
@@ -317,18 +317,7 @@ defmodule Uniform.Blueprint do
 
   @optional_callbacks extra: 1, target_path: 2, app_lib_except: 1
 
-  @doc """
-       A macro for defining an ejection blueprint.
-
-       The required `templates` path points to the EEx templates used by
-       Uniform.
-
-       ### Examples
-
-           defmodule MyBaseApp.Uniform.Project do
-             use Uniform.Blueprint, templates: "lib/my_base_app/uniform/templates"
-
-       """ && false
+  @doc false
   defmacro __using__(opts) do
     templates = opts[:templates]
 
@@ -571,7 +560,7 @@ defmodule Uniform.Blueprint do
 
   """
   defmacro base_files(do: block) do
-    {:__block__, [], items} = block
+    items = block_contents(block)
 
     items =
       Enum.map(items, fn
@@ -769,11 +758,7 @@ defmodule Uniform.Blueprint do
 
   """
   defmacro lib(name, do: block) do
-    opts =
-      case block do
-        {:__block__, _meta, opts} -> opts
-        opt -> [opt]
-      end
+    opts = block_contents(block)
 
     quote do
       try do
@@ -791,6 +776,9 @@ defmodule Uniform.Blueprint do
       Uniform.Blueprint.__lib__(__MODULE__, unquote(name), [], @deps_always_block)
     end
   end
+
+  defp block_contents({:__block__, _meta, contents}), do: contents
+  defp block_contents(item), do: [item]
 
   @doc false
   def __lib__(mod, name, opts, always) when is_atom(name) and is_list(opts) do

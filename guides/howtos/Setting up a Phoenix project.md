@@ -235,7 +235,7 @@ end
 
 ```elixir
 defmodule MyBaseApp.Uniform.Blueprint do
-  use Uniform.Blueprint, templates: "..."
+  use Uniform.Blueprint
 
   modify "lib/my_base_app_web/router.ex", fn file, app ->
     String.replace(
