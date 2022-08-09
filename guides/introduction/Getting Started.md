@@ -39,7 +39,7 @@ To start, you can create an empty Blueprint like this.
 
 ```elixir
 defmodule MyApp.Uniform.Blueprint do
-  use Uniform.Blueprint, templates: "lib/my_app/uniform/templates"
+  use Uniform.Blueprint
 end
 ```
 
