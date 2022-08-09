@@ -55,7 +55,7 @@ defmodule Mix.Tasks.Uniform.Init do
         do_add_config(config, otp_app)
 
       {:error, reason} ->
-        Logger.warning("Could not patch config/config.exs – reason: #{reason}")
+        Logger.warn("Could not patch config/config.exs – reason: #{reason}")
     end
   end
 
@@ -74,7 +74,7 @@ defmodule Mix.Tasks.Uniform.Init do
         IO.puts("Added configuration in config/config.exs")
 
       _ ->
-        Logger.warning(
+        Logger.warn(
           "Could not patch config/config.exs because it does not contain `import Config`"
         )
     end
@@ -82,7 +82,7 @@ defmodule Mix.Tasks.Uniform.Init do
 
   defp write_unless_exists(path, contents) do
     if File.exists?(path) do
-      Logger.warning("Did not create #{path} because it already exists")
+      Logger.warn("Did not create #{path} because it already exists")
     else
       File.write!(path, contents)
       IO.puts("Created #{path}")
