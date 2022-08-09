@@ -143,8 +143,19 @@ defmodule Uniform.Config do
       config.mix_project.project()
       |> Keyword.get(:deps, [])
       |> Enum.map(fn
-        {name, _} -> name
-        {name, _, _} -> name
+        {name, _} ->
+          name
+
+        {name, _, _} ->
+          name
+
+        dep ->
+          raise """
+          Mix deps in mix.exs must be tuples with 2 or 3 elements. Received:
+
+              #{inspect(dep)}
+
+          """
       end)
 
     names =

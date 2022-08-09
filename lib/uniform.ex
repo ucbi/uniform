@@ -35,7 +35,7 @@ defmodule Uniform do
 
   In summary, you'll need to:
 
-  1. Add the dep in `mix.exs`: `{:uniform, "~> 0.1.0"}`
+  1. Add the dep in `mix.exs`
   2. Add a [Blueprint](Uniform.Blueprint.html) module to your project
   3. Add configuration to identify the Blueprint module
   4. Add `uniform.exs` manifests to each Ejectable App

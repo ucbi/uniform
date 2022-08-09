@@ -2,18 +2,13 @@
 
 ## Add Uniform to mix.exs
 
-Add `:uniform` as a dependency in `mix.exs` and wrap the deps list in `#
-uniform:deps` and `# /uniform:deps` comments, like this.
-
+Add `:uniform` as a dependency in `mix.exs`.
 
 ```elixir
 defp deps do
-  # uniform:deps
   [
-    {:uniform, "~> 0.1.1"},
-    ...
+    {:uniform, "~> 0.2.0"}
   ]
-  # /uniform:deps
 end
 ```
 

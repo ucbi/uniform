@@ -143,32 +143,101 @@ defmodule Uniform.Modifiers do
   #
 
   @doc """
-       Given the contents of a mix.exs file and an `%App{}`, look for the
-       following code fence that should be wrapping the mix deps:
-
-           # uniform:deps
-
-           ...
-
-           # /uniform:deps
-
-       ...and filter out the deps that should not be included in this app.
+       Given the contents of a mix.exs file and an `%App{}`, look for the `defp
+       deps` function and filter out the deps that should not be included in
+       this app.
        """ && false
   def remove_unused_mix_deps(file_contents, app) do
-    file_contents
-    |> String.replace(~r/\n *# uniform:deps(.+?)# \/uniform:deps/s, fn deps ->
-      deps
-      |> Code.string_to_quoted!()
-      |> Enum.filter(&(dep_name(&1) in app.internal.deps.included.mix))
-      |> Macro.to_string()
-    end)
+    quoted_deps_function = quoted_deps_function(file_contents)
+    start_line = Sourceror.get_line(quoted_deps_function)
+    end_line = Sourceror.get_end_line(quoted_deps_function)
+    lines = String.split(file_contents, "\n")
+    prelude = Enum.slice(lines, 0..(start_line - 2))
+    postlude = Enum.slice(lines, end_line..-1)
+    quoted_deps = quoted_deps(quoted_deps_function)
+    included_dep_names = app.internal.deps.included.mix
+    filtered_deps = for dep <- quoted_deps, dep_name(dep) in included_dep_names, do: dep
+
+    IO.iodata_to_binary([
+      Enum.intersperse(prelude, "\n"),
+      "\n",
+      "  defp deps do\n",
+      Sourceror.to_string(filtered_deps),
+      "  end\n",
+      Enum.intersperse(postlude, "\n")
+    ])
   end
 
-  defp dep_name({dep, version}) when is_binary(version), do: dep
-  defp dep_name({dep, opts}) when is_list(opts), do: dep
-  defp dep_name({:{}, _meta, [dep, _version, opts]}) when is_list(opts), do: dep
-  defp dep_name({:{}, _meta, [dep, opts]}) when is_list(opts), do: dep
-  defp dep_name(quoted), do: raise("did not parse quoted AST `#{inspect(quoted)}` in mix deps")
+  # returns the `defp deps` function from a `mix.exs` as Elixir AST
+  @spec quoted_deps_function(String.t()) :: Macro.t()
+  defp quoted_deps_function(file_contents) do
+    zipper =
+      file_contents
+      |> Sourceror.parse_string()
+      |> Sourceror.Zipper.zip()
+      |> Sourceror.Zipper.find(:next, fn
+        {:defp, _, [{:deps, _, nil}, [_deps]]} -> true
+        _ -> false
+      end)
+
+    if zipper do
+      zipper
+      |> Sourceror.Zipper.node()
+      |> Sourceror.Comments.extract_comments()
+      |> elem(0)
+    else
+      raise_invalid_deps_exception()
+    end
+  end
+
+  # extracts the AST for the deps themselves from the full `defp deps` AST
+  @spec quoted_deps(Macro.t()) :: Macro.t()
+  defp quoted_deps(
+         {:defp, _, [{:deps, _, nil}, [{{_, _, [:do]}, {:__block__, _, [quoted_deps]}}]]}
+       ) do
+    quoted_deps
+  end
+
+  defp quoted_deps(_), do: raise_invalid_deps_exception()
+
+  defp raise_invalid_deps_exception do
+    raise """
+    mix.exs is not set up properly.
+
+    Uniform expects your mix.exs file to have the default structure generated
+    by standard tools like `mix new` and `mix phx.new`.
+
+    It should have a private `deps` function which immediately returns a list
+    of deps.
+
+        defp deps do
+          [
+            {:gettext, "~> 0.20"},
+            {:phoenix, "~> 1.6"},
+            ...
+          ]
+        end
+
+    The `project` function should use deps() like this.
+
+        def project do
+          [
+            deps: deps(),
+            ...
+          ]
+        end
+
+    """
+  end
+
+  # extracts the name of a dep from its AST form
+  @spec dep_name(Macro.t()) :: atom
+  defp dep_name(quoted) do
+    case Code.eval_quoted(quoted) do
+      {{name, _}, _} -> name
+      {{name, _, _}, _} -> name
+    end
+  end
 
   #
   # Base Project Name Replacement

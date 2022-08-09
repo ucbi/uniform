@@ -46,7 +46,11 @@ defmodule Mix.Tasks.Uniform.EjectTest do
     mix_exs = read!("mix.exs")
     assert mix_exs =~ "included_mix"
     assert mix_exs =~ "always_included_mix"
+    # test that opts are transferred properly
+    assert mix_exs =~ "runtime: Mix.env() == :dev"
     refute mix_exs =~ "excluded_mix"
+    # removes comments for now instead of moving them all to the top
+    refute mix_exs =~ "comment to remove"
 
     # files copied with `dir` should not be modified
     file_txt = read!("dir/file.txt")
