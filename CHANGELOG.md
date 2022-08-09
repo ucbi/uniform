@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.3.0 (2022-08-09)
+
+  * Make `templates` optional in `use Uniform.Blueprint` (#33)
+  * Stop requiring `# uniform:deps` code fences in mix.exs (#34)
+
 ## v0.2.0 (2022-08-08)
 
   * Change API of `mix uniform.eject` to accept `my_app` instead of `MyApp` (#31)
