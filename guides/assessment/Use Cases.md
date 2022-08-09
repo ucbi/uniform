@@ -4,10 +4,10 @@
 
 Uniform is powerful in scenarios in which you want to:
 
-1. Maintain a portfolio of apps.
-2. Deploy them separately.
-3. Keep many aspects of them in sync.
-4. Share capabilities between apps.
+1. Maintain a portfolio of apps
+2. Deploy them separately
+3. Keep many aspects of them in sync
+4. Share capabilities between apps
 
 This makes Uniform especially powerful for software organizations that do not
 have an entire team dedicated to each app.
@@ -20,24 +20,25 @@ deployment pipelines, and assurance processes. However, they share data access
 patterns, UI libraries, authentication mechanisms, and many other common
 features.
 
-By leveraging Uniform, we're able to perform many changes to our entire
-portfolio of apps in the time that it would take to make the change to a single
-app. For example, when we find a security issue in our shared code
+By leveraging Uniform, we're able to perform a change to our *entire portfolio*
+of apps in the same time that it would normally take to make the change to a
+single app. For example, when we find a security issue in our shared code
 architecture, we patch it once and all apps are instantly updated. What could
 have been a lengthy process to audit and patch dozens of apps becomes much
 simpler and less time-intensive.
 
-Uniform also helps us accomplish _sharing capabilities_ among apps. In the
-process of building an app, we create a UI component for suggesting results as
-the user types. Without any extra effort, since our UI library is shared among
-all apps, this component becomes instantly available in all other apps.
+Uniform also helps us accomplish _sharing capabilities_ among apps. While
+building a feature for a single app, we might create an "autosuggest" UI
+component for suggesting live results as the user types in an input field. With
+extremely little effort, by simply moving the component out of `lib/that_app`
+into `lib/shared_ui_components`, this component becomes instantly available in
+all other apps.
 
 ## Agencies
 
-Agencies that build custom apps for multiple independent clients often find
-themselves squeezed for time as they try to balance budget and time
-constraints. They're often left needing to make hard calls about whether there
-is enough time and money to add features or capabilities.
+Agencies that build custom apps often find themselves pressed for time as they
+try to balance the client's financial constraints with feature wishlists and
+the health of the codebase.
 
 Uniform can help an agency leverage as much value as possible from their
 portfolio of already-built apps as they start new projects. Instead of
