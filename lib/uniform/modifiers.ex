@@ -143,32 +143,123 @@ defmodule Uniform.Modifiers do
   #
 
   @doc """
-       Given the contents of a mix.exs file and an `%App{}`, look for the
-       following code fence that should be wrapping the mix deps:
-
-           # uniform:deps
-
-           ...
-
-           # /uniform:deps
-
-       ...and filter out the deps that should not be included in this app.
+       Given the contents of a mix.exs file and an `%App{}`, look for the `defp
+       deps` function and filter out the deps that should not be included in
+       this app.
        """ && false
   def remove_unused_mix_deps(file_contents, app) do
-    file_contents
-    |> String.replace(~r/\n *# uniform:deps(.+?)# \/uniform:deps/s, fn deps ->
-      deps
-      |> Code.string_to_quoted!()
-      |> Enum.filter(&(dep_name(&1) in app.internal.deps.included.mix))
-      |> Macro.to_string()
-    end)
+    zipper =
+      file_contents
+      |> Sourceror.parse_string()
+      |> Sourceror.Zipper.zip()
+      |> Sourceror.Zipper.find(:next, fn
+        {:defp, _, [{:deps, _, nil}, _]} ->
+          true
+
+        _ ->
+          false
+      end)
+
+    defp_deps = if zipper, do: Sourceror.Zipper.node(zipper)
+
+    unless defp_deps do
+      raise """
+      mix.exs is not set up properly.
+
+      Uniform expects your mix.exs file to have the default structure generated
+      by standard tools like `mix new` and `mix phx.new`.
+
+      It should have a private `deps` function which returns a list of deps.
+
+          defp deps do
+            [
+              {:gettext, "~> 0.20"},
+              {:phoenix, "~> 1.6"},
+              ...
+            ]
+          end
+
+      The `project` function should use deps() like this.
+
+          def project do
+            [
+              deps: deps(),
+              ...
+            ]
+          end
+
+      """
+    end
+
+    start_line = Sourceror.get_line(defp_deps)
+    end_line = Sourceror.get_end_line(defp_deps)
+    lines = String.split(file_contents, "\n")
+    prelude = Enum.slice(lines, 0..(start_line - 2))
+    postlude = Enum.slice(lines, end_line..-1)
+    all_deps = app.internal.config.mix_project.project()[:deps]
+
+    new_deps =
+      for dep <- all_deps, dep_name(dep) in app.internal.deps.included.mix do
+        {name, version, opts} =
+          case dep do
+            {name, ver} when is_binary(ver) ->
+              {name, ver, nil}
+
+            {name, opts} ->
+              validate_opts!(name, opts) && {name, nil, opts}
+
+            {name, ver, opts} when is_binary(ver) ->
+              validate_opts!(name, opts) && {name, ver, opts}
+          end
+
+        tuple_contents =
+          [
+            name && inspect(name),
+            version && inspect(version),
+            opts && String.slice(inspect(opts), 1..-2)
+          ]
+          |> Enum.reject(&is_nil/1)
+          |> Enum.intersperse(", ")
+
+        ["      {", tuple_contents, "},\n"]
+      end
+
+    new_defp_deps = [
+      "\n",
+      "  defp deps do\n",
+      "    [\n",
+      new_deps,
+      "    ]\n",
+      "  end\n"
+    ]
+
+    IO.iodata_to_binary([
+      Enum.intersperse(prelude, "\n"),
+      new_defp_deps,
+      Enum.intersperse(postlude, "\n")
+    ])
   end
 
-  defp dep_name({dep, version}) when is_binary(version), do: dep
-  defp dep_name({dep, opts}) when is_list(opts), do: dep
-  defp dep_name({:{}, _meta, [dep, _version, opts]}) when is_list(opts), do: dep
-  defp dep_name({:{}, _meta, [dep, opts]}) when is_list(opts), do: dep
-  defp dep_name(quoted), do: raise("did not parse quoted AST `#{inspect(quoted)}` in mix deps")
+  defp validate_opts!(dep, opts) do
+    unless Keyword.keyword?(opts) do
+      raise """
+      Options given in mix.exs deps are not a keyword list.
+
+      Dependency: #{inspect(dep)}
+      Received: #{inspect(opts)}
+
+      See valid formats in the docs:
+
+          https://hexdocs.pm/mix/1.13/Mix.Tasks.Deps.html
+
+      """
+    end
+
+    :ok
+  end
+
+  defp dep_name({dep, _version_or_opts}), do: dep
+  defp dep_name({dep, _version, _opts}), do: dep
 
   #
   # Base Project Name Replacement

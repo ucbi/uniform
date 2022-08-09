@@ -29,7 +29,8 @@ defmodule Uniform.MixProject do
 
   defp deps do
     [
-      {:ex_doc, ">= 0.28.4", only: [:dev, :docs], runtime: false}
+      {:ex_doc, ">= 0.28.4", only: [:dev, :docs], runtime: false},
+      {:sourceror, "~> 0.11"}
     ]
   end
 

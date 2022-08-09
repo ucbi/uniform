@@ -369,34 +369,17 @@ end
 
 #### You don't need to use Code Fences in `deps` {: .tip}
 
-Note that removing deps from the `deps` section of `mix.exs` is automatic if
-you follow the [Getting Started](getting-started.html) instructions properly.
-
-So this would not be required.
+Note that removing deps from the `deps` section of `mix.exs` is automatic, so
+this would not be required.
 
 ```elixir
 # ❌ Do NOT wrap individual deps in code fences
 defp deps do
   [
     # uniform:mix:jason
-    {:jason, "~> 1.0"},
+    {:jason, "~> 1.0"}
     # /uniform:mix:jason
-    ...
   ]
-end
-```
-
-Instead, wrap your entire deps list in `uniform:deps` fences.
-
-```elixir
-# ✅ Do use `uniform:deps` fences
-defp deps do
-  # uniform:deps
-  [
-    {:jason, "~> 1.0"},
-    ...
-  ]
-  # /uniform:deps
 end
 ```
 

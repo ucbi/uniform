@@ -11,15 +11,12 @@ defmodule TestProject.MixProject do
   end
 
   defp deps do
-    # uniform:deps
     [
       {:uniform, path: "../../../"},
-      {:included_mix, ">= 0.1.0"},
+      {:included_mix, ">= 0.1.0", override: true},
       {:excluded_mix, ">= 0.1.0"},
-      {:indirectly_included_mix, ">= 0.1.0"},
+      {:indirectly_included_mix, ">= 0.1.0", path: "path/to/place"},
       {:always_included_mix, ">= 0.1.0"}
     ]
-
-    # /uniform:deps
   end
 end
