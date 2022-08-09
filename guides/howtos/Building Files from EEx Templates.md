@@ -24,25 +24,17 @@ defmodule MyApp.Uniform.Blueprint do
 
 ## Step 2: Add the EEx file in the correct relative path
 
-EEx templates must be added in the destination path, **relative to the
-templates directory**.
+EEx templates must be added in the destination path, relative to the
+`templates` directory from `use Uniform.Blueprint`, with a `.eex` suffix.
 
 So to emit our file into `config/runtime.exs`, we must create it in
 
 ```bash
 lib/uniform/templates/config/runtime.exs.eex
 \___________________/ \________________/\__/
-        |                   |           |
-templates directory     destination    .eex suffix
+        |                     |           |
+templates directory     destination    .eex suffix (Don't forget!)
 ```
-
-The path "prefix", `lib/uniform/templates`, must match the `templates`
-directory specified with `use Uniform.Blueprint` above.
-
-> #### Don't forget the .eex suffix {: .tip}
->
-> Note above that the filename is the exact file name you want to emit,
-> appended with `.eex`.
 
 ## Step 3: Write the template
 
@@ -74,21 +66,38 @@ config :my_base_app, some_configuration: "just for some_app"
 # /uniform:app:some_app
 ```
 
-> #### The App struct in templates {: .tip}
->
-> In EEx templates, the `Uniform.App` struct will be available as `app`. You
-> can use the contents of `app.extra` to make decisions about what to render in
-> the template.
->
-> Also, the `Uniform.App.depends_on?/3` utility is available as `depends_on?`
-> and can be used like this: `depends_on?.(app, :mix, :absinthe)`
+Keep in mind a few considerations documented below when building out templates.
 
-> #### Code Transformations and templates {: .info}
->
-> [Code Transformations](code-transformations.html) are ran **after** the
-> template is generated. This means that you can inject the base app name into
-> a template anywhere you want the ejected app name to appear, and it will be
-> transformed into the ejected app name.
->
-> So in the example above, instead of writing `config :<%= app.name.underscore %>`,
-> we just wrote, `config :my_base_app`.
+### The App struct
+
+In EEx templates, the `Uniform.App` struct will be available as `app`. You can
+use the contents of `app.extra` to make decisions about what to render in the
+template.
+
+Also, the `Uniform.App.depends_on?/3` utility is available as `depends_on?` and
+can be used like this.
+
+```elixir
+depends_on?.(app, :mix, :absinthe)
+```
+
+Don't miss the `.` before the `(`.
+
+### Code transformations
+
+[Code Transformations](code-transformations.html) are ran **after** the
+template is generated. This means that you can inject the base app name into a
+template anywhere you want the ejected app name to appear, and it will be
+transformed into the ejected app name.
+
+So in the example above, instead of writing
+
+```elixir
+config :<%= app.name.underscore %>
+```
+
+We just wrote
+
+```elixir
+config :my_base_app
+```
