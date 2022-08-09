@@ -158,7 +158,7 @@ defmodule Uniform.Modifiers do
 
     filtered_deps =
       quoted_deps
-      |> Enum.filter(&(ast_dep_name(&1) in app.internal.deps.included.mix))
+      |> Enum.filter(&(quoted_dep_name(&1) in app.internal.deps.included.mix))
       |> Macro.to_string()
 
     new_defp_deps = [
@@ -175,6 +175,8 @@ defmodule Uniform.Modifiers do
     ])
   end
 
+  # returns the `defp deps` function from a `mix.exs` as Elixir AST
+  @spec quoted_deps_function(String.t()) :: Macro.t()
   defp quoted_deps_function(file_contents) do
     zipper =
       file_contents
@@ -192,6 +194,8 @@ defmodule Uniform.Modifiers do
     end
   end
 
+  # extracts the AST for the deps themselves from the full `defp deps` AST
+  @spec quoted_deps(Macro.t()) :: Macro.t()
   defp quoted_deps(
          {:defp, _, [{:deps, _, nil}, [{{_, _, [:do]}, {:__block__, _, [quoted_deps]}}]]}
        ) do
@@ -230,7 +234,9 @@ defmodule Uniform.Modifiers do
     """
   end
 
-  defp ast_dep_name(quoted) do
+  # extracts the name of a dep from its AST form
+  @spec quoted_dep_name(Macro.t()) :: atom
+  defp quoted_dep_name(quoted) do
     case Code.eval_quoted(quoted) do
       {{name, _}, _} -> name
       {{name, _, _}, _} -> name
