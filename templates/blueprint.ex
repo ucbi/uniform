@@ -86,7 +86,7 @@ defmodule <%= @app_module %>.Uniform.Blueprint do
   # uncomment this line to not delete these root-level files on `mix uniform.eject`
   # @preserve [".vscode"]
 
-  # uncomment to Specify files NOT to eject from the lib directory of the app
+  # uncomment to specify files NOT to eject from the lib directory of the app
   # @impl Uniform.Blueprint
   # def app_lib_except(_app) do
   #   # add specific file paths or regexes
