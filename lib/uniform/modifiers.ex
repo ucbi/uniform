@@ -155,22 +155,15 @@ defmodule Uniform.Modifiers do
     prelude = Enum.slice(lines, 0..(start_line - 2))
     postlude = Enum.slice(lines, end_line..-1)
     quoted_deps = quoted_deps(quoted_deps_function)
-
-    filtered_deps =
-      quoted_deps
-      |> Enum.filter(&(quoted_dep_name(&1) in app.internal.deps.included.mix))
-      |> Macro.to_string()
-
-    new_defp_deps = [
-      "\n",
-      "  defp deps do\n",
-      filtered_deps,
-      "  end\n"
-    ]
+    included_dep_names = app.internal.deps.included.mix
+    filtered_deps = for dep <- quoted_deps, dep_name(dep) in included_dep_names, do: dep
 
     IO.iodata_to_binary([
       Enum.intersperse(prelude, "\n"),
-      new_defp_deps,
+      "\n",
+      "  defp deps do\n",
+      Macro.to_string(filtered_deps),
+      "  end\n",
       Enum.intersperse(postlude, "\n")
     ])
   end
@@ -235,8 +228,8 @@ defmodule Uniform.Modifiers do
   end
 
   # extracts the name of a dep from its AST form
-  @spec quoted_dep_name(Macro.t()) :: atom
-  defp quoted_dep_name(quoted) do
+  @spec dep_name(Macro.t()) :: atom
+  defp dep_name(quoted) do
     case Code.eval_quoted(quoted) do
       {{name, _}, _} -> name
       {{name, _, _}, _} -> name
