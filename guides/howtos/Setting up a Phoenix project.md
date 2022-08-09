@@ -178,16 +178,12 @@ end
 
 ## The Phoenix Router
 
-A simple way to set up your `Phoenix.Router` is to use [Code
-Fences](code-transformations.html#code-fences) and
-`Uniform.Blueprint.modify/2`.
+A simple way to set up your `Phoenix.Router` is to put the routes for all of
+your apps in a single router. Then, use [Code
+Fences](code-transformations.html#code-fences) and `Uniform.Blueprint.modify/2`
+to transform the router upon ejection.
 
-Routes for all of your apps are all placed in the router, with two caveats:
-
-1. Routes are wrapped in [Code Fences](code-transformations.html#code-fences)
-   so that they're removed when other apps are ejected.
-2. Paths are prefixed with `/app-name` so that each app exists at a nice URL
-   for development. The prefixes are removed with `modify`.
+Let's look at an example. We'll explain each part below.
 
 ```elixir
 defmodule MyBaseAppWeb.Router do
@@ -196,18 +192,6 @@ defmodule MyBaseAppWeb.Router do
   pipeline :browser do
     # ...
   end
-
-  # uniform:remove
-
-  # Place "internal pages" that should never be ejected here.
-  # See "Internal Pages" below this code example.
-  scope "/", SomeAppWeb do
-    pipe_through :browser
-
-    get "/internal-team-page", InternalTeamController, :index
-  end
-
-  # /uniform:remove
 
   # uniform:app:some_app
   scope "/some-app", SomeAppWeb do
@@ -221,17 +205,51 @@ defmodule MyBaseAppWeb.Router do
   # /uniform:app:some_app
 
   # uniform:app:another_app
-  scope "/another-app", SomeAppWeb do
+  scope "/another-app", AnotherAppWeb do
     pipe_through :browser
 
-    get "/widgets", WidgetController, :index
-    get "/widgets/new", WidgetController, :new
-    post "/widgets/new", WidgetController, :create
-    get "/widgets/:widget_id", WidgetController, :show
+    get "/posts", PostController, :index
+    get "/posts/new", PostController, :new
+    post "/posts/new", PostController, :create
+    get "/posts/:post_id", PostController, :show
   end
   # /uniform:app:another_app
 end
 ```
+
+You'll want to structure the router for reuse by including any pipelines (e.g.
+`:browser` or `:api`) that your apps will need.
+
+```
+pipeline :browser do
+  # ...
+end
+```
+
+Next, add scopes for each app, wrapped in [Code
+Fences](code-transformations.html#code-fences). This ensures ejected routers
+will only contain routes related to the ejected app.
+
+```elixir
+# uniform:app:some_app
+scope "/some-app", SomeAppWeb do
+  # ...
+end
+# /uniform:app:some_app
+```
+
+> You'll need to add controllers/views/etc inside of the app's `lib` directory.
+>
+> For example, `SomeAppWeb.WidgetController` should be in `lib/some_app`.
+>
+> (Probably at `lib/some_app/controllers/widget_controller.ex`.)
+
+Prefix the paths of each scope with `/app-name` (like `/some-app` above) so
+that each app has a predictable, separated URL structure when running the Base
+Project locally.
+
+As a last step, we need to remove the `/app-name` path prefix
+during ejection. We can do this with `modify`.
 
 ```elixir
 defmodule MyBaseApp.Uniform.Blueprint do
@@ -247,15 +265,13 @@ defmodule MyBaseApp.Uniform.Blueprint do
 end
 ```
 
-The Code Fences (comments like this: `# uniform:app:some_app`) will cause the
-code to be removed when ejecting a different app. The simple code transformer
-defined with `modify` changes
+With this modifier, the following code
 
 ```elixir
 scope "/some-app", SomeAppWeb do
 ```
 
-To
+Changes to
 
 ```elixir
 scope "/", SomeAppWeb do
@@ -276,6 +292,16 @@ to the Base Project that aren't intended to be ejected with any app.
 For example, you might add a page that catalogs and links to your various apps.
 We recommend adding these routes and wrapping them all in `# uniform:remove`
 Code Fences as in the example above.
+
+```elixir
+# uniform:remove
+scope "/", SomeAppWeb do
+  pipe_through :browser
+
+  get "/internal-team-page", InternalTeamController, :index
+end
+# /uniform:remove
+```
 
 ## Code Fences Everywhere!
 
