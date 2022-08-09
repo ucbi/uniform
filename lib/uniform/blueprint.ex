@@ -571,7 +571,7 @@ defmodule Uniform.Blueprint do
 
   """
   defmacro base_files(do: block) do
-    {:__block__, [], items} = block
+    items = block_contents(block)
 
     items =
       Enum.map(items, fn
@@ -769,11 +769,7 @@ defmodule Uniform.Blueprint do
 
   """
   defmacro lib(name, do: block) do
-    opts =
-      case block do
-        {:__block__, _meta, opts} -> opts
-        opt -> [opt]
-      end
+    opts = block_contents(block)
 
     quote do
       try do
@@ -791,6 +787,9 @@ defmodule Uniform.Blueprint do
       Uniform.Blueprint.__lib__(__MODULE__, unquote(name), [], @deps_always_block)
     end
   end
+
+  defp block_contents({:__block__, _meta, contents}), do: contents
+  defp block_contents(item), do: [item]
 
   @doc false
   def __lib__(mod, name, opts, always) when is_atom(name) and is_list(opts) do
