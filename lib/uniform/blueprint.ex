@@ -999,8 +999,8 @@ defmodule Uniform.Blueprint do
   def template(path, opts \\ []), do: {:template, {path, opts}}
 
   @doc """
-  `cp_r` works like `cp/2`, but for directory instead of a file.  The directory
-  is copied as-is with `File.cp_r!/3`.
+  `cp_r` works like `cp/2`, but for a directory instead of a file. The
+  directory is copied as-is with `File.cp_r!/3`.
 
   **None of the files are ran through Code Modifiers.**
 
