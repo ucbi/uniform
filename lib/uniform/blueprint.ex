@@ -802,12 +802,10 @@ defmodule Uniform.Blueprint do
   end
 
   @doc """
-  Since Uniform is aware of all mix dependencies in `mix.exs`, you don't need
-  to tell it about all of them.
+  Uniform automatically catalogues the deps in `mix.exs`, so there are only two
+  scenarios where you need to list them in your Blueprint.
 
-  However, there are two scenarios where you do need to list mix dependencies.
-
-  ## 1. Specifying mix dependencies that should _always_ be ejected.
+  ## 1. Specifying deps that should _always_ be ejected.
 
       deps do
         always do
