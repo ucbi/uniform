@@ -51,9 +51,9 @@ Provide the directory in `lib` as an atom. (E.g. `:ui_components` for
 `extra` contains a keyword list of arbitrary, developer-defined data. The
 contents are placed in `app.extra`. (See [`Uniform.App`](Uniform.App.html))
 
-When you need make `mix uniform.eject` change what code is emitted for
-different apps (beyond including/excluding dependencies), you'll want to use
-`app.extra` with one of these tools:
+When you need `mix uniform.eject` to emit different variations of code for
+different apps beyond including/excluding dependencies, you'll probably want to
+use `app.extra` with one of these tools:
 
 - [`base_files`](Uniform.Blueprint.html#base_files/1)
 - [Templates](building-files-from-eex-templates.html)
