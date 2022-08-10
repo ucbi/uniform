@@ -345,19 +345,21 @@ defmodule Uniform.Blueprint do
   #
 
   @doc """
-  Specify a file path or regex pattern and a transformation function, which
-  must return the new file contents as a string.
+  Modify the contents of one or more files during ejection.
 
-  The first argument of `modify` must be either the relative path of a file in
-  your Base Project, or a regex which matches against those relative paths.
+  Takes a transformation function which returns the new file contents as a
+  string.
 
-      # exact (relative) path
+  The first argument is either the relative path of a file in your Base
+  Project or a `Regex`.
+
+      # modify a specific test
       modify "tests/path/to/specific_test.exs", fn file -> ... end
 
-      # regex
-      modify ~r/.+_test.exs/, fn file -> ... end
+      # modify all `_test.exs` files
+      modify ~r/_test.exs$/, fn file -> ... end
 
-  The second argument of `modify` must either be a function capture
+  The second argument is either a function capture
 
       modify ~r/.+_test.exs/, &MyApp.Modify.modify_tests/1
       modify ~r/.+_test.exs/, &MyApp.Modify.modify_tests/2
@@ -677,85 +679,75 @@ defmodule Uniform.Blueprint do
   end
 
   @doc """
-  Uniform considers all directories in the project root's `lib/` directory to
-  be "lib dependencies".
+  [Lib Dependencies](dependencies.html#lib-dependencies) are shared code
+  libraries in the `lib` directory of your project. Uniform scans `lib/`, so
+  you don't need to inform it about them.
 
-  Since Uniform is aware of all lib dependencies in `lib/`, you don't need to
-  tell it about them.
+  However, there are four scenarios where you do need to list them in your
+  Blueprint.
 
-  However, there are a few scenarios where you do need to list them in your `Blueprint` module:
-
-  1. Specifying which lib dependencies should _always_ be ejected. (See
-     `Uniform.Blueprint.always/1`.)
-  2. To specify that a lib dependency has other mix or lib dependencies. (I.e.
-     Other mix packages or lib directories should always be ejected along with
-     it.)
-  3. To specify to eject other files that aren't in a `lib/` directory
-     alongside a lib dependency.
-
-  > #### Including Lib Dependencies in an App {: .info}
-  >
-  > To eject a lib dependency with a specific app (but not all), make sure to
-  > put it in the app's [Uniform Manifest
-  > file](./getting-started.html#add-uniform-manifests), or make it a
-  > `lib_dependency` of another dependency in the Manifest.
-
-  ## Examples
+  ## 1. Specifying which Lib Dependencies should _always_ be ejected
 
       deps do
         always do
           # every app will have lib/utilities
           lib :utilities
-
-          # every app will have lib/mix, but only my_app.some_task.ex will be ejected
-          lib :mix do
-            only ["lib/mix/tasks/my_app.some_task.ex"]
-          end
-        end
-
-        # If uniform.exs says to include sso_auth, then `lib/sso_auth` will be copied
-        # along with `lib/other_utilities`. However, `some_file.ex` will never be
-        # included. Also, the tesla mix dep will be included.
-        lib :sso_auth do
-          mix_deps [:tesla]
-          lib_deps [:other_utilities]
-          except ["lib/sso_auth/some_file.ex"]
-        end
-
-        mix :oban do
-          # any app that is ejected with oban will also have oban_pro and oban_web
-          mix_deps [:oban_pro, :oban_web]
         end
       end
 
-  ## Associated files
+  See `always/1`.
 
-  Some Lib Dependencies require other files outside of `lib/that_library`. Use
-  the following to include those files whenever the Lib Dependency is ejected.
+  ## 2. When a Lib Dependency has other Lib or Mix Dependencies
 
-  - `file/2`
-  - `template/2`
-  - `cp/1`
-  - `cp_r/1`
+      deps do
+        # if `lib/auth` is included, tesla and `lib/utils` will be included
+        lib :auth do
+          mix_deps [:tesla]
+          lib_deps [:utils]
+        end
+      end
+
+  See `mix_deps/1` and `lib_deps/1`.
+
+  ## 3. Including files outside of `lib`
+
+  Some libraries require other files outside of `lib/that_library`.
 
   For example:
 
-  ```
-  deps do
-    # if my_data_source is required...
-    lib :my_data_source do
-      # everything in priv/my_data_source_repo will be ejected
-      file Path.wildcard("priv/my_data_source_repo/**", match_dot: true)
+      deps do
+        # when `lib/my_data_source is included...
+        lib :my_data_source do
+          # files in priv/my_data_source_repo will be included
+          file Path.wildcard("priv/my_data_source_repo/**", match_dot: true)
 
-      # every .ex file in test/support/fixtures/my_data_source will be ejected
-      file Path.wildcard("test/support/fixtures/my_data_source/**/*.ex")
+          # .ex files in `test/support/my_data_source` will be included
+          file Path.wildcard("test/support/my_data_source/**/*.ex")
 
-      # the `some/template/for/my_data_source` file will be ejected via a template
-      template "some/template/for/my_data_source"
-    end
-  end
-  ```
+          # `priv/my_data_source_file` will be included from a template
+          template "priv/my_data_source_file"
+        end
+      end
 
+  See `file/2`, `template/2`, `cp/1`, and `cp_r/1`.
+
+  ## 4. When certain files should be excluded from a Lib Dependency upon ejection
+
+      deps do
+        always do
+          # every app will have lib/mix, but only `some_task.ex` will be ejected
+          lib :mix do
+            only ["lib/mix/tasks/some_task.ex"]
+          end
+        end
+
+        # `some_file.ex` will be omitted from `lib/auth` in ejected codebases
+        lib :auth do
+          except ["lib/auth/some_file.ex"]
+        end
+      end
+
+  See `only/1` and `except/1`.
   """
   defmacro lib(name, do: block) do
     opts = block_contents(block)
@@ -813,24 +805,9 @@ defmodule Uniform.Blueprint do
   Since Uniform is aware of all mix dependencies in `mix.exs`, you don't need
   to tell it about all of them.
 
-  However, there are two scenarios where you do need to list mix dependencies:
+  However, there are two scenarios where you do need to list mix dependencies.
 
-  1. Specifying mix dependencies that should _always_ be ejected. (See
-     `always/1`.)
-  2. When a Mix Dependency has other Mix Dependencies. (I.e. Other mix packages
-     should always be included when it is included.)
-
-  > #### Including Mix Dependencies in an App {: .info}
-  >
-  > To eject a mix dependency with a specific app (but not all), put it (or
-  > another dependency that requires it) in the app's [Uniform Manifest
-  > file](./getting-started.html#add-uniform-manifests). 
-  >
-  > As explained in the How It Works guide (see [What is
-  > "Ejecting"?](how-it-works.html#what-is-ejecting), `mix uniform.eject` will
-  > remove a dep from `mix.exs` if it's not required by the app.
-
-  ### Examples
+  ## 1. Specifying mix dependencies that should _always_ be ejected.
 
       deps do
         always do
@@ -838,13 +815,20 @@ defmodule Uniform.Blueprint do
           mix :credo
           mix :ex_doc
         end
+      end
 
+  See `always/1`.
+
+  ## 2. When a Mix Dependency has other Mix Dependencies.
+
+      deps do
         mix :oban do
           # any app that is ejected with oban will also have oban_pro and oban_web
           mix_deps [:oban_pro, :oban_web]
         end
       end
 
+  See `mix_deps/1`.
   """
   defmacro mix(name, do: block) do
     opts =
@@ -882,10 +866,47 @@ defmodule Uniform.Blueprint do
     Module.put_attribute(mod, :mix_deps, mix_dep)
   end
 
-  @doc false
+  @doc """
+  Specify transitive [Mix Dependencies](dependencies.html#mix-dependencies) of
+  other Lib/Mix Dependencies.
+
+  Dependencies listed with `mix_deps` will be included in the ejected `mix.exs`
+  any time the "parent" dependency is included.
+
+  ## Examples
+
+      deps do
+        # if absinthe is included, absinthe_plug and dataloader will be included
+        mix :absinthe do
+          mix_deps [:absinthe_plug, :dataloader]
+        end
+
+        # when `lib/ui_components` is included, surface will be included
+        lib :ui_components do
+          mix_deps [:surface]
+        end
+      end
+
+  """
   defmacro mix_deps(deps), do: {:mix_deps, List.wrap(deps)}
 
-  @doc false
+  @doc """
+  Specify transitive [Lib Dependencies](dependencies.html#lib-dependencies) of
+  other Lib Dependencies.
+
+  Libraries listed with `lib_deps` will be included in the ejected codebase any
+  time the "parent" dependency is included.
+
+  ## Examples
+
+      deps do
+        # `lib/core_auth` will never be ejected without `lib/oauth_lib`
+        lib :core_auth do
+          lib_deps [:oauth_lib]
+        end
+      end
+
+  """
   defmacro lib_deps(deps), do: {:lib_deps, List.wrap(deps)}
 
   @doc """

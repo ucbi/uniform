@@ -4,6 +4,8 @@ As explained in the How It Works guide, [Ejectable
 Apps](how-it-works.html#ejectable-apps) are defined by the existence of a
 `uniform.exs` file inside the app's `lib` directory.
 
+Each app has its own `uniform.exs`.
+
 ## Structure
 
 `uniform.exs` contains a keyword list with three supported options: `mix_deps`,
@@ -22,7 +24,7 @@ A typical `uniform.exs` might look something like this.
 # lib/my_app/uniform.exs
 [
   mix_deps: [:gql, :timex],
-  lib_deps: [:some_lib_directory],
+  lib_deps: [:ui_components, :auth],
   extra: [
     some_data: "just for this app"
   ]
@@ -32,43 +34,31 @@ A typical `uniform.exs` might look something like this.
 ## mix_deps
 
 `mix_deps` lists [Mix Dependencies](dependencies.html#mix-dependencies) of the
-app. Provide the same atom as you do in `mix.exs`. (E.g. `:ecto`.)
+app.
 
-Mix Dependencies required by every app should be specified using
-[always](Uniform.Blueprint.html#always/1) in the `deps` section of your
-Blueprint. It isn't necessary to redundantly add them to `uniform.exs`.
+Provide the same atom as you do in `mix.exs`. (E.g. `:ecto`.)
 
 ## lib_deps
 
 `lib_deps` lists [Lib Dependencies](dependencies.html#lib-dependencies) of the
-app. Provide the directory in `lib` as an atom. (E.g. `:ui_components` for
-`lib/ui_components`.)
+app.
 
-Lib Dependencies required by every app should be specified using
-[always](Uniform.Blueprint.html#always/1) in the `deps` section of your
-Blueprint. It isn't necessary to redundantly add them to `uniform.exs`.
+Provide the directory in `lib` as an atom. (E.g. `:ui_components` for
+`lib/ui_components`.)
 
 ## extra
 
-`extra` contains arbitrary developer-defined data to configure the app.
+`extra` contains a keyword list of arbitrary, developer-defined data. The
+contents are placed in `app.extra`. (See [`Uniform.App`](Uniform.App.html))
 
-Whenever you run `mix uniform.eject`, the contents of `extra` in `uniform.exs`
-are merged with the output of the (optional) [extra
-callback](Uniform.Blueprint.html#c:extra/1) in your Blueprint. (`uniform.exs`
-has precedence for conflicting keys.) The merged results are placed in
-`app.extra`.
+When you need make `mix uniform.eject` change what code is emitted for
+different apps (beyond including/excluding dependencies), you'll want to use
+`app.extra` with one of these tools:
 
-You can use `app.extra` to make decisions about:
+- [`base_files`](Uniform.Blueprint.html#base_files/1)
+- [Templates](building-files-from-eex-templates.html)
+- [Modifiers](Uniform.Blueprint.html#modify/2)
 
-- What to render in [templates](building-files-from-eex-templates.html)
-- Which [base_files](Uniform.Blueprint.html#base_files/1) to include
-- How to [modify](Uniform.Blueprint.html#modify/2) code before ejecting
-
-For example, `extra` can be used to store:
-
-- Which UI theme to use (if you have many)
-- The host to deploy with (if you have many)
-- A list of [crons jobs](https://en.wikipedia.org/wiki/Cron) to be added in the
-  app's ejected configuration. (E.g. with
-  [quantum](https://hex.pm/packages/quantum))
-
+Note that `app.extra` also contains keys returned by the [extra
+callback](Uniform.Blueprint.html#c:extra/1). (`uniform.exs` has precedence for
+conflicting keys.)
