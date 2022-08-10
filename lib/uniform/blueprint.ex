@@ -811,25 +811,24 @@ defmodule Uniform.Blueprint do
 
   @doc """
   Since Uniform is aware of all mix dependencies in `mix.exs`, you don't need
-  to tell it about them.
+  to tell it about all of them.
 
   However, there are two scenarios where you do need to list mix dependencies:
 
   1. Specifying mix dependencies that should _always_ be ejected. (See
-     `Uniform.Blueprint.always/1`.)
+     `always/1`.)
   2. When a Mix Dependency has other Mix Dependencies. (I.e. Other mix packages
      should always be included when it is included.)
 
   > #### Including Mix Dependencies in an App {: .info}
   >
-  > To eject a mix dependency with a specific app (but not all), make sure to
-  > include it as a dependency of lib dependencies (see `lib/2`) or put it in
-  > the app's [Uniform Manifest
-  > file](./getting-started.html#add-uniform-manifests).
+  > To eject a mix dependency with a specific app (but not all), put it (or
+  > another dependency that requires it) in the app's [Uniform Manifest
+  > file](./getting-started.html#add-uniform-manifests). 
   >
   > As explained in the How It Works guide (see [What is
-  > "Ejecting"?](how-it-works.html#what-is-ejecting), `mix uniform.eject`
-  > removes Mix Dependencies that aren't explicitly required from `mix.exs`.
+  > "Ejecting"?](how-it-works.html#what-is-ejecting), `mix uniform.eject` will
+  > remove a dep from `mix.exs` if it's not required by the app.
 
   ### Examples
 
