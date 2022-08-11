@@ -46,7 +46,7 @@ alongside it in `lib/my_app/uniform/templates`.
 
 If you opted out of running `mix uniform.init`, add the following line to
 `config/config.exs`. (Changing the `blueprint` value to match the name of your
-Blueprint module name above.)
+Blueprint module above.)
 
 ```elixir
 config :my_app, Uniform, blueprint: MyApp.Uniform.Blueprint
