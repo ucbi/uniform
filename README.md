@@ -8,9 +8,9 @@
 [![hex.pm](https://img.shields.io/hexpm/l/uniform.svg)](https://hex.pm/packages/uniform)
 [![Documentation](https://img.shields.io/badge/documentation-gray)](https://hexdocs.pm/uniform)
 
-With Uniform, developers maintain multiple Elixir apps inside a Base Project: a
-"monolith" containing every app. Before deployment, the apps are "ejected" into
-separate codebases containing only the code needed by each app.
+With Uniform, developers maintain multiple Elixir apps inside a Base Project –
+a "monolith" containing every app. Before deployment, the apps are "ejected"
+into separate codebases containing only the code needed by each app.
 
 The entire process is automated, so there's much less work required to start a
 new app or share capabilities between apps.
