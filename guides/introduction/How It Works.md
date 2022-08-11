@@ -58,19 +58,16 @@ To set up an Ejectable App manually:
 
 ## Exactly which files get ejected?
 
-There are four rules that determine which files are copied during ejection.
-[Read about the four rules
-here.](Mix.Tasks.Uniform.Eject.html#module-which-files-get-ejected)
+There are [four rules that determine which files are
+copied](Mix.Tasks.Uniform.Eject.html#module-which-files-get-ejected) during
+ejection.
 
-In summary, the files in the Blueprint's
-[`base_files`](Uniform.Blueprint.html#base_files/1) are ejected along with
-every directory in `lib/*` and `test/*` that correspond to the app being
-ejected and its [Lib Dependencies](dependencies.html#lib-dependencies).
+Basically, the Blueprint's `base_files` are ejected along with every directory
+in `lib` and `test` whose name matches (1) the app being ejected and (2) its
+Lib Dependencies.
 
-You have complete control to customize which files are ejected using your
-[Blueprint](Uniform.Blueprint.html) file and each app's [Uniform
-Manifest](uniform-manifests-uniform-exs.html).
-
-Make sure to build out your [Blueprint](Uniform.Blueprint.html)'s `base_files`
-and `deps` sections. If you're building Phoenix apps, you may want to consult
-the [Setting up a Phoenix project](./setting-up-a-phoenix-project.html) guide.
+Make sure to build out your Blueprint's
+[`base_files`](Uniform.Blueprint.html#base_files/1) and
+[`deps`](Uniform.Blueprint.html#deps/1) sections. If you're building Phoenix
+apps, you may want to consult the [Setting up a Phoenix
+project](./setting-up-a-phoenix-project.html) guide.

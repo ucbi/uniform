@@ -67,61 +67,51 @@ precedence and overrides both of these behaviors.
 
 ## Add Uniform Manifests
 
-Designate all `lib` directories that represent an [Ejectable
-App](how-it-works.html#ejectable-apps) by placing a `uniform.exs` manifest file
-into each directory.
+> #### Skip this step if you have no apps yet. {: .tip}
+>
+> If you're setting up a brand new project, skip to [Build the
+> Blueprint](#build-the-blueprint).
+>
+> When you add [Ejectable Apps](how-it-works.html#ejectable-apps) in your
+> project, you'll need to come back to this step.
 
-You can do so with `mix uniform.gen.app`, which creates an empty manifest
-containing code comments to help you start.
+Put a `uniform.exs` file inside each directory in `lib` that represents an
+Ejectable App. You can do so with this command:
 
 ```bash
 mix uniform.gen.app my_app_name
 ```
 
-Or, if you want to do this manually, you can start with a barebones manifest
-that contains an empty list.
+It creates an empty manifest with code comments to help you start. If you want
+to create the file manually instead, start with a barebones file that contains
+an empty list:
 
 ```elixir
 # lib/my_app_name/uniform.exs
 []
 ```
 
-Once you start structuring your project for Uniform, you'll add
-[Lib](dependencies.html#lib-dependencies) and
-[Mix](dependencies.html#mix-dependencies) Dependencies in this file.
+The [Uniform Manifests](uniform-manifests-uniform-exs.html) guide explains how
+to use this file.
 
-```elixir
-[
-  lib_deps: [:my_data_source, :utilities],
-  mix_deps: [:csv, :chromic_pdf]
-]
-```
-
-> #### More on uniform.exs {: .info}
->
-> See the [Uniform Manifests](uniform-manifests-uniform-exs.html) guide for an
-> explanation of supported options.
-
-## Ejecting an App
-
-At this point, you should be able to run
+At this point you should be able to run:
 
 ```bash
 mix uniform.eject my_app_name
 ```
 
-And be able to successfully create an ejected codebase. However, it probably
+And it will create a standalone codebase for the app. However, it probably
 won't contain the files needed to run locally or be deployed.
 
-This leads us to the final step of **Building a Blueprint**.
+This leads us to the final step of **Building the Blueprint**.
 
 ## Build the Blueprint
 
 > Read the documentation for [Uniform.Blueprint](Uniform.Blueprint.html) for
 > the full range of features to build out your Blueprint module.
 
-The [Blueprint module](#create-a-blueprint-module) is central for configuring
-which files are ejected during `mix uniform.eject`.
+The Blueprint module is central for configuring which files are ejected during
+`mix uniform.eject`.
 
 Since each Elixir project is different, **it is up to you** to determine which
 files need to be ejected to emit a working application.
