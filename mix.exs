@@ -47,6 +47,7 @@ defmodule Uniform.MixProject do
   defp docs do
     [
       main: "Uniform",
+      logo: "guides/images/jersey.png",
       source_ref: "v#{@version}",
       source_url: @source_url,
       extra_section: "GUIDES",
