@@ -68,8 +68,8 @@ precedence and overrides both of these behaviors.
 ## Add Uniform Manifests
 
 Designate all `lib` directories that represent an [Ejectable
-App](how-it-works.html#ejectable-apps) by placing an `uniform.exs`
-manifest file into each directory.
+App](how-it-works.html#ejectable-apps) by placing a `uniform.exs` manifest file
+into each directory.
 
 You can do so with `mix uniform.gen.app`, which creates an empty manifest
 containing code comments to help you start.
