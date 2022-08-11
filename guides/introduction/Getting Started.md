@@ -114,7 +114,7 @@ The Blueprint module is central for configuring which files are ejected during
 `mix uniform.eject`.
 
 Since each Elixir project is different, **it is up to you** to determine which
-files need to be ejected to emit a working application.
+files need to be ejected in your project to emit a working application.
 
 > #### Are you building Phoenix apps? {: .tip}
 >

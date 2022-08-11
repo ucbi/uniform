@@ -31,9 +31,7 @@ defmodule Uniform do
   ## Installation
 
   Consult the [Getting Started](getting-started.html) guide to add Uniform to
-  an Elixir application.
-
-  In summary, you'll need to:
+  an Elixir application. In summary, you'll need to:
 
   1. Add the dep in `mix.exs`
   2. Add a [Blueprint](Uniform.Blueprint.html) module to your project
