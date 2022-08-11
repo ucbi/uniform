@@ -19,6 +19,10 @@ defmodule Mix.Tasks.Uniform.EjectTest do
     capture_io(fn -> Mix.Task.rerun("uniform.eject", ["tweeter", "--confirm"]) end)
     # reset blueprint so we don't affect other tests
     set_blueprint_in_config(TestProject.Uniform.Blueprint)
+
+    # clear files in preparation for next test
+    [app] = Uniform.ejectable_apps()
+    Mix.Tasks.Uniform.Eject.clear_destination(app)
   end
 
   test "missing templates directory" do
@@ -30,6 +34,10 @@ defmodule Mix.Tasks.Uniform.EjectTest do
 
     # reset blueprint so we don't affect other tests
     set_blueprint_in_config(TestProject.Uniform.Blueprint)
+
+    # clear files in preparation for next test
+    [app] = Uniform.ejectable_apps()
+    Mix.Tasks.Uniform.Eject.clear_destination(app)
   end
 
   test "full ejection" do
