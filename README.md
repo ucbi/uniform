@@ -1,5 +1,5 @@
 <br>
-<img width="250" src="https://github.com/ucbi/uniform/raw/main/guides/images/logo.png" alt="Uniform">
+<img width="250" src="https://github.com/ucbi/uniform/raw/main/guides/images/uniform.png" alt="Uniform">
 
 > Write less boilerplate and reuse more code in your portfolio of Elixir apps
 
