@@ -5,19 +5,19 @@ defmodule Uniform.App do
 
   ## Where it's availabile
 
-  This struct is available in the Blueprint module in these locations:
+  An `app` struct is available in the Blueprint in these callbacks and macros:
 
-  - `c:Uniform.Blueprint.extra/1` callback
-  - `c:Uniform.Blueprint.target_path/2` callback
-  - `Uniform.Blueprint.base_files/1` macro
-  - `Uniform.Blueprint.modify/2` macros
+  - [`base_files`](`Uniform.Blueprint.base_files/1`)
+  - [`modify`](`Uniform.Blueprint.modify/2`)
+  - [`extra`](`c:Uniform.Blueprint.extra/1`)
+  - [`target_path`](`c:Uniform.Blueprint.target_path/2`)
 
-  In these callbacks and macros, you can make decisions about what to eject or
-  how files should be modified using the `app`.
+  Use the `app` to make decisions about what to eject or how files should be
+  modified.
 
   ## Checking for dependencies
 
-  In the callbacks and macros above, you can use `depends_on?/3` determine
+  In the callbacks and macros above, you can use `depends_on?` to determine
   whether an app depends on a mix or lib dependency.
 
       depends_on?(app, :mix, :norm)

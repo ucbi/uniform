@@ -395,18 +395,18 @@ defmodule Uniform.Blueprint do
   """
   @spec modify(
           pattern :: Path.t() | Regex.t(),
-          fun ::
+          function ::
             (file :: String.t(), Uniform.App.t() -> String.t())
             | (file :: String.t() -> String.t())
         ) :: term
-  defmacro modify(path_or_regex, {:&, _, [{:/, _, _}]} = fun) do
+  defmacro modify(path_or_regex, {:&, _, [{:/, _, _}]} = function) do
     quote do
       Uniform.Blueprint.validate_path_or_regex!(unquote(path_or_regex))
-      Module.put_attribute(__MODULE__, :modifiers, {unquote(path_or_regex), unquote(fun)})
+      Module.put_attribute(__MODULE__, :modifiers, {unquote(path_or_regex), unquote(function)})
     end
   end
 
-  defmacro modify(path_or_regex, {call, _, _} = fun) when call in [:fn, :&] do
+  defmacro modify(path_or_regex, {call, _, _} = function) when call in [:fn, :&] do
     # anonymous functions cannot be saved into module attributes, so create a
     # named function
     fn_name = String.to_atom("__modify_line_#{__CALLER__.line}__")
@@ -421,7 +421,7 @@ defmodule Uniform.Blueprint do
       )
 
       def unquote(fn_name)(file, app) do
-        f = unquote(fun)
+        f = unquote(function)
 
         case f do
           f when is_function(f, 1) -> f.(file)
@@ -431,7 +431,7 @@ defmodule Uniform.Blueprint do
     end
   end
 
-  defmacro modify(path_or_regex, fun) do
+  defmacro modify(path_or_regex, function) do
     quote do
       raise ArgumentError,
         message: """
@@ -439,7 +439,7 @@ defmodule Uniform.Blueprint do
 
         Received:
 
-            #{inspect(unquote(fun))}
+            #{inspect(unquote(function))}
 
         Instead, either pass an anonymous function:
 
@@ -561,7 +561,7 @@ defmodule Uniform.Blueprint do
       end
 
   """
-  defmacro base_files(do: block) do
+  defmacro base_files([do: block] = _files) do
     items = block_contents(block)
 
     items =
@@ -624,8 +624,8 @@ defmodule Uniform.Blueprint do
       end
 
   """
-  @spec deps(block :: term) :: term
-  defmacro deps(_block = [do: block]) do
+  @spec deps(mix_and_lib_deps :: term) :: term
+  defmacro deps(_mix_and_lib_deps = [do: block]) do
     prelude =
       quote do
         try do
@@ -667,7 +667,7 @@ defmodule Uniform.Blueprint do
       end
 
   """
-  defmacro always(do: block) do
+  defmacro always(_deps = [do: block]) do
     quote do
       try do
         @deps_always_block true
