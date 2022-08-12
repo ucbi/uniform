@@ -40,8 +40,8 @@ templates directory     destination    .eex suffix (Don't forget!)
 
 Here is an example of what the `runtime.exs.eex` template might contain.
 
-Note the use of [Code Fences](code-transformations.html#code-fences) at the end
-of the file.
+Note the use of [Eject Fences](code-transformations.html#eject-fences) at the
+end of the file.
 
 ```elixir
 import Config

@@ -68,7 +68,7 @@ defmodule Mix.Tasks.Uniform.Eject do
   dependencies of those deps.
 
   `mix format` tidies up things like chains of newlines that may appear from
-  applying [Code Fences](code-transformations.html#code-fences). It also
+  applying [Eject Fences](code-transformations.html#eject-fences). It also
   prevents you from having to think about code formatting in
   [modify](Uniform.Blueprint.html#modify/2).
 

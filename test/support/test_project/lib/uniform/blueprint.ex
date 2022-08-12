@@ -41,8 +41,8 @@ defmodule TestProject.Uniform.Blueprint do
 
   modify ~r/\.dotfile/, &(&1 <> "Added to #{&2.name.camel} in anonymous function capture")
 
-  # test code_fences/1
-  modify ~r/\.dotfile/, &code_fences(&1, &2, "---")
+  # test eject_fences/1
+  modify ~r/\.dotfile/, &eject_fences(&1, &2, "---")
 
   defmodule Modify do
     def append_hello_world(file) do

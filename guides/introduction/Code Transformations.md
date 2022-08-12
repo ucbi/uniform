@@ -7,16 +7,16 @@ contents. These transformations happen to every file except those ejected with
 They occur **in this order**.
 
 1. [Unused mix.exs Dependencies are Removed](#mix-exs-dependency-removal)
-2. [Blueprint Modifiers](#modifiers-from-the-ejection-blueprint) are ran
+2. [Blueprint Modifiers](#blueprint-modifiers) are ran
 3. [The Base Project Name is replaced](#replacing-the-base-project-name) with the ejected app's name
-4. [Code Fences](#code-fences) are processed
+4. [Eject Fences](#eject-fences) are processed
 
 ## mix.exs Dependency Removal
 
 Any Mix Dependency that is not directly or indirectly required by the app via
 `mix.exs` or the `Blueprint` module is removed from the ejected `mix.exs`.
 
-## Modifiers from the Ejection Blueprint
+## Blueprint Modifiers
 
 Users can specify arbitrary modifications that should be applied to various
 files using the `modify` macro in the [Blueprint](`Uniform.Blueprint`) module:
@@ -96,9 +96,9 @@ defmodule MyEjectableAppWeb.Endpoint do
 end
 ```
 
-## Code Fences
+## Eject Fences
 
-In any `.ex` or `.exs` file, you can use "code fence" comments to remove code
+In any `.ex` or `.exs` file, you can use "Eject Fence" comments to remove code
 unless certain criteria are met.
 
 To remove code unless the ejected app depends on a Lib Dependency called
@@ -137,18 +137,18 @@ it in these comments:
 # /uniform:remove
 ```
 
-> #### Code Fence comments are removed on ejection {: .info}
+> #### Eject Fence comments are always removed {: .info}
 >
-> Note that regardless of whether `mix uniform.eject` keeps or deletes the code in a
-> code fence, the code fence comments themselves (like `# uniform:app:my_app`)
+> Regardless of whether `mix uniform.eject` keeps or deletes the code in an
+> eject fence, the eject fence comments themselves (like `# uniform:app:my_app`)
 > are always removed.
 >
 > Furthermore, `mix uniform.eject` runs `mix format` on the ejected codebase at
 > the end. So you always end up with "clean" looking code.
 
-### Code Fences for other languages
+### Eject Fences for other languages
 
-Code Fences are also processed for `.js`/`.ts`/`.jsx`/`.tsx` files using JS
+Eject Fences are also processed for `.js`/`.ts`/`.jsx`/`.tsx` files using JS
 single-line comments.
 
 ```js
@@ -157,21 +157,20 @@ single-line comments.
 // /uniform:lib:my_lib
 ```
 
-If you would like to support Code Fences for other languages or file types, you
-can do so using `Uniform.Blueprint.modify/2` and
-`Uniform.Modifiers.code_fences/3`.
+If you would like to support Eject Fences for other languages or file types, you
+can do so using `Uniform.Modifiers.eject_fences/3`.
 
 ```elixir
-# code fences for SQL files
+# eject fences for SQL files
 modify ~r/\.sql$/, fn file, app ->
-  code_fences(file, app, "--")
+  eject_fences(file, app, "--")
 end
 
-# code fences for Rust files
-modify ~r/\.rs$/, &code_fences(&1, &2, "//")
+# eject fences for Rust files
+modify ~r/\.rs$/, &eject_fences(&1, &2, "//")
 ```
 
-## Disabling Code Transformations for a file
+## Disabling Code Transformations
 
 If you have a file that should not have Code Transformations applied upon
 ejection, use [`cp`](Uniform.Blueprint.html#cp/2) instead of

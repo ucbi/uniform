@@ -179,8 +179,8 @@ end
 ## The Phoenix Router
 
 A simple way to set up your `Phoenix.Router` is to put the routes for all of
-your apps in a single router. Then, use [Code
-Fences](code-transformations.html#code-fences) and `Uniform.Blueprint.modify/2`
+your apps in a single router. Then, use [Eject
+Fences](code-transformations.html#eject-fences) and `Uniform.Blueprint.modify/2`
 to transform the router upon ejection.
 
 Let's look at an example. We'll explain each part below.
@@ -226,8 +226,8 @@ pipeline :browser do
 end
 ```
 
-Next, add scopes for each app, wrapped in [Code
-Fences](code-transformations.html#code-fences). This ensures ejected routers
+Next, add scopes for each app, wrapped in [Eject
+Fences](code-transformations.html#eject-fences). This ensures ejected routers
 will only contain routes related to the ejected app.
 
 ```elixir
@@ -291,7 +291,7 @@ to the Base Project that aren't intended to be ejected with any app.
 
 For example, you might add a page that catalogs and links to your various apps.
 We recommend adding these routes and wrapping them all in `# uniform:remove`
-Code Fences as in the example above.
+Eject Fences as in the example above.
 
 ```elixir
 # uniform:remove
@@ -303,13 +303,13 @@ end
 # /uniform:remove
 ```
 
-## Code Fences Everywhere!
+## Eject Fences Everywhere!
 
 There are other files which are central for running Elixir apps.
 
 Similarly to the Phoenix Router, we recommend that you add the code required by
 each of your apps and [Lib Dependencies](dependencies.html#lib-dependencies) to
-all of these files. Then, use [Code Fences](code-transformations.html#code-fences)
+all of these files. Then, use [Eject Fences](code-transformations.html#eject-fences)
 to selectively remove code during ejection.
 
 Let's examine what this might look like for `application.ex`, `mix.exs`, and
@@ -321,7 +321,7 @@ Your `Application` file at `lib/my_base_app/application.ex` is a critical piece
 of Elixir applications since it's used to start processes and supervisors at
 the start of the application.
 
-Here's what an example `Application` file would look like with Code Fences
+Here's what an example `Application` file would look like with Eject Fences
 applied.
 
 ```elixir
@@ -358,8 +358,8 @@ defmodule MyBaseApp.Application do
 end
 ```
 
-Notice that code which should always be ejected does not get surrounded by Code
-Fences.
+Notice that code which should always be ejected does not get surrounded by
+Eject Fences.
 
 ### mix.exs
 
@@ -377,7 +377,7 @@ end
 ```
 
 But what if only some of your apps require exq? Wrap the exq-specific code in
-Code Fences, and it will only be included when exq is required.
+Eject Fences, and it will only be included when exq is required.
 
 ```elixir
 def application do
@@ -393,13 +393,13 @@ def application do
 end
 ```
 
-#### You don't need to use Code Fences in `deps` {: .tip}
+#### You don't need to use Eject Fences in `deps` {: .tip}
 
 Note that removing deps from the `deps` section of `mix.exs` is automatic, so
 this would not be required.
 
 ```elixir
-# ❌ Do NOT wrap individual deps in code fences
+# ❌ Do NOT wrap individual deps in eject fences
 defp deps do
   [
     # uniform:mix:jason
@@ -411,7 +411,7 @@ end
 
 ### Config Files
 
-Many dependencies also require configuration. Apply code fences in your
+Many dependencies also require configuration. Apply Eject Fences in your
 configuration files for the same result.
 
 ```elixir

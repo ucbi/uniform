@@ -93,8 +93,8 @@ defmodule Uniform.Blueprint do
 
   ## Preserving files
 
-  Whenever running `mix uniform.eject`, the contents in the destination
-  directory will be deleted except for the `.git`, `deps`, and `_build`
+  Before `mix uniform.eject` copies any files, the contents in the destination
+  directory are deleted – except for the `.git`, `deps`, and `_build`
   directories.
 
   If there are any other files or directories *in the project's root folder*
@@ -330,7 +330,7 @@ defmodule Uniform.Blueprint do
 
       import Uniform.Blueprint, only: [modify: 2, deps: 1, base_files: 1]
       import Uniform.App, only: [depends_on?: 3]
-      import Uniform.Modifiers, only: [code_fences: 3]
+      import Uniform.Modifiers, only: [eject_fences: 3]
 
       def __template_dir__, do: unquote(templates)
 

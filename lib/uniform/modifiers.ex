@@ -1,35 +1,35 @@
 defmodule Uniform.Modifiers do
   @moduledoc """
-  Utilities for building code transformations with `modify` in your
-  `Uniform.Blueprint` module.
+  Utilities for building code transformations with
+  `Uniform.Blueprint.modify/2`.
   """
 
   #
-  # Code Fences
+  # Eject Fences
   #
 
   @doc """
-  Build code transformations to apply [Code
-  Fences](code-transformations.html#code-fences) with this function.
+  Apply [Eject Fences](code-transformations.html#eject-fences) to extra
+  languages with this function.
 
-  Note that code fences are already applied automatically to `.ex/.exs` files
-  as well as `.js/.jsx/.ts/.tsx` files.
+  Uniform already applies Eject Fences to Elixir (`.ex/.exs`) and JavaScript
+  (`.js/.jsx/.ts/.tsx`) files automatically.
 
-  This function is automatically imported in your Blueprint.
+  `use Uniform.Blueprint` imports `eject_fences`.
 
   ## Examples
 
       # code fences for SQL files
-      modify ~r/\.sql$/, &code_fences(&1, &2, "--")
+      modify ~r/\.sql$/, &eject_fences(&1, &2, "--")
 
       # code fences for Rust files
       modify ~r/\.rs$/, fn file, app ->
-        code_fences(file, app, "//")
+        eject_fences(file, app, "//")
       end
 
   """
-  @spec code_fences(String.t(), Uniform.App.t(), String.t()) :: String.t()
-  def code_fences(file_contents, app, comment_prefix) do
+  @spec eject_fences(String.t(), Uniform.App.t(), String.t()) :: String.t()
+  def eject_fences(file_contents, app, comment_prefix) do
     remove_regex =
       Regex.compile!(
         "\n *#{comment_prefix} uniform:remove.+?#{comment_prefix} \/uniform:remove",
@@ -43,7 +43,7 @@ defmodule Uniform.Modifiers do
       file_contents,
       fn _, category, dep, code ->
         dep = String.to_existing_atom(dep)
-        code_fence_replacement(app, category, dep, code)
+        eject_fence_replacement(app, category, dep, code)
       end,
       global: true
     )
@@ -61,7 +61,7 @@ defmodule Uniform.Modifiers do
       end
   end
 
-  defp code_fence_replacement(app, "lib", dep_name, inner_match) do
+  defp eject_fence_replacement(app, "lib", dep_name, inner_match) do
     if dep_name in app.internal.deps.all.lib do
       if dep_name in app.internal.deps.included.lib do
         String.trim_trailing(inner_match)
@@ -73,7 +73,7 @@ defmodule Uniform.Modifiers do
     end
   end
 
-  defp code_fence_replacement(app, "mix", dep_name, inner_match) do
+  defp eject_fence_replacement(app, "mix", dep_name, inner_match) do
     if dep_name in app.internal.deps.all.mix do
       if dep_name in app.internal.deps.included.mix do
         String.trim_trailing(inner_match)
@@ -85,7 +85,7 @@ defmodule Uniform.Modifiers do
     end
   end
 
-  defp code_fence_replacement(app, "app", app_name, inner_match) do
+  defp eject_fence_replacement(app, "app", app_name, inner_match) do
     if to_string(app_name) == app.name.underscore do
       inner_match
     else
@@ -129,13 +129,13 @@ defmodule Uniform.Modifiers do
            # /uniform:remove
 
        """ && false
-  def elixir_code_fences(file_contents, app) do
-    code_fences(file_contents, app, "#")
+  def elixir_eject_fences(file_contents, app) do
+    eject_fences(file_contents, app, "#")
   end
 
   @doc false
-  def js_code_fences(file_contents, app) do
-    code_fences(file_contents, app, "//")
+  def js_eject_fences(file_contents, app) do
+    eject_fences(file_contents, app, "//")
   end
 
   #

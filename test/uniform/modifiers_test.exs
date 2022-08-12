@@ -18,12 +18,12 @@ defmodule Uniform.ModifiersTest do
         extra: []
       )
 
-    %{app: App.new!(config, manifest, "code_fence_app")}
+    %{app: App.new!(config, manifest, "eject_fence_app")}
   end
 
   test "uniform:lib", %{app: app} do
     output =
-      Modifiers.elixir_code_fences(
+      Modifiers.elixir_eject_fences(
         """
         defmodule Testing do
           # uniform:lib:included_lib
@@ -45,7 +45,7 @@ defmodule Uniform.ModifiersTest do
 
   test "uniform:mix", %{app: app} do
     output =
-      Modifiers.elixir_code_fences(
+      Modifiers.elixir_eject_fences(
         """
         defmodule Testing do
           # uniform:mix:included_mix
@@ -67,16 +67,16 @@ defmodule Uniform.ModifiersTest do
 
   test "uniform:app", %{app: app} do
     # prime String.to_existing_atom
-    :code_fence_app
+    :eject_fence_app
     :another_app
 
     output =
-      Modifiers.elixir_code_fences(
+      Modifiers.elixir_eject_fences(
         """
         defmodule Testing do
-          # uniform:app:code_fence_app
+          # uniform:app:eject_fence_app
           # Keep
-          # /uniform:app:code_fence_app
+          # /uniform:app:eject_fence_app
           # uniform:app:another_app
           # Remove
           # /uniform:app:another_app
@@ -93,7 +93,7 @@ defmodule Uniform.ModifiersTest do
 
   test "uniform:remove", %{app: app} do
     output =
-      Modifiers.elixir_code_fences(
+      Modifiers.elixir_eject_fences(
         """
         defmodule Testing do
           # Keep

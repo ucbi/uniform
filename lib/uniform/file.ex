@@ -254,8 +254,8 @@ defmodule Uniform.File do
 
   @default_modifiers [
     {"mix.exs", &Uniform.Modifiers.remove_unused_mix_deps/2},
-    {~r/\.(ex|exs)$/, &Uniform.Modifiers.elixir_code_fences/2},
-    {~r/\.(js|ts|jsx|tsx)$/, &Uniform.Modifiers.js_code_fences/2},
+    {~r/\.(ex|exs)$/, &Uniform.Modifiers.elixir_eject_fences/2},
+    {~r/\.(js|ts|jsx|tsx)$/, &Uniform.Modifiers.js_eject_fences/2},
     {:all, &Uniform.Modifiers.replace_base_project_name/2}
   ]
 
