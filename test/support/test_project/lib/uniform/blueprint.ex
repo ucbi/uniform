@@ -1,5 +1,5 @@
 defmodule TestProject.Uniform.Blueprint do
-  use Uniform.Blueprint, templates: "templates"
+  use Uniform.Blueprint, templates: "test/support/test_project/templates"
 
   @preserve [".gitignore"]
 

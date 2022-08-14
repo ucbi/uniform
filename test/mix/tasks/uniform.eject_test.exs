@@ -40,6 +40,21 @@ defmodule Mix.Tasks.Uniform.EjectTest do
     Mix.Tasks.Uniform.Eject.clear_destination(app)
   end
 
+  test "missing template file" do
+    set_blueprint_in_config(TestProject.Uniform.MissingTemplateBlueprint)
+
+    assert_raise Uniform.MissingTemplateError, fn ->
+      capture_io(fn -> Mix.Task.rerun("uniform.eject", ["tweeter", "--confirm"]) end)
+    end
+
+    # reset blueprint so we don't affect other tests
+    set_blueprint_in_config(TestProject.Uniform.Blueprint)
+
+    # clear files in preparation for next test
+    [app] = Uniform.ejectable_apps()
+    Mix.Tasks.Uniform.Eject.clear_destination(app)
+  end
+
   test "full ejection" do
     # Use rerun here because `Mix.Task` refuses to run it twice otherwise
     capture_io(fn -> Mix.Task.rerun("uniform.eject", ["tweeter", "--confirm"]) end)

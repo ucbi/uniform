@@ -5,7 +5,7 @@ defmodule Uniform.MissingTemplateDirError do
 
   def message(error) do
     """
-    No template directory defined.
+    No template directory defined
 
     Trying to eject template: #{error.template}
 
