@@ -86,4 +86,8 @@ defmodule TestProject.Uniform.Blueprint do
       mix_deps [:indirectly_included_mix]
     end
   end
+
+  # For testing that imported and inline functions are available in templates
+  import String, only: [upcase: 1], warn: false
+  def inline_upcase(string), do: String.upcase(string)
 end

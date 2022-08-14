@@ -95,6 +95,9 @@ defmodule Mix.Tasks.Uniform.EjectTest do
     assert template_file =~ "App name is tweeter"
     assert template_file =~ "Depends on included_mix"
     refute template_file =~ "Depends on excluded_mix"
+    # test using imported and inline functions
+    assert template_file =~ "INLINE UPCASE"
+    assert template_file =~ "STRING.UPCASE"
 
     lib_template = read!("priv/included_lib/template.txt")
     assert lib_template =~ "Template generated for included lib via tweeter"

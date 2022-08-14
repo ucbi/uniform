@@ -8,3 +8,6 @@
 <%= if depends_on?(app, :mix, :excluded_mix) do %>
   # Depends on excluded_mix
 <% end %>
+
+# <%= inline_upcase("Inline upcase") %>
+# <%= upcase("String.upcase") %>
