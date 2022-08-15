@@ -40,6 +40,13 @@ jobs:
           mix local.hex --force
           mix local.rebar --force
           mix deps.get --only test
+      - name: Compile test projects
+        run: |
+          cd test/projects/empty && mix compile
+          cd test/projects/full && mix compile
+          cd test/projects/initable && mix compile
+          cd test/projects/missing_template && mix compile
+          cd test/projects/missing_template_dir && mix compile
       - run: mix compile --warnings-as-errors
         if: matrix.warnings_as_errors
       - run: mix test
