@@ -13,13 +13,11 @@ defmodule UniformTest do
   end
 
   test "ejectable_apps/0" do
-    {stdout, 0} =
-      System.cmd(
-        "mix",
-        ["run", "-e", "Uniform.ejectable_apps()|> inspect() |> IO.puts()"]
-      )
-
-    assert stdout ==
-             "[#Uniform.App<extra: [company: :fake_co, logo_file: \"pixel\"], name: %{camel: \"Tweeter\", hyphen: \"tweeter\", module: Tweeter, underscore: \"tweeter\"}, ...>]\n"
+    command = "Uniform.ejectable_apps() |> hd() |> Map.delete(:__struct__) |> inspect() |> IO.puts()"
+    {stdout, 0} = System.cmd("mix", ["run", "-e", command])
+    {map, []} = Code.eval_string(stdout)
+    app = Map.put(map, :__struct__, Uniform.App)
+    assert app.extra == [company: :fake_co, logo_file: "pixel"]
+    assert app.name == %{camel: "Tweeter", hyphen: "tweeter", module: Tweeter, underscore: "tweeter"}
   end
 end
