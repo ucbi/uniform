@@ -43,10 +43,10 @@ jobs:
       - name: Compile test projects
         run: |
           cd test/projects/empty && mix deps.get && mix compile
-          cd test/projects/full && mix deps.get && mix compile
-          cd test/projects/initable && mix deps.get && mix compile
-          cd test/projects/missing_template && mix deps.get && mix compile
-          cd test/projects/missing_template_dir && mix deps.get && mix compile
+          cd ../full && mix deps.get && mix compile
+          cd ../initable && mix deps.get && mix compile
+          cd ../missing_template && mix deps.get && mix compile
+          cd ../missing_template_dir && mix deps.get && mix compile
       - run: mix compile --warnings-as-errors
         if: matrix.warnings_as_errors
       - run: mix test
