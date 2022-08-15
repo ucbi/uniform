@@ -32,7 +32,7 @@ defmodule Mix.Tasks.Uniform.Gen.App do
     path = "lib/#{lib}/uniform.exs"
 
     if File.exists?(path) do
-      Logger.warning("Did not create #{path} because it already exists")
+      Logger.warn("Did not create #{path} because it already exists")
     else
       File.write!(path, """
       [
