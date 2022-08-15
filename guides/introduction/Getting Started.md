@@ -39,8 +39,7 @@ end
 ```
 
 You can name the module whatever you like, but we suggest putting it in
-`lib/my_app/uniform/blueprint.ex` and specifying the templates directory
-alongside it in `lib/my_app/uniform/templates`.
+`lib/my_app/uniform/blueprint.ex`.
 
 ### Configuration
 
