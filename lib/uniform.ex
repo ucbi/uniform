@@ -137,11 +137,14 @@ defmodule Uniform do
 
             mix uniform.eject my_app
 
+        Did you forget to run this command?
+
+            mix uniform.gen.app #{name}
+
         """
     end
 
     Mix.Task.run("compile", [])
-
     config = Uniform.Config.build()
     manifest = Uniform.Manifest.eval_and_parse(config, Macro.underscore(name))
     Uniform.App.new!(config, manifest, name, opts)

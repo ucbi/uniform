@@ -22,5 +22,6 @@ erl_crash.dump
 # A directory for tests to eject to
 /test/ejected
 
-# A directory that gets created during tests
-/test/support/test_project/_build
+# Directories that get created during tests
+/test/projects/**/_build
+/test/projects/**/deps

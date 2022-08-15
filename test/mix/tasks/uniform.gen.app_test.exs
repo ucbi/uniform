@@ -1,13 +1,11 @@
 defmodule Mix.Tasks.Uniform.Gen.AppTest do
-  use Uniform.TestProjectCase
-
-  import ExUnit.CaptureIO
+  use ExUnit.Case
 
   test "creates the directory and empty uniform.exs" do
-    # remove stdout from test output
-    capture_io(fn -> Mix.Task.run("uniform.gen.app", ["new_test_app"]) end)
-    {manifest, []} = Code.eval_file("lib/new_test_app/uniform.exs")
+    on_exit(fn -> File.rm_rf!("test/projects/full/lib/new_app") end)
+    {stdout, 0} = System.cmd("mix", ["uniform.gen.app", "new_app"], cd: "test/projects/full")
+    assert stdout == "Created lib/new_app/uniform.exs\n"
+    {manifest, []} = Code.eval_file("test/projects/full/lib/new_app/uniform.exs")
     assert manifest == []
-    on_exit(fn -> File.rm_rf!("lib/new_test_app") end)
   end
 end

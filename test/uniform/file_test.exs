@@ -1,27 +1,30 @@
 defmodule Uniform.FileTest do
-  use Uniform.TestProjectCase
+  use ExUnit.Case
 
   alias Uniform.{App, Manifest, Config}
 
-  setup do
-    cwd = File.cwd!()
+  defmodule Blueprint do
+    use Uniform.Blueprint, templates: "test/support"
 
-    # set alternative working directory so that Path.wildcard and Path.expand
-    # start within the test corral
-    File.cd("test/support/test_project")
+    base_files do
+      file "lib/uniform.ex"
+      template "template.txt"
+    end
+  end
 
-    # restore working directory
-    on_exit(fn -> File.cd(cwd) end)
+  defmodule MixProject do
+    def project, do: [deps: deps()]
+    defp deps, do: [{:included_mix, "0.1.0"}]
   end
 
   setup do
     config = %Config{
-      mix_project_app: :test_project,
-      mix_project: TestProject.MixProject,
-      blueprint: TestProject.Uniform.Blueprint
+      mix_project_app: :test,
+      mix_project: Uniform.FileTest.MixProject,
+      blueprint: Uniform.FileTest.Blueprint
     }
 
-    manifest = %Manifest{lib_deps: [:included_lib], mix_deps: [:included_mix]}
+    manifest = %Manifest{lib_deps: [:uniform], mix_deps: [:included_mix]}
     app = App.new!(config, manifest, "tweeter")
     %{app: app}
   end
@@ -31,23 +34,19 @@ defmodule Uniform.FileTest do
   } do
     files = Uniform.File.all_for_app(app)
 
-    # expected to be included
-    assert Enum.find(files, &match?(%Uniform.File{source: ".dotfile"}, &1))
+    # included
+    assert Enum.find(files, &match?(%Uniform.File{source: "lib/uniform.ex"}, &1))
+    assert Enum.find(files, &match?(%Uniform.File{source: "lib/uniform/app.ex"}, &1))
 
     assert Enum.find(
              files,
-             &match?(%Uniform.File{source: "config/runtime.exs", type: :template}, &1)
+             &match?(%Uniform.File{source: "template.txt", type: :template}, &1)
            )
 
-    assert Enum.find(
-             files,
-             &match?(%Uniform.File{source: "lib/included_lib/included.ex"}, &1)
-           )
-
-    # not expected to be included
+    # excluded
     refute Enum.find(
              files,
-             &match?(%Uniform.File{source: "lib/excluded_lib" <> _}, &1)
+             &match?(%Uniform.File{source: "lib/mix" <> _}, &1)
            )
   end
 end

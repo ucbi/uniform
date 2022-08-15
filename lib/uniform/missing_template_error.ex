@@ -7,7 +7,7 @@ defmodule Uniform.MissingTemplateError do
     """
     Template does not exist
 
-    #{Path.join(error.templates_dir, error.source)}.eex
+        #{Path.join(error.templates_dir, error.source)}.eex
 
     Did you forget to create the file?
     """

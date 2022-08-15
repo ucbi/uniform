@@ -1,10 +1,14 @@
 defmodule Mix.Tasks.Uniform.EjectableAppsTest do
-  use Uniform.TestProjectCase
-
-  import ExUnit.CaptureIO
+  use ExUnit.Case
 
   test "lists ejectable app names" do
-    stdout = capture_io(fn -> Mix.Task.run("uniform.ejectable_apps") end)
+    {stdout, 0} =
+      System.cmd(
+        "mix",
+        ["uniform.ejectable_apps"],
+        cd: "test/projects/full"
+      )
+
     assert stdout == "tweeter\n"
   end
 end

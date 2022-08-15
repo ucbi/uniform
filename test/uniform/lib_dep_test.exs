@@ -1,4 +1,4 @@
 defmodule Uniform.LibDepTest do
-  use Uniform.TestProjectCase
+  use ExUnit.Case
   doctest Uniform.LibDep, import: true
 end

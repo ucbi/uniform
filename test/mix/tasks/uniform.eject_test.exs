@@ -1,74 +1,75 @@
 defmodule Mix.Tasks.Uniform.EjectTest do
-  use Uniform.TestProjectCase
+  use ExUnit.Case
 
-  import ExUnit.CaptureIO
-
-  defp read!(path), do: File.read!("../../ejected/tweeter/" <> path)
-
-  defp file_exists?(path) do
-    case File.read("../../ejected/tweeter/" <> path) do
-      {:ok, _} -> true
-      _ -> false
-    end
+  defp eject(project, app_name) do
+    System.cmd(
+      "mix",
+      ["uniform.eject", app_name, "--destination", "../../ejected/#{app_name}", "--confirm"],
+      cd: "test/projects/#{project}",
+      stderr_to_stdout: true
+    )
   end
 
   test "ejecting with an empty Blueprint" do
-    set_blueprint_in_config(TestProject.Uniform.EmptyBlueprint)
     # We don't assert anything but simply test the happy path for crashes.
-    # Use rerun here because `Mix.Task` refuses to run it twice otherwise.
-    capture_io(fn -> Mix.Task.rerun("uniform.eject", ["tweeter", "--confirm"]) end)
-    # reset blueprint so we don't affect other tests
-    set_blueprint_in_config(TestProject.Uniform.Blueprint)
-
-    # clear files in preparation for next test
-    [app] = Uniform.ejectable_apps()
-    Mix.Tasks.Uniform.Eject.clear_destination(app)
+    {_, 0} = eject("empty", "hatmail")
   end
 
   test "missing templates directory" do
-    set_blueprint_in_config(TestProject.Uniform.MissingTemplatesBlueprint)
+    {stderr, 1} = eject("missing_template_dir", "trillo")
 
-    assert_raise Uniform.MissingTemplateDirError, fn ->
-      capture_io(fn -> Mix.Task.rerun("uniform.eject", ["tweeter", "--confirm"]) end)
-    end
+    assert stderr =~
+             """
+             ** (Uniform.MissingTemplateDirError) No template directory defined
 
-    # reset blueprint so we don't affect other tests
-    set_blueprint_in_config(TestProject.Uniform.Blueprint)
+             Trying to eject template: some/template
 
-    # clear files in preparation for next test
-    [app] = Uniform.ejectable_apps()
-    Mix.Tasks.Uniform.Eject.clear_destination(app)
+             Pass the `templates` option to `use Uniform.Blueprint`
+
+                 defmodule MissingTemplateDir.Uniform.Blueprint do
+                   use Uniform.Blueprint, templates: "lib/missing_template_dir/uniform/templates"
+                                             ^
+                                           this is missing
+             """
   end
 
   test "missing template file" do
-    set_blueprint_in_config(TestProject.Uniform.MissingTemplateBlueprint)
+    {stderr, 1} = eject("missing_template", "instant_gram")
 
-    assert_raise Uniform.MissingTemplateError, fn ->
-      capture_io(fn -> Mix.Task.rerun("uniform.eject", ["tweeter", "--confirm"]) end)
-    end
+    assert stderr =~
+             """
+             ** (Uniform.MissingTemplateError) Template does not exist
 
-    # reset blueprint so we don't affect other tests
-    set_blueprint_in_config(TestProject.Uniform.Blueprint)
+                 templates/this/template/does/not/exist.eex
 
-    # clear files in preparation for next test
-    [app] = Uniform.ejectable_apps()
-    Mix.Tasks.Uniform.Eject.clear_destination(app)
+             Did you forget to create the file?
+             """
   end
 
   test "full ejection" do
-    # Use rerun here because `Mix.Task` refuses to run it twice otherwise
-    capture_io(fn -> Mix.Task.rerun("uniform.eject", ["tweeter", "--confirm"]) end)
+    {_stdout, 0} = eject("full", "tweeter")
+
+    read! = &File.read!("test/ejected/tweeter/" <> &1)
+
+    exists? = fn path ->
+      case File.read("test/ejected/tweeter/" <> path) do
+        {:ok, _} -> true
+        _ -> false
+      end
+    end
 
     # check for files that are always ejected (read! will crash if missing)
-    read!("mix.lock")
-    read!(".gitignore")
-    read!(".formatter.exs")
-    read!("test/test_helper.exs")
+    read!.("mix.lock")
+    read!.(".gitignore")
+    read!.(".formatter.exs")
+    read!.("test/test_helper.exs")
 
     # excluded mix deps are removed; included ones are kept
-    mix_exs = read!("mix.exs")
-    assert mix_exs =~ "included_mix"
-    assert mix_exs =~ "always_included_mix"
+    mix_exs = read!.("mix.exs")
+    # indirectly included via lib in manifest
+    assert mix_exs =~ "esbuild"
+    # always included via Blueprint
+    assert mix_exs =~ "decimal"
     # test that opts are transferred properly
     assert mix_exs =~ "runtime: Mix.env() == :dev"
     refute mix_exs =~ "excluded_mix"
@@ -76,34 +77,34 @@ defmodule Mix.Tasks.Uniform.EjectTest do
     refute mix_exs =~ "comment to remove"
 
     # files copied with `dir` should not be modified
-    file_txt = read!("dir/file.txt")
-    assert file_txt =~ "TestProject"
+    file_txt = read!.("dir/file.txt")
+    assert file_txt =~ "Full"
     refute file_txt =~ "Tweeter"
 
     # binary files are copied without modification
-    assert read!("assets/static/images/pixel.png") ==
-             read!("../../support/test_project/assets/static/images/pixel.png")
+    assert read!.("assets/static/images/pixel.png") ==
+             read!.("../../projects/full/assets/static/images/pixel.png")
 
     # lib files should be modified
-    lib_file = read!("lib/included_lib/included.ex")
+    lib_file = read!.("lib/included_lib/included.ex")
     assert lib_file =~ "Tweeter"
-    refute lib_file =~ "TestProject"
+    refute lib_file =~ "Full"
 
     # files are created from templates for `base_files` and `lib`
-    template_file = read!("config/runtime.exs")
+    template_file = read!.("config/runtime.exs")
     assert template_file =~ "1 + 1 = 2"
     assert template_file =~ "App name is tweeter"
-    assert template_file =~ "Depends on included_mix"
-    refute template_file =~ "Depends on excluded_mix"
+    assert template_file =~ "Depends on esbuild"
+    refute template_file =~ "Depends on lhttpc"
     # test using imported and inline functions
     assert template_file =~ "INLINE UPCASE"
     assert template_file =~ "STRING.UPCASE"
 
-    lib_template = read!("priv/included_lib/template.txt")
+    lib_template = read!.("priv/included_lib/template.txt")
     assert lib_template =~ "Template generated for included lib via tweeter"
 
     # `modify` transformations are ran
-    modified_file = read!(".dotfile")
+    modified_file = read!.(".dotfile")
     assert modified_file =~ "[REPLACED LINE WHILE EJECTING Tweeter]"
     refute modified_file =~ "[REPLACE THIS LINE VIA modify]"
     refute modified_file =~ "removed via code fences"
@@ -113,27 +114,40 @@ defmodule Mix.Tasks.Uniform.EjectTest do
     assert modified_file =~ "Added to Tweeter in anonymous function capture"
 
     # associated_files are included
-    assert file_exists?("priv/associated.txt")
+    assert exists?.("priv/associated.txt")
 
     # when `only` option given, only ejects files matching an `only` entry
-    assert file_exists?("lib/with_only/included.txt")
-    refute file_exists?("lib/with_only/excluded.txt")
+    assert exists?.("lib/with_only/included.txt")
+    refute exists?.("lib/with_only/excluded.txt")
 
     # when `except` option given, does not eject files matching `except` entry
     # (supported by both deps and app_lib_except/1)
-    refute file_exists?("lib/included_lib/excluded.txt")
-    refute file_exists?("lib/always_included_lib/excluded.txt")
-    assert file_exists?("lib/tweeter/included.txt")
-    refute file_exists?("lib/tweeter/excluded.txt")
+    refute exists?.("lib/included_lib/excluded.txt")
+    refute exists?.("lib/always_included_lib/excluded.txt")
+    assert exists?.("lib/tweeter/included.txt")
+    refute exists?.("lib/tweeter/excluded.txt")
 
     # target_path callback is able to modify path of a given file
-    assert file_exists?("lib/included_lib_changed/lib_dir_changed.txt")
-    assert file_exists?("lib/tweeter_changed/lib_dir_changed.txt")
+    assert exists?.("lib/included_lib_changed/lib_dir_changed.txt")
+    assert exists?.("lib/tweeter_changed/lib_dir_changed.txt")
 
     # demonstrate that `@preserve`d files are never cleared
-    # (note: TestProject.Uniform.Blueprint specifies to preserve .gitignore)
-    [app] = Uniform.ejectable_apps()
+    # (note: Full.Uniform.Blueprint specifies to preserve .gitignore)
+    app = app("full")
     Mix.Tasks.Uniform.Eject.clear_destination(app)
-    assert file_exists?(".gitignore")
+    assert exists?.(".gitignore")
+  end
+
+  # get an `%App{}` in a hacky way from a remote project
+  defp app(project) do
+    args = [
+      "run",
+      "-e",
+      "Uniform.ejectable_apps() |> hd() |> Map.delete(:__struct__) |> inspect() |> IO.puts()"
+    ]
+
+    {stdout, 0} = System.cmd("mix", args, cd: "test/projects/#{project}")
+    {map, []} = Code.eval_string(stdout)
+    Map.put(map, :__struct__, Uniform.App)
   end
 end
