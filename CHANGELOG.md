@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.4.0 (2022-08-15)
+
+  * Rename `code_fences` to `eject_fences`
+  * Compile templates into Blueprint (#36)
+
 ## v0.3.0 (2022-08-09)
 
   * Make `templates` optional in `use Uniform.Blueprint` (#33)
