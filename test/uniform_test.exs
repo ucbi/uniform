@@ -19,6 +19,7 @@ defmodule UniformTest do
         ["run", "-e", "Uniform.ejectable_apps()|> inspect() |> IO.puts()"]
       )
 
-    assert stdout == "[#Uniform.App<extra: [company: :fake_co, logo_file: \"pixel\"], name: %{camel: \"Tweeter\", hyphen: \"tweeter\", module: Tweeter, underscore: \"tweeter\"}, ...>]\n"
+    assert stdout ==
+             "[#Uniform.App<extra: [company: :fake_co, logo_file: \"pixel\"], name: %{camel: \"Tweeter\", hyphen: \"tweeter\", module: Tweeter, underscore: \"tweeter\"}, ...>]\n"
   end
 end
