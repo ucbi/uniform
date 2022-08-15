@@ -31,7 +31,8 @@ defmodule Mix.Tasks.Uniform.Eject do
   3. All files in `lib/my_app` and `test/my_app` are copied.
   4. For every [Lib Dependency](dependencies.html#lib-dependencies) of `my_app`:
       - All files in `lib/my_lib_dep` and `test/my_lib_dep` are copied.
-      - All [associated files](Uniform.Blueprint.html#lib/2-associated-files)
+      - All [associated
+        files](Uniform.Blueprint.html#lib/2-3-including-files-outside-of-lib)
         tied to the Lib Dependency are copied.
 
   > If you need to apply exceptions to these rules, you can use these tools.

@@ -1029,7 +1029,8 @@ defmodule Uniform.Blueprint do
   `cp_r` works like `cp/2`, but for a directory instead of a file. The
   directory is copied as-is with `File.cp_r!/3`.
 
-  **None of the files are ran through Code Modifiers.**
+  **None of the files are ran through [Code
+  Transformations](code-transformations.html).**
 
   This is useful for directories that do not require modification, and contain
   many files.
@@ -1055,8 +1056,8 @@ defmodule Uniform.Blueprint do
   def cp_r(path, opts \\ []), do: {:cp_r, {path, opts}}
 
   @doc """
-  `cp` works exactly like `file/2`, except that **no transformations are
-  applied to the file**.
+  `cp` works exactly like `file/2`, except that **no [Code
+  Transformations](code-transformations.html) are applied to the file**.
 
   The file is copied as-is with `File.cp!/3`.
 

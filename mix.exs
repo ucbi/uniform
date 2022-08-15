@@ -59,7 +59,7 @@ defmodule Uniform.MixProject do
         "guides/introduction/Code Transformations.md",
         "guides/howtos/Setting up a Phoenix project.md",
         "guides/howtos/Auto-updating ejected codebases.md",
-        "guides/howtos/Handling multiple databases.md",
+        "guides/howtos/Handling multiple data sources.md",
         "guides/howtos/Building files from EEx templates.md",
         "guides/assessment/Use Cases.md",
         "guides/assessment/Benefits and Disadvantages.md",
