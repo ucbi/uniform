@@ -1,9 +1,38 @@
 defmodule Uniform.Blueprint.BeforeCompile do
   @moduledoc false
-  defmacro __before_compile__(_env) do
+  defmacro __before_compile__(env) do
+    templates_dir = Module.get_attribute(env.module, :templates_dir)
+
+    templates =
+      if templates_dir do
+        templates_dir
+        |> Path.join("**/*.eex")
+        |> Path.wildcard()
+      else
+        []
+      end
+
+    template_functions =
+      for path <- templates do
+        path = Path.relative_to(path, templates_dir)
+
+        quote do
+          @file unquote(path)
+          @external_resource unquote(path)
+
+          EEx.function_from_file(
+            :def,
+            unquote(String.to_atom(path)),
+            unquote(Path.join(templates_dir, path)),
+            [:app]
+          )
+        end
+      end
+
     quote do
       def __modifiers__, do: @modifiers
       def __preserve__, do: @preserve
+      unquote(template_functions)
     end
   end
 end
@@ -319,8 +348,6 @@ defmodule Uniform.Blueprint do
 
   @doc false
   defmacro __using__(opts) do
-    templates = opts[:templates]
-
     quote do
       @behaviour Uniform.Blueprint
       @before_compile Uniform.Blueprint.BeforeCompile
@@ -331,12 +358,14 @@ defmodule Uniform.Blueprint do
       import Uniform.Blueprint, only: [modify: 2, deps: 1, base_files: 1]
       import Uniform.App, only: [depends_on?: 3]
       import Uniform.Modifiers, only: [eject_fences: 3]
-
-      def __template_dir__, do: unquote(templates)
+      require EEx
 
       Module.register_attribute(__MODULE__, :lib_deps, accumulate: true)
       Module.register_attribute(__MODULE__, :mix_deps, accumulate: true)
       Module.register_attribute(__MODULE__, :modifiers, accumulate: true)
+      Module.put_attribute(__MODULE__, :templates_dir, unquote(opts[:templates]))
+
+      def __templates_dir__, do: @templates_dir
     end
   end
 

@@ -1,22 +1,29 @@
 defmodule Uniform.ModifiersTest do
-  use Uniform.TestProjectCase
+  use ExUnit.Case
 
   alias Uniform.{App, Modifiers, Manifest, Config}
+
+  defmodule Blueprint do
+    use Uniform.Blueprint
+  end
+
+  defmodule MixProject do
+    def project, do: [deps: deps()]
+    defp deps, do: [{:included_mix, "0.1.0"}, {:excluded_mix, "0.1.0"}]
+  end
 
   setup do
     config = %Config{
       mix_project_app: :test,
-      mix_project: TestProject.MixProject,
-      blueprint: TestProject.Uniform.Blueprint
+      mix_project: Uniform.ModifiersTest.MixProject,
+      blueprint: Uniform.ModifiersTest.Blueprint
     }
 
-    manifest =
-      Manifest.new!(
-        config,
-        mix_deps: [:included_mix],
-        lib_deps: [:included_lib],
-        extra: []
-      )
+    manifest = %Manifest{
+      mix_deps: [:included_mix],
+      lib_deps: [:uniform],
+      extra: []
+    }
 
     %{app: App.new!(config, manifest, "eject_fence_app")}
   end
@@ -26,12 +33,12 @@ defmodule Uniform.ModifiersTest do
       Modifiers.elixir_eject_fences(
         """
         defmodule Testing do
-          # uniform:lib:included_lib
+          # uniform:lib:uniform
           # Keep
-          # /uniform:lib:included_lib
-          # uniform:lib:excluded_lib
+          # /uniform:lib:uniform
+          # uniform:lib:mix
           # Remove
-          # /uniform:lib:excluded_lib
+          # /uniform:lib:mix
         end
         """,
         app

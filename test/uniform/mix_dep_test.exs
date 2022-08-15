@@ -1,4 +1,4 @@
 defmodule Uniform.MixDepTest do
-  use Uniform.TestProjectCase
+  use ExUnit.Case
   doctest Uniform.MixDep, import: true
 end

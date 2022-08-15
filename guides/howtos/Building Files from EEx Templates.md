@@ -78,10 +78,8 @@ Also, the `Uniform.App.depends_on?/3` utility is available as `depends_on?` and
 can be used like this.
 
 ```elixir
-depends_on?.(app, :mix, :absinthe)
+depends_on?(app, :mix, :absinthe)
 ```
-
-Don't miss the `.` before the `(`.
 
 ### Code transformations
 

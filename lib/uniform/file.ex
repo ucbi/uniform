@@ -221,20 +221,24 @@ defmodule Uniform.File do
         contents =
           case t do
             :template ->
-              template_dir = app.internal.config.blueprint.__template_dir__()
+              templates_dir = app.internal.config.blueprint.__templates_dir__()
 
-              if !template_dir do
+              if !templates_dir do
                 raise Uniform.MissingTemplateDirError,
                   template: source,
                   blueprint: app.internal.config.blueprint,
                   mix_project_app: app.internal.config.mix_project_app
               end
 
-              EEx.eval_file(
-                Path.join(template_dir, source <> ".eex"),
-                app: app,
-                depends_on?: &Uniform.App.depends_on?/3
-              )
+              fn_name = String.to_atom(source <> ".eex")
+
+              if !function_exported?(app.internal.config.blueprint, fn_name, 1) do
+                raise Uniform.MissingTemplateError,
+                  source: source,
+                  templates_dir: templates_dir
+              end
+
+              apply(app.internal.config.blueprint, fn_name, [app])
 
             :text ->
               File.read!(Path.expand(source))

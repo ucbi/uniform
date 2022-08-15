@@ -1,3 +1,0 @@
-TestProject
-test_project
-test-project
