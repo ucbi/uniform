@@ -24,7 +24,7 @@ In order to understand and use this library, we heavily recommend reading the
 following guides:
 
 - [How It Works](https://hexdocs.pm/uniform/how-it-works.html)
-- [Uniform Manifests](uniform-manifests-uniform-exs.html)
+- [Uniform Manifests](https://hexdocs.pm/uniform/uniform-manifests-uniform-exs.html)
 - [Dependencies](https://hexdocs.pm/uniform/dependencies.html)
 - [Code Transformations](https://hexdocs.pm/uniform/code-transformations.html)
 
