@@ -14,7 +14,7 @@ They occur **in this order**.
 ## mix.exs Dependency Removal
 
 Any Mix Dependency that is not directly or indirectly required by the app via
-`mix.exs` or the `Blueprint` module is removed from the ejected `mix.exs`.
+`uniform.exs` or the `Blueprint` module is removed from the ejected `mix.exs`.
 
 ## Blueprint Modifiers
 
