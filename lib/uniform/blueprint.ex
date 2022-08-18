@@ -804,17 +804,7 @@ defmodule Uniform.Blueprint do
   @doc false
   def __lib__(mod, name, opts, always) when is_atom(name) and is_list(opts) do
     associated_files =
-      Enum.flat_map(opts, fn opt ->
-        case opt do
-          {type, path_or_paths} when type in [:text, :template, :cp, :cp_r] ->
-            path_or_paths
-            |> List.wrap()
-            |> Enum.map(&{type, &1})
-
-          _ ->
-            []
-        end
-      end)
+      for {type, path} <- opts, type in [:text, :template, :cp, :cp_r], do: {type, path}
 
     lib_dep =
       Uniform.LibDep.new!(%{
@@ -1123,4 +1113,6 @@ defmodule Uniform.Blueprint do
 
   """
   def only(paths), do: {:only, List.wrap(paths)}
+
+  def wildcard(path, opts \\ []), do: {:wildcard, {path, opts}}
 end

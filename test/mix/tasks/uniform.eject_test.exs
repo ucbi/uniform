@@ -103,6 +103,11 @@ defmodule Mix.Tasks.Uniform.EjectTest do
     lib_template = read!.("priv/included_lib/template.txt")
     assert lib_template =~ "Template generated for included lib via tweeter"
 
+    # `wildcard` works
+    assert exists?.("priv/wildcard_me/one.txt")
+    assert exists?.("priv/wildcard_me/two.txt")
+    assert exists?.("priv/wildcard_me/three.txt")
+
     # `modify` transformations are ran
     modified_file = read!.(".dotfile")
     assert modified_file =~ "[REPLACED LINE WHILE EJECTING Tweeter]"
