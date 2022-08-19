@@ -24,9 +24,11 @@ defmodule Full.Uniform.Blueprint do
   base_files do
     cp "assets/static/images/#{app.extra[:logo_file]}.png"
     template "config/runtime.exs"
+    file "priv/wildcard_me/*.txt"
 
     if app.extra[:company] == :fake_co do
-      file [".dotfile", ".another-dotfile"]
+      file ".dotfile"
+      file ".another-dotfile"
       cp_r "dir"
     end
   end
@@ -73,7 +75,7 @@ defmodule Full.Uniform.Blueprint do
       cp_r "priv"
       cp "priv/associated.txt"
       file "priv/associated.txt"
-      template("priv/included_lib/template.txt", chmod: 0o555)
+      template "priv/included_lib/template.txt", chmod: 0o555
 
       except ~r/excluded/
     end

@@ -1,6 +1,9 @@
 defmodule Uniform.File do
   @moduledoc """
-             Functions for writing files to an ejection destination.
+             Functions for:
+
+             1. Gathering the files that should be ejected with an app.
+             2. Writing those files to the ejected codebase.
 
              An `t:Uniform.File.t/0` can be any of the following:
 
@@ -16,10 +19,22 @@ defmodule Uniform.File do
   defstruct [:type, :source, :destination, :chmod]
 
   @typedoc """
-  A file to be ejected. (In true POSIX form, may be a directory, in which case the full contents are copied.)
+  A type of file to be ejected.
+
+  :text and :template have Code Transformations applied.
+  :cp and :cp_r use File.cp!() and File.cp_r!().
+  """
+  @type type :: :text | :template | :cp_r | :cp
+
+  @typedoc """
+  A file to be ejected. In true POSIX form, it may be a directory (when type is
+  `:cp_r`) in which case the full contents are copied.
+
+  When `type` is `:text`, the `source` may include "wildcard characters". See
+  the docs for `Path.wildcard/2`.
   """
   @type t :: %__MODULE__{
-          type: :text | :template | :cp_r | :cp,
+          type: type,
           source: Path.t(),
           destination: Path.t(),
           chmod: nil | non_neg_integer
@@ -57,6 +72,41 @@ defmodule Uniform.File do
     )
   end
 
+  @spec from_tuples([{type, keyword}], App.t()) :: [t]
+  def from_tuples(files, app) do
+    Enum.flat_map(files, fn file ->
+      case file do
+        {type, {path, _}} when not is_binary(path) ->
+          function =
+            case type do
+              :text -> :file
+              _ -> type
+            end
+
+          or_glob = if type == :text, do: " or glob"
+
+          raise """
+          `#{function}` was not given a path#{or_glob}.
+
+          You provided:
+
+              #{function} #{inspect(path)}
+
+          Try something like this instead:
+
+              #{function} "path/to/a/file"
+
+          """
+
+        {:text, {path, opts}} ->
+          for match <- Path.wildcard(path, opts), do: new(:text, app, match, opts)
+
+        {type, {path, opts}} when type in [:template, :cp, :cp_r] ->
+          [new(type, app, path, opts)]
+      end
+    end)
+  end
+
   #
   # Functions for gathering all Uniform.Files for a given app
   #
@@ -80,16 +130,7 @@ defmodule Uniform.File do
     if function_exported?(app.internal.config.blueprint, :__base_files__, 1) do
       app
       |> app.internal.config.blueprint.__base_files__()
-      |> Enum.flat_map(fn item ->
-        case item do
-          {type, {path_or_paths, opts}} when type in [:text, :template, :cp, :cp_r] ->
-            for path <- List.wrap(path_or_paths), do: new(type, app, path, opts)
-
-          _ ->
-            []
-        end
-      end)
-      |> Enum.reject(&is_nil/1)
+      |> from_tuples(app)
     else
       []
     end
@@ -157,14 +198,7 @@ defmodule Uniform.File do
     paths = Enum.reject(paths, &File.dir?/1)
 
     lib_files = for path <- paths, do: new(:text, app, path)
-
-    associated_files =
-      Enum.flat_map(
-        opts[:associated_files] || [],
-        fn {type, {path_or_paths, opts}} ->
-          for path <- List.wrap(path_or_paths), do: new(type, app, path, opts)
-        end
-      )
+    associated_files = from_tuples(opts[:associated_files] || [], app)
 
     lib_files ++ associated_files
   end

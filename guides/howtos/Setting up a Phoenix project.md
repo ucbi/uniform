@@ -25,8 +25,8 @@ defmodule MyBaseApp.Uniform.Blueprint do
     cp_r "priv/static"
 
     file "lib/my_base_app_web.ex"
-    file Path.wildcard("config/**/*.exs")
-    file Path.wildcard("test/support/*_case.ex")
+    file "config/**/*.exs"
+    file "test/support/*_case.ex"
   end
 
   deps do
@@ -42,7 +42,7 @@ defmodule MyBaseApp.Uniform.Blueprint do
         ]
 
         # `match_dot: true` so that we eject `priv/repo/.formatter.exs`
-        file Path.wildcard("priv/repo/**/*.exs", match_dot: true)
+        file "priv/repo/**/*.exs", match_dot: true
       end
 
       lib :my_base_app_web do
@@ -75,8 +75,8 @@ base_files do
   cp_r "priv/static"
 
   file "lib/my_base_app_web.ex"
-  file Path.wildcard("config/**/*.exs")
-  file Path.wildcard("test/support/*_case.ex")
+  file "config/**/*.exs"
+  file "test/support/*_case.ex"
 end
 ```
 
@@ -109,7 +109,7 @@ We also proceed with the assumption that the ejected app will need the Base
 Project's configuration files.
 
 ```elixir
-file Path.wildcard("config/**/*.exs")
+file "config/**/*.exs"
 ```
 
 ## The `deps` section
@@ -144,14 +144,15 @@ lib :my_base_app do
     "lib/my_base_app/repo.ex"
   ]
 
-  file Path.wildcard("priv/repo/**/*.exs", match_dot: true)
+  file "priv/repo/**/*.exs", match_dot: true
 end
 ```
 
 You may have a setup that requires you to add more files, such as `mailer.ex`.
 
 Note that we also include all of the Repo's migrations and seeds scripts with
-`file Path.wildcard(...)`. The `match_dot: true` ensures
+a glob: `priv/repo/**/*.exs`. Both that and the `match_dot` option are passed
+to `Path.wildcard/2` under the hood. `match_dot: true` ensures that
 `priv/repo/.formatter.exs` is ejected so that the ejected codebase is formatted
 properly.
 
@@ -167,7 +168,7 @@ lib :my_base_app_web do
     "lib/my_base_app_web/telemetry.ex",
     "lib/my_base_app_web/channels/user_socket.ex",
     "lib/my_base_app_web/templates/layout/app.html.heex",
-    "lib/my_base_app_web/templates/layout/live.html.heex"
+    "lib/my_base_app_web/templates/layout/live.html.heex",
     "lib/my_base_app_web/templates/layout/root.html.heex",
     "lib/my_base_app_web/views/error_helpers.ex",
     "lib/my_base_app_web/views/error_view.ex",

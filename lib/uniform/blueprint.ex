@@ -242,8 +242,8 @@ defmodule Uniform.Blueprint do
             mix_deps [:faker, :norm]
 
             # if my_data_lib is included, also eject these files
-            file Path.wildcard("priv/my_data_repo/**/*.exs", match_dot: true)
-            file Path.wildcard("test/support/fixtures/my_data_lib/**/*.ex")
+            file "priv/my_data_repo/**/*.exs", match_dot: true
+            file "test/support/fixtures/my_data_lib/**/*.ex"
           end
         end
       end
@@ -546,7 +546,7 @@ defmodule Uniform.Blueprint do
 
       base_files do
         file ".credo.exs"
-        file Path.wildcard("config/**/*.exs")
+        file "config/**/*.exs"
         template "config/runtime.exs"
         cp "bin/some-executable", chmod: 0o555
         cp_r "assets"
@@ -748,10 +748,10 @@ defmodule Uniform.Blueprint do
         # when `lib/my_data_source is included...
         lib :my_data_source do
           # files in priv/my_data_source_repo will be included
-          file Path.wildcard("priv/my_data_source_repo/**", match_dot: true)
+          file "priv/my_data_source_repo/**", match_dot: true
 
           # .ex files in `test/support/my_data_source` will be included
-          file Path.wildcard("test/support/my_data_source/**/*.ex")
+          file "test/support/my_data_source/**/*.ex"
 
           # `priv/my_data_source_file` will be included from a template
           template "priv/my_data_source_file"
@@ -804,17 +804,7 @@ defmodule Uniform.Blueprint do
   @doc false
   def __lib__(mod, name, opts, always) when is_atom(name) and is_list(opts) do
     associated_files =
-      Enum.flat_map(opts, fn opt ->
-        case opt do
-          {type, path_or_paths} when type in [:text, :template, :cp, :cp_r] ->
-            path_or_paths
-            |> List.wrap()
-            |> Enum.map(&{type, &1})
-
-          _ ->
-            []
-        end
-      end)
+      for {type, path} <- opts, type in [:text, :template, :cp, :cp_r], do: {type, path}
 
     lib_dep =
       Uniform.LibDep.new!(%{
@@ -941,24 +931,18 @@ defmodule Uniform.Blueprint do
   not in a `lib/` directory** which should be ejected in the app or along with
   the lib.
 
-  > #### Use `Path.wildcard/1` for shorter code {: .tip}
-  >
-  > Note that `file` can take a path or a list of paths. You can use
-  > `Path.wildcard` as in the example below to target multiple files instead
-  > of listing them on separate lines.
-
   ## Options
 
-  `file` takes a `chmod` option, which sets the `mode` for the given `file`
-  after it's ejected. See the possible [permission
-  options](https://hexdocs.pm/elixir/File.html#chmod/2-permissions).
+  - `chmod` – Sets the `mode` for the given `file` after it's ejected. See the
+    possible [permission options](https://hexdocs.pm/elixir/File.html#chmod/2-permissions).
+  - `match_dot` – Forwarded to `Path.wildcard/2`. See "Wildcard Globs" below.
 
   ## Examples
 
       base_files do
         # every ejected app will include these
         file "assets/js/app.js"
-        file Path.wildcard("config/**/*.exs")
+        file "config/**/*.exs"
         file "some/file", chmod: 0o777
       end
 
@@ -969,6 +953,13 @@ defmodule Uniform.Blueprint do
           file "test/support/fixtures/some_aws_fixture.xml"
         end
       end
+
+  ## Wildcard Globs
+
+  Note that the `path` and `opts` given to `file` are passed under the hood to
+  `Path.wildcard/2`. As a result, you can use wildcard characters such as `?`
+  and `*` to target multiple files instead of listing them individually with
+  separate calls to `file`.
 
   """
   def file(path, opts \\ []), do: {:text, {path, opts}}
@@ -1036,9 +1027,8 @@ defmodule Uniform.Blueprint do
   many files.
 
   For example, the `assets/node_modules` directory in a Phoenix application
-  would take ages to copy with `file
-  Path.wildcard("assets/node_modules/**/*")`. Instead, use `cp_r
-  "assets/node_modules"`.
+  would take ages to copy with `file "assets/node_modules/**/*"`. Instead, use
+  `cp_r "assets/node_modules"`.
 
   ## Examples
 

@@ -63,6 +63,6 @@ lib :my_data_source do
   mix_deps [:faker, ...]
 
   # `match_dot: true` below to include priv/my_data_source_repo/.formatter.exs
-  file Path.wildcard("priv/my_data_source_repo/**", match_dot: true)
+  file "priv/my_data_source_repo/**", match_dot: true
 end
 ```
