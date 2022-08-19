@@ -937,13 +937,28 @@ defmodule Uniform.Blueprint do
     possible [permission options](https://hexdocs.pm/elixir/File.html#chmod/2-permissions).
   - `match_dot` – Forwarded to `Path.wildcard/2`. See "Wildcard Globs" below.
 
+  ## Glob Expressions
+
+  You can use a `glob` expression with [wildcard characters](`Path.wildcard/2`)
+  to target multiple files. (See "Examples" below.)
+
+  This is possible because Uniform internally forwards the `path` and `opts` to
+  `Path.wildcard/2` to determine which files to eject.
+
+  Note that the `*` and `?` "wildcard characters" will not match files starting
+  with a dot (`.`) unless you provide `match_dot: true`.
+
   ## Examples
 
       base_files do
-        # every ejected app will include these
         file "assets/js/app.js"
-        file "config/**/*.exs"
         file "some/file", chmod: 0o777
+
+        # glob targeting .exs files in config/
+        file "config/**/*.exs"
+
+        # glob targeting .exs files in priv/repo/ – including .formatter.exs
+        file "priv/repo/**/*.exs", match_dot: true
       end
 
       deps do
@@ -953,13 +968,6 @@ defmodule Uniform.Blueprint do
           file "test/support/fixtures/some_aws_fixture.xml"
         end
       end
-
-  ## Wildcard Globs
-
-  Note that the `path` and `opts` given to `file` are passed under the hood to
-  `Path.wildcard/2`. As a result, you can use wildcard characters such as `?`
-  and `*` to target multiple files instead of listing them individually with
-  separate calls to `file`.
 
   """
   def file(path, opts \\ []), do: {:text, {path, opts}}
