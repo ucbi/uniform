@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.5.0 (2022-08-19)
+
+  * Support globs with `Path.wildcard` wildcard characters in `file` (#37)
+  * Remove support for lists of paths in `file`, `template`, `cp`, and `cp_r` (#37)
+
 ## v0.4.0 (2022-08-15)
 
   * Rename `code_fences` to `eject_fences`
