@@ -1,6 +1,9 @@
 defmodule Uniform.File do
   @moduledoc """
-             Functions for writing files to an ejection destination.
+             Functions for:
+
+             1. Gathering the files that should be ejected with an app.
+             2. Writing those files to the ejected codebase.
 
              An `t:Uniform.File.t/0` can be any of the following:
 
@@ -24,7 +27,11 @@ defmodule Uniform.File do
   @type type :: :text | :template | :cp_r | :cp
 
   @typedoc """
-  A file to be ejected. (In true POSIX form, may be a directory, in which case the full contents are copied.)
+  A file to be ejected. In true POSIX form, it may be a directory (when type is
+  `:cp_r`) in which case the full contents are copied.
+
+  When `type` is `:text`, the `source` may include "wildcard characters". See
+  the docs for `Path.wildcard/2`.
   """
   @type t :: %__MODULE__{
           type: type,
