@@ -81,10 +81,10 @@ end
 ```
 
 In the [base_files](Uniform.Blueprint.html#base_files/1) section, we specify
-files that should _always_ be ejected in every app. Phoenix apps will typically
-have CSS and JS assets in the `assets` directory. They'll also have static
-files to be served as-is in `priv/static`. Some of these files are binary
-(non-text) files, and we assume none of them need to pass through the [Code
+files that should be ejected in _every_ app. Phoenix apps will typically have
+CSS and JS assets in the `assets` directory. They'll also have static files to
+be served as-is in `priv/static`. Most of these files will typically be binary
+(non-text) files. So we assume none of them need to pass through the [Code
 Transformation](code-transformations.html) phase. That's why the first two
 lines are included.
 
@@ -105,11 +105,43 @@ the `base_files` section.
 file "lib/my_base_app_web.ex"
 ```
 
-We also proceed with the assumption that the ejected app will need the Base
+For the last two lines below, we'll use [wildcard
+characters](https://hexdocs.pm/elixir/Path.html#wildcard/2) to target multiple
+files. (`file` accepts a `Path.wildcard/2` glob or a concrete path.)
+
+We proceed with the assumption that the ejected app will need the Base
 Project's configuration files.
 
 ```elixir
 file "config/**/*.exs"
+```
+
+Lastly, we include all the custom test cases in the Base Project.
+
+```elixir
+file "test/support/*_case.ex"
+```
+
+### Using front-end JavaScript Libraries
+
+If you're using a front-end JavaScript library like React.js, you probably
+don't want to eject all of the contents of `assets` with every app like this.
+
+Depending on your setup, you may want to put JS files in separate directories
+for each app and include them in `base_files` in one of these ways.
+
+```elixir
+# with Code Transformations
+base_files do
+  file "assets/#{app.name.underscore}/**/*.{js,ts}"
+end
+```
+
+```elixir
+# without Code Transformations
+base_files do
+  cp_r "assets/#{app.name.underscore}"
+end
 ```
 
 ## The `deps` section
@@ -394,13 +426,13 @@ def application do
 end
 ```
 
-#### You don't need to use Eject Fences in `deps` {: .tip}
+#### You don't need to use Eject Fences in `deps`
 
 Note that removing deps from the `deps` section of `mix.exs` is automatic, so
 this would not be required.
 
 ```elixir
-# ❌ Do NOT wrap individual deps in eject fences
+# ❌ There is no need to wrap individual deps in eject fences
 defp deps do
   [
     # uniform:mix:jason
