@@ -7,25 +7,24 @@ defmodule Uniform.Blueprint.BeforeCompile do
       if templates_dir do
         templates_dir
         |> Path.join("**/*.eex")
-        |> Path.wildcard()
+        |> Path.wildcard(match_dot: true)
       else
         []
       end
 
     template_functions =
       for path <- templates do
+        quoted = EEx.compile_file(path)
         path = Path.relative_to(path, templates_dir)
 
         quote do
           @file unquote(path)
           @external_resource unquote(path)
 
-          EEx.function_from_file(
-            :def,
-            unquote(String.to_atom(path)),
-            unquote(Path.join(templates_dir, path)),
-            [:app]
-          )
+          def unquote(String.to_atom(path))(var!(app)) do
+            _ = var!(app)
+            unquote(quoted)
+          end
         end
       end
 
