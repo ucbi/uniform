@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.5.1 (2022-08-19)
+
+  * Fix issue where template files beginning with `.` weren't compiled (#40)
+  * Remove warning whenever `app` not used by a template (#40)
+
 ## v0.5.0 (2022-08-19)
 
   * Support globs with `Path.wildcard` wildcard characters in `file` (#37)
