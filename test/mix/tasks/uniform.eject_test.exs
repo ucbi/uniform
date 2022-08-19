@@ -103,7 +103,7 @@ defmodule Mix.Tasks.Uniform.EjectTest do
     lib_template = read!.("priv/included_lib/template.txt")
     assert lib_template =~ "Template generated for included lib via tweeter"
 
-    # `wildcard` works
+    # `wildcard` globs work
     assert exists?.("priv/wildcard_me/one.txt")
     assert exists?.("priv/wildcard_me/two.txt")
     assert exists?.("priv/wildcard_me/three.txt")
