@@ -53,7 +53,7 @@ defmodule MyBaseApp.Uniform.Blueprint do
           "lib/my_base_app_web/telemetry.ex",
           "lib/my_base_app_web/channels/user_socket.ex",
           "lib/my_base_app_web/templates/layout/app.html.heex",
-          "lib/my_base_app_web/templates/layout/live.html.heex"
+          "lib/my_base_app_web/templates/layout/live.html.heex",
           "lib/my_base_app_web/templates/layout/root.html.heex",
           "lib/my_base_app_web/views/error_helpers.ex",
           "lib/my_base_app_web/views/error_view.ex",
