@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.5.2 (2022-09-02)
+
+  * Include Blueprint template file in published Hex package (#43)
+
 ## v0.5.1 (2022-08-19)
 
   * Fix issue where template files beginning with `.` weren't compiled (#40)
