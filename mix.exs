@@ -40,7 +40,8 @@ defmodule Uniform.MixProject do
       licenses: ["Apache-2.0"],
       links: %{
         GitHub: @source_url
-      }
+      },
+      files: ~w(.formatter.exs mix.exs README.md LICENSE CHANGELOG.md lib templates)
     }
   end
 
