@@ -51,6 +51,11 @@ In summary, you'll need to:
 4. Add `uniform.exs` manifests to each Ejectable App
 5. Fill out the Blueprint so all the necessary files get ejected
 
+## Example Codebase
+
+You can find a barebones example project here:
+https://github.com/ucbi/example_uniform_project
+
 ## License
 
 Copyright 2022 United Community Bank
