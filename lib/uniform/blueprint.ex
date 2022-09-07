@@ -15,13 +15,13 @@ defmodule Uniform.Blueprint.BeforeCompile do
     template_functions =
       for path <- templates do
         quoted = EEx.compile_file(path)
-        path = Path.relative_to(path, templates_dir)
+        relative_path = Path.relative_to(path, templates_dir)
 
         quote do
           @file unquote(path)
-          @external_resource unquote(path)
+          @external_resource unquote(Path.expand(path))
 
-          def unquote(String.to_atom(path))(var!(app)) do
+          def unquote(String.to_atom(relative_path))(var!(app)) do
             _ = var!(app)
             unquote(quoted)
           end
