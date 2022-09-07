@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.5.3 (2022-09-07)
+
+  * Fix to ensure Blueprint is recompiled when templates change (#45)
+
 ## v0.5.2 (2022-09-02)
 
   * Include Blueprint template file in published Hex package (#43)
