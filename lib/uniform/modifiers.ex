@@ -8,7 +8,7 @@ defmodule Uniform.Modifiers do
   # Eject Fences
   #
 
-  @doc """
+  @doc ~S"""
   Apply [Eject Fences](code-transformations.html#eject-fences) to extra
   languages with this function.
 
