@@ -7,7 +7,7 @@ Add `:uniform` as a dependency in `mix.exs`.
 ```elixir
 defp deps do
   [
-    {:uniform, "~> 0.5.3"}
+    {:uniform, "~> 0.6.0"}
   ]
 end
 ```

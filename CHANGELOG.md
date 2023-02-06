@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.6.0 (2023-02-06)
+
+  * Adds support for suffix on eject fences (#46)
+
 ## v0.5.3 (2022-09-07)
 
   * Fix to ensure Blueprint is recompiled when templates change (#45)
