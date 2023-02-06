@@ -356,7 +356,7 @@ defmodule Uniform.Blueprint do
 
       import Uniform.Blueprint, only: [modify: 2, deps: 1, base_files: 1]
       import Uniform.App, only: [depends_on?: 3]
-      import Uniform.Modifiers, only: [eject_fences: 3]
+      import Uniform.Modifiers, only: [eject_fences: 3, eject_fences: 4]
       require EEx
 
       Module.register_attribute(__MODULE__, :lib_deps, accumulate: true)

@@ -47,7 +47,7 @@ defmodule Uniform.ModifiersTest do
     assert output =~ "Keep"
     refute output =~ "Remove"
     # code fences themselves are always removed
-    refute output =~ "eject"
+    refute output =~ "uniform"
   end
 
   test "uniform:mix", %{app: app} do
@@ -69,7 +69,7 @@ defmodule Uniform.ModifiersTest do
     assert output =~ "Keep"
     refute output =~ "Remove"
     # code fences themselves are always removed
-    refute output =~ "eject"
+    refute output =~ "uniform"
   end
 
   test "uniform:app", %{app: app} do
@@ -95,7 +95,7 @@ defmodule Uniform.ModifiersTest do
     assert output =~ "Keep"
     refute output =~ "Remove"
     # code fences themselves are always removed
-    refute output =~ "eject"
+    refute output =~ "uniform"
   end
 
   test "uniform:remove", %{app: app} do
@@ -115,6 +115,46 @@ defmodule Uniform.ModifiersTest do
     assert output =~ "Keep"
     refute output =~ "Remove"
     # code fences themselves are always removed
-    refute output =~ "eject"
+    refute output =~ "uniform"
+  end
+
+  test "comment suffixes", %{app: app} do
+    output =
+      Modifiers.eject_fences(
+        """
+        p {text-color: "red"}
+
+        /* uniform:remove */
+        h1 {text-color: "blue"}
+        /* /uniform:remove */
+        """,
+        app,
+        "/\\*",
+        "\\*/"
+      )
+
+    assert output =~ "red"
+    refute output =~ "blue"
+    # code fences themselves are always removed
+    refute output =~ "uniform"
+  end
+
+  test "js_eject_fences", %{app: app} do
+    output =
+      Modifiers.js_eject_fences(
+        """
+        console.log(true + true - true);
+
+        // uniform:remove
+        console.log(0.1 + 0.2);
+        // /uniform:remove
+        """,
+        app
+      )
+
+    assert output =~ "true"
+    refute output =~ "0.1"
+    # code fences themselves are always removed
+    refute output =~ "uniform"
   end
 end

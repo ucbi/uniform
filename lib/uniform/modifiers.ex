@@ -27,17 +27,29 @@ defmodule Uniform.Modifiers do
         eject_fences(file, app, "//")
       end
 
+  Note that the `prefix` and `suffix` are placed directly into a `Regex` using
+  `Regex.compile!/2`.  Therefore, if the `prefix` and `suffix` include special
+  Regex characters such as `*`, they must be escaped appropriately.
+
+  For example, the following would process CSS `/* comments */`.
+
+      # code fences for CSS files
+      modify ~r/\.css$/, fn file, app ->
+        eject_fences(file, app, "/\\*", "\\*/")
+      end
+
   """
-  @spec eject_fences(String.t(), Uniform.App.t(), String.t()) :: String.t()
-  def eject_fences(file_contents, app, comment_prefix) do
+  @spec eject_fences(String.t(), Uniform.App.t(), prefix :: String.t(), suffix :: String.t()) ::
+          String.t()
+  def eject_fences(file_contents, app, prefix, suffix \\ nil) do
     remove_regex =
       Regex.compile!(
-        "\n *#{comment_prefix} uniform:remove.+?#{comment_prefix} \/uniform:remove",
+        "\n *#{prefix} *uniform:remove *#{suffix}.+?\n *#{prefix} *\/uniform:remove *#{suffix}",
         "s"
       )
 
     # A regex that detects code fences
-    "\n *#{comment_prefix} uniform:(lib|mix|app):([a-z0-9_]+)(.+?)#{comment_prefix} \/uniform:\\1:\\2"
+    "\n *#{prefix} *uniform:(lib|mix|app):([a-z0-9_]+) *#{suffix}(.+?)#{prefix} *\/uniform:\\1:\\2 *#{suffix}"
     |> Regex.compile!("s")
     |> Regex.replace(
       file_contents,
