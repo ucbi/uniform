@@ -168,6 +168,9 @@ end
 
 # eject fences for Rust files
 modify ~r/\.rs$/, &eject_fences(&1, &2, "//")
+
+# eject fences for CSS files
+modify ~r/\.css$/, &eject_fences(&1, &2, "/\\*", "\\*/")
 ```
 
 ## Disabling Code Transformations
