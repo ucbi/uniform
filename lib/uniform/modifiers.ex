@@ -39,7 +39,12 @@ defmodule Uniform.Modifiers do
       end
 
   """
-  @spec eject_fences(String.t(), Uniform.App.t(), prefix :: String.t(), suffix :: String.t()) ::
+  @spec eject_fences(
+          String.t(),
+          Uniform.App.t(),
+          prefix :: String.t(),
+          suffix :: String.t() | nil
+        ) ::
           String.t()
   def eject_fences(file_contents, app, prefix, suffix \\ nil) do
     remove_regex =
