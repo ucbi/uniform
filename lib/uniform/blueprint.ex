@@ -571,8 +571,8 @@ defmodule Uniform.Blueprint do
 
   If a file or template should only be ejected in the case that a certain Lib
   Dependency is included, we recommend placing that inside the `deps` section
-  instead of in `base_files`. (See [Associated
-  files](#lib/2-associated-files).)
+  instead of in `base_files`. (See [Including files outside of
+  `lib`](#lib/2-3-including-files-outside-of-lib).)
 
       # ❌ Don't do this
       base_files do
