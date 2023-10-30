@@ -83,19 +83,19 @@ defmodule Uniform.AppTest do
     assert %MixDep{mix_deps: [:indirect_mix]} = app.internal.deps.mix.included_mix
     assert %MixDep{mix_deps: []} = app.internal.deps.mix.indirect_mix
 
-    assert app.internal.deps.included.lib == [
+    assert Enum.sort(app.internal.deps.included.lib) == [
              :always_included_lib,
              :included_lib,
              :indirectly_included_lib
            ]
 
-    assert app.internal.deps.included.mix == [
+    assert Enum.sort(app.internal.deps.included.mix) == [
              :always_included_mix,
              :included_mix,
              :indirect_mix
            ]
 
-    assert app.internal.deps.all.lib == [
+    assert Enum.sort(app.internal.deps.all.lib) == [
              :always_included_lib,
              :excluded_lib,
              :included_lib,
@@ -105,7 +105,7 @@ defmodule Uniform.AppTest do
              :with_only
            ]
 
-    assert app.internal.deps.all.mix == [
+    assert Enum.sort(app.internal.deps.all.mix) == [
              :always_included_mix,
              :excluded_mix,
              :included_mix,
