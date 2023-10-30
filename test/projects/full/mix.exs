@@ -26,7 +26,7 @@ defmodule Full.MixProject do
       {:esbuild, "~> 0.5", runtime: Mix.env() == :dev},
       {:graphql_document, "~> 0.2.1"},
       # test that options are retained
-      {:sourceror, "~> 0.11.1", path: "../../../deps/sourceror", override: true},
+      {:sourceror, "~> 0.11.1", override: true},
       {:decimal, "~> 2.0"}
     ]
   end
