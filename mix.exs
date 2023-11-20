@@ -8,7 +8,7 @@ defmodule Uniform.MixProject do
     [
       app: :uniform,
       version: @version,
-      elixir: "~> 1.10",
+      elixir: "~> 1.13",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -29,8 +29,8 @@ defmodule Uniform.MixProject do
 
   defp deps do
     [
-      {:ex_doc, ">= 0.28.4", only: [:dev, :docs], runtime: false},
-      {:sourceror, "~> 0.11"}
+      {:ex_doc, ">= 0.30.9", only: [:dev, :docs], runtime: false},
+      {:sourceror, "~> 0.14"}
     ]
   end
 
