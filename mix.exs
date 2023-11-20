@@ -12,6 +12,11 @@ defmodule Uniform.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       elixirc_paths: elixirc_paths(Mix.env()),
+      dialyzer: [
+        plt_add_apps: [:mix],
+        plt_file: {:no_warn, "priv/plts/dialyzer.plt"},
+        list_unused_filters: true
+      ],
 
       # Hex
       description: "Write less boilerplate and reuse more code in your portfolio of Elixir apps",
@@ -30,7 +35,8 @@ defmodule Uniform.MixProject do
   defp deps do
     [
       {:ex_doc, ">= 0.30.9", only: [:dev, :docs], runtime: false},
-      {:sourceror, "~> 0.14"}
+      {:sourceror, "~> 0.14"},
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false, optional: true}
     ]
   end
 
