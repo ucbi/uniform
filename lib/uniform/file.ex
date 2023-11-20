@@ -185,7 +185,7 @@ defmodule Uniform.File do
   # Given a directory, return which paths to eject based on the rules
   # associated with that directory. Includes files in `lib/<lib_dir>`
   # as well as `test/<lib_dir>`
-  @spec lib_dir_files(App.t(), String.t(), keyword) :: [Uniform.File.t()]
+  @spec lib_dir_files(App.t(), String.t(), keyword | map) :: [Uniform.File.t()]
   defp lib_dir_files(app, lib_dir, opts) do
     # location of lib and test cp_r is configurable for testing
     only = opts[:only]

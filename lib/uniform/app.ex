@@ -230,7 +230,7 @@ defmodule Uniform.App do
 
   # Given a manifest struct, returns a `%Deps{}` struct containing
   # information about lib and mix dependencies.
-  @spec deps(Config.t(), Manifest.t()) :: t
+  @spec deps(Config.t(), Manifest.t()) :: Deps.t()
   defp deps(config, manifest) do
     all_libs = Config.lib_deps(config)
     all_mixs = Config.mix_deps(config)
