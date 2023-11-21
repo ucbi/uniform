@@ -125,7 +125,7 @@ defmodule Uniform do
        disk the ejected app will be written, etc.). If there is a mistake, the user will
        have a chance to abort before performing a potentially destructive action.
        """ && false
-  @spec prepare(init :: %{name: atom, opts: [prepare_opt]}) :: Uniform.App.t()
+  @spec prepare(init :: %{name: String.t(), opts: [prepare_opt]}) :: Uniform.App.t()
   def prepare(%{name: name, opts: opts}) do
     # ensure the name was passed in under_score format; otherwise subtle bugs happen
     unless name in Uniform.ejectable_app_names() do
