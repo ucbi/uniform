@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.6.1 (2026-04-22)
+
+  * Fix formatting of large `app.extra` output in `mix uniform.eject` (#49)
+
 ## v0.6.0 (2023-02-06)
 
   * Adds support for suffix on eject fences (#46)
