@@ -35,6 +35,7 @@ defmodule Uniform.LibDep do
       %Uniform.LibDep{
         always: true,
         associated_files: ["priv/path/to/associated/file"],
+        except: nil,
         only: nil,
         lib_deps: [:my_graph_dep],
         mix_deps: [:absinthe],
