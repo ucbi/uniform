@@ -30,13 +30,11 @@ defmodule Uniform.LibDep do
       ...>   lib_deps: [:my_graph_dep],
       ...>   always: true,
       ...>   only: nil,
-      ...>   except: [~r/regex-of-files-not-to-eject/],
       ...>   associated_files: ["priv/path/to/associated/file"],
       ...> })
       %Uniform.LibDep{
         always: true,
         associated_files: ["priv/path/to/associated/file"],
-        except: [~r/regex-of-files-not-to-eject/],
         only: nil,
         lib_deps: [:my_graph_dep],
         mix_deps: [:absinthe],
