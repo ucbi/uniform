@@ -14,7 +14,7 @@ defmodule UniformTest do
 
   test "ejectable_apps/0" do
     command =
-      "Uniform.ejectable_apps() |> hd() |> Map.delete(:__struct__) |> inspect() |> IO.puts()"
+      "Uniform.ejectable_apps() |> hd() |> Map.delete(:__struct__) |> inspect(limit: :infinity, printable_limit: :infinity) |> IO.puts()"
 
     {stdout, 0} = System.cmd("mix", ["run", "-e", command])
     {map, []} = Code.eval_string(stdout)

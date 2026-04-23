@@ -15,6 +15,15 @@ defmodule Mix.Tasks.Uniform.EjectTest do
     {_, 0} = eject("empty", "hatmail")
   end
 
+  test "ejecting with a large extra payload does not abbreviate inspected code" do
+    {stdout, 0} = eject("extra_formatting", "newsflash")
+
+    assert stdout =~ "📰 Extra:"
+    assert stdout =~ "archive_tag: :community"
+    assert stdout =~ "TAIL_MARKER"
+    refute stdout =~ "..."
+  end
+
   test "missing templates directory" do
     {stderr, 1} = eject("missing_template_dir", "trillo")
 
@@ -148,7 +157,7 @@ defmodule Mix.Tasks.Uniform.EjectTest do
     args = [
       "run",
       "-e",
-      "Uniform.ejectable_apps() |> hd() |> Map.delete(:__struct__) |> inspect() |> IO.puts()"
+      "Uniform.ejectable_apps() |> hd() |> Map.delete(:__struct__) |> inspect(limit: :infinity, printable_limit: :infinity) |> IO.puts()"
     ]
 
     {stdout, 0} = System.cmd("mix", args, cd: "test/projects/#{project}")

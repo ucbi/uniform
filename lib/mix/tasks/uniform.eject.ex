@@ -140,7 +140,7 @@ defmodule Mix.Tasks.Uniform.Eject do
       IO.puts("📰 Extra:")
 
       app.extra
-      |> inspect()
+      |> inspect(limit: :infinity, printable_limit: :infinity)
       |> Code.format_string!()
       |> to_string()
       |> String.replace(~r/^/m, "   ")
